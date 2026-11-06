@@ -148,7 +148,7 @@ S.RegisterSkin("cognac", {
 		c.scrollThumb = c.accent
 		c.scrollThumbHover = { 1, 0.95, 0.75, 1 }
 	end,
-	metrics = { edge = EDGE, inset = EDGE },
+	metrics = { edge = EDGE, inset = EDGE, navInset = 8 },
 	button = plate,
 	paintButton = function(b, enabled)
 		local piece = platePiece(b, enabled)

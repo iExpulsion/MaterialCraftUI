@@ -123,8 +123,8 @@ S.SetTheme()
 S.PAD, S.GAP, S.CONTROL_H = 12, 8, 24
 
 -- What a skin's frame decoration takes up: edge, the border S.Frame draws around a "window", which its content
--- stays inside; inset, the padding inside a "popup".
-local METRICS = { edge = 0, inset = S.PAD }
+-- stays inside; inset, the padding inside a "popup"; navInset, how far in from a sidebar's sides its entries sit.
+local METRICS = { edge = 0, inset = S.PAD, navInset = 0 }
 S.metrics = {}
 for k, v in pairs(METRICS) do S.metrics[k] = v end
 

@@ -21,7 +21,7 @@ MOCK.check("skins listed", #list == 2 and list[1].key == "material" and list[2].
 -- Switching to Cognac brings its scheme, colors and metrics.
 S.UseSkin("cognac")
 MOCK.check("cognac scheme", S.Skin() == "cognac" and near(S.colors.accent[1], 0xf0 / 255) and near(S.colors.navSelected[2], 1))
-MOCK.check("cognac metrics", S.metrics.edge == 18 and S.metrics.inset == 18)
+MOCK.check("cognac metrics", S.metrics.edge == 18 and S.metrics.inset == 18 and S.metrics.navInset == 8)
 
 -- A Cognac button is a plate from the addon's own copy of the atlas, not a backdrop.
 local b = S.Button(parent, "Plate", "secondary", 90)
