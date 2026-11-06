@@ -7,4 +7,5 @@
 UI\Style.lua
 UI\Skins\Cognac\Atlas.lua
 UI\Skins\Cognac\Skin.lua
+UI\Skins\Classic\Skin.lua
 Demo.lua

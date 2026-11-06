@@ -5,6 +5,8 @@
 - **Skins:** `S.UseSkin` switches how controls are drawn, not just their colors. Material, the flat look, is built
   in and stays the default. `S.Skins` lists them for a picker and `S.RegisterSkin` adds one.
 - **Cognac Skin:** painted gold frames, plates and chips on dark glass, in `Skins/Cognac`.
+- **Classic Skin:** the default UI's own look, in `Skins/Classic`: dialog-box windows, red panel buttons, gold text,
+  tooltip-bordered menus and lists, and the quest log's row highlight, all from textures the client ships.
 - **Skin-Aware Helpers:** `S.Frame`, `S.Well`, `S.Sidebar`, `S.NavEntry` and `S.Highlight` draw window frames,
   wells, sidebars, navigation entries and hover states in the current skin, and `S.metrics` says how much room a skin's border needs.
 - **Pixel Alignment:** `S.PixelScale` scales a window so its units are whole screen pixels, so every edge and 1px
@@ -14,7 +16,7 @@
   the size it's drawn at, since the client has no mipmaps for TGA textures. `S.Art`, `S.PlaceArt`, `S.ArtPart` and
   `S.NineSlice` draw from it.
 - **Sync Script:** names skins to copy along with the kit.
-- **Demo:** the theme dropdown includes Cognac.
+- **Demo:** the theme dropdown includes Cognac and Classic.
 
 ## 1.0.0
 

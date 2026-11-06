@@ -13,6 +13,8 @@ local THEMES = {
 	{ value = 5, text = "Rose", tooltip = "S.SetTheme({ primary = \"ffb1c8\" })", roles = { primary = "ffb1c8" } },
 	{ value = 6, text = "Cognac", skin = "cognac",
 		tooltip = "S.UseSkin(\"cognac\"): the painted skin. Art by Jeff, from AttuneNext." },
+	{ value = 7, text = "Classic", skin = "classic",
+		tooltip = "S.UseSkin(\"classic\"): the default UI's own frames, buttons and fonts." },
 }
 
 local NAV = {

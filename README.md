@@ -20,7 +20,7 @@ runtime, so two addons using different versions never affect each other.
 - **Color Roles:** window, panel and well surfaces, borders, an accent, text, and good, warning and bad colors.
 - **Themes:** swap in your own accent or a whole Material 3 scheme with one call.
 - **Skins:** change how the controls are drawn, not just their colors. The flat Material skin is built in, and the
-  optional painted Cognac skin comes in its own folder.
+  optional Classic (the default UI's own look) and painted Cognac skins come in their own folders.
 - **Controls:** buttons in five kinds, checkboxes, dropdowns, and one-line or multi-line inputs with placeholders.
 - **Dropdown Behavior:** menus and popups close on a click anywhere else, and inputs give up the keyboard the same
   way. Nothing grabs focus on its own.
@@ -110,13 +110,13 @@ f:SetScript("OnHide", S.Dismiss)
 
 `demo/MaterialCraftUIDemo` is a small addon that shows every control in one window: each button kind and its
 disabled look, a segmented button, a popup, inputs, dropdowns, checkboxes, every color role and a scrolling list.
-A dropdown in its title bar switches between a few themes and the Cognac skin. Copy the folder into
+A dropdown in its title bar switches between a few themes and the Cognac and Classic skins. Copy the folder into
 `Interface\AddOns` and type `/mcui` in game.
 
 Its `UI/Style.lua` and `UI/Skins` are synced copies like any addon's. After changing the kit, refresh them with:
 
 ```bash
-py -I -X utf8 tools/sync_style.py demo MaterialCraftUIDemo Cognac
+py -I -X utf8 tools/sync_style.py demo MaterialCraftUIDemo Cognac Classic
 ```
 
 ## Reference
@@ -189,13 +189,14 @@ larger or smaller. `S.PixelScale(frame, false)` turns it off.
 ### Skins
 
 A skin decides how buttons, inputs, window frames, sidebars, hover states and navigation entries are drawn. The
-flat **Material** skin is built in and is the default. Others live in `Skins/<Name>`, each as an `Atlas.lua`, a
-`Skin.lua` and its texture. List them in your `.toc` after `Style.lua`:
+flat **Material** skin is built in and is the default. Others live in `Skins/<Name>`: a `Skin.lua`, and for a
+painted skin an `Atlas.lua` and its texture. List them in your `.toc` after `Style.lua`:
 
 ```
 UI\Style.lua
 UI\Skins\Cognac\Atlas.lua
 UI\Skins\Cognac\Skin.lua
+UI\Skins\Classic\Skin.lua
 ```
 
 Pick one with `S.UseSkin(key, roles)` before building any frames. A skin with a scheme of its own ignores
@@ -220,6 +221,10 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
 - `S.Sidebar(frame)`: a navigation sidebar's background and dividing edge.
 - `S.NavEntry(button, text)`: a sidebar entry with its label as `button.label`. `button:SetSelected(on)` repaints it.
 - `S.Highlight(frame)`: the hover look for a clickable row, menu item or column heading.
+
+**Classic** is the default UI's own look: dialog-box windows, red panel buttons, gold text, tooltip-bordered menus
+and lists, and the quest log's row highlight. It's drawn entirely from textures the client ships, so its folder is
+just a `Skin.lua`.
 
 **Cognac** is painted gold frames, plates and chips on dark glass.
 

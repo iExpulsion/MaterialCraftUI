@@ -3,6 +3,7 @@
 local S = NS.Style
 LOAD("Skins/Cognac/Atlas.lua")
 LOAD("Skins/Cognac/Skin.lua")
+LOAD("Skins/Classic/Skin.lua")
 
 local file = io.open(ROOT .. "/demo/MaterialCraftUIDemo/Demo.lua", "r")
 local src = file:read("*a")
@@ -34,6 +35,9 @@ MOCK.check("old window hidden after a theme change", not first:IsShown())
 NS.Demo.setTheme(6)
 local cognac = NS.Demo.window()
 MOCK.check("cognac rebuilds", S.Skin() == "cognac" and cognac:IsShown() and cognac.width == 680 + 36)
+-- The Classic entry rebuilds it in the stock look, larger by its dialog border.
+NS.Demo.setTheme(7)
+MOCK.check("classic rebuilds", S.Skin() == "classic" and NS.Demo.window().width == 680 + 24)
 -- Back to a Material theme after it.
 NS.Demo.setTheme(1)
 MOCK.check("material again", S.Skin() == "material" and NS.Demo.window().width == 680)
