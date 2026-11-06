@@ -56,6 +56,14 @@ MOCK.check("quality color", epic[1] == 0.6 and epic[4] == 1)
 MOCK.check("quality color reused", S.QualityColor(4) == epic)
 MOCK.check("unknown quality falls back to text", S.QualityColor(99) == S.colors.text)
 
+-- Heirloom, which the 3.3.5 client's table leaves out, gets its link color; the client's own entry wins if present.
+local heirloom = S.QualityColor(7)
+MOCK.check("heirloom without a client color", math.abs(heirloom[1] - 0xe6 / 255) < 0.001 and math.abs(heirloom[3] - 0x80 / 255) < 0.001)
+ITEM_QUALITY_COLORS[7] = { r = 0, g = 0.8, b = 1 }
+S.SetTheme()
+MOCK.check("client heirloom color wins", S.QualityColor(7)[2] == 0.8)
+ITEM_QUALITY_COLORS[7] = nil
+
 -- A section heading is a label with a rule beside it.
 local label, line = S.SectionHeading(parent, "Loot", 12, -8)
 MOCK.check("section heading", label.text == "Loot" and line ~= nil)

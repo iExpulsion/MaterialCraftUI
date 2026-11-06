@@ -168,7 +168,8 @@ height of every button, input and dropdown, so a row of controls lines up.
 
 - `S.Count(n, singular, plural)`: `"1 item"`, `"3 items"`.
 - `S.Hex(color, text)`: wraps text in a color escape.
-- `S.QualityColor(quality)`: an item quality's color, cached.
+- `S.QualityColor(quality)`: an item quality's color, cached. Heirloom (7), which the 3.3.5 client's color table
+  leaves out, gets its link color.
 
 ### Shapes
 
