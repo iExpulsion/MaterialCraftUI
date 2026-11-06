@@ -17,10 +17,7 @@
     "search": { "sheet": "controls", "rect": [15, 591, 173, 690], "draw": 0.24 },
     "corner_nw": { "sheet": "chrome", "rect": [0, 0, 256, 256], "trim": true, "draw": 0.16 },
     "corner_ne": { "sheet": "chrome", "rect": [256, 0, 512, 256], "trim": true, "draw": 0.16 },
-    "corner_sw": { "sheet": "chrome", "rect": [512, 0, 768, 256], "trim": true, "draw": 0.16 },
-    "corner_se": { "sheet": "chrome", "rect": [768, 0, 1024, 256], "trim": true, "draw": 0.16 },
     "border_top": { "sheet": "chrome", "rect": [0, 256, 256, 512], "trim": true, "draw": 0.13 },
-    "border_bottom": { "sheet": "chrome", "rect": [256, 256, 512, 512], "trim": true, "draw": 0.13 },
     "divider_v": { "sheet": "chrome", "rect": [256, 512, 512, 768], "trim": true, "draw": 0.24 },
     "bezel": { "sheet": "chrome", "rect": [529, 530, 750, 751], "trim": true, "draw": 0.11 }
   }
