@@ -1,4 +1,5 @@
-"""Copies MaterialCraftUI's Style.lua into an addon, stamped with the commit it came from.
+"""Copies MaterialCraftUI's Style.lua into an addon, stamped with the version it came from: a tag such as v1.0.0,
+or the tag plus the commits since (v1.0.0-2-gabc1234).
 
     py -I -X utf8 tools/sync_style.py <addon repo> <addon folder>
 
@@ -22,7 +23,7 @@ def main():
     repo, folder = sys.argv[1], sys.argv[2]
     src = os.path.join(LIB, 'Style.lua')
     dest = os.path.join(repo, folder, 'UI', 'Style.lua')
-    rev = git('rev-parse', '--short', 'HEAD') or 'unknown'
+    rev = git('describe', '--tags', '--always') or 'unknown'
     changed = git('status', '--porcelain', '--', 'Style.lua') != ''
     stamp = f'{rev}{" with uncommitted changes" if changed else ""}'
     with open(src, encoding='utf8', newline='') as f:

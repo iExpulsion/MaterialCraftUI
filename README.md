@@ -49,8 +49,9 @@ runtime, so two addons using different versions never affect each other.
 
 ### Keeping the Copy Up to Date
 
-`tools/sync_style.py` copies `Style.lua` into an addon and stamps its first line with the commit it came from,
-so you can always tell which version an addon ships:
+`tools/sync_style.py` copies `Style.lua` into an addon and stamps its first line with the version it came from,
+such as `v1.0.0`, or the tag plus the commits since it (`v1.0.0-2-gabc1234`), so you can always tell which version
+an addon ships:
 
 ```bash
 py -I -X utf8 tools/sync_style.py "<addon repo>" "<addon folder>"
