@@ -1,36 +1,183 @@
 # MaterialCraftUI
 
-A flat dark style kit for World of Warcraft 3.3.5 addons, built on Material 3 color roles: surfaces, one accent
-color, 1px borders, hover and press state layers, and Material's filled, tonal and text button kinds.
+A flat dark style kit for World of Warcraft 3.3.5a (Wrath of the Lich King) addons, built on
+[Material 3](https://m3.material.io/) color roles. It gives you surfaces, one accent color, 1px borders, hover
+and press states, and Material's filled, tonal and text buttons.
 
-It's one file, `Style.lua`, that each addon ships its own copy of. Nothing is shared at runtime, so updating one
-addon never changes another.
+It's a single file, `Style.lua`, with no dependencies. Each addon ships its own copy, and nothing is shared at
+runtime, so two addons using different versions never affect each other.
 
-## What's In It
+## Features
 
-- **Colors:** `S.colors` (window, sidebar, panel, well, border, accent, text, muted, good, warn, bad...),
-  `S.QualityColor(q)`, `S.Hex(color, text)`.
-- **Spacing:** `S.PAD`, `S.GAP`, `S.CONTROL_H`.
-- **Text:** `S.Text`, `S.FontString`, `S.SetFont`, `S.RefreshFonts` (reads the stock fonts again, for UI addons
-  that restyle them), `S.Count`.
-- **Shapes:** `S.Panel`, `S.Solid`, `S.Rule`, `S.ScrollBar`, `S.SectionHeading`.
-- **Controls:** `S.Button` (kinds `primary`, `secondary`, `selected`, `danger`, `ghost`; `SetText`, `SetLabel`,
-  `SetKind`), `S.AddArrow`, `S.Check`, `S.Dropdown`, `S.Input` (one line, or several with `lines`).
-- **Closing things:** `S.Dismiss`, `S.OnDismiss`, `S.CloseMenus`, `S.TrackPopup`, `S.TrackInput`. A press anywhere
-  else closes open menus and popups and takes focus from inputs.
+- **Color Roles:** window, panel and well surfaces, borders, an accent, text, and good, warning and bad colors.
+- **Controls:** buttons in five kinds, checkboxes, dropdowns, and one-line or multi-line inputs with placeholders.
+- **Dropdown Behavior:** menus and popups close on a click anywhere else, and inputs give up the keyboard the same
+  way. Nothing grabs focus on its own.
+- **Fonts Without Shadows:** text uses the client's own fonts, read again when UI addons such as ElvUI restyle them.
+- **No Name Clashes:** font objects are named after the addon that loads the kit.
 
-## Using It in an Addon
+## Requirements
 
-1. List `UI\Style.lua` in the addon's `.toc`, before anything that uses it.
-2. Read it as `NS.Style` from the addon table (`local _, NS = ...`). Font objects are named after the addon, so
-   copies in different addons never clash.
-3. Add a two-line `tools/sync_style.py` to the addon that runs this repo's `tools/sync_style.py` with the addon's
-   repo and folder. Run it after changing the kit here, test the addon, and commit the copy.
+- WoW 3.3.5a (Interface 30300), which runs Lua 5.1.
+- To run the tests: Python 3 and [lupa](https://pypi.org/project/lupa/).
+
+## Adding It to an Addon
+
+1. Copy `Style.lua` into your addon, for example as `UI/Style.lua`.
+2. List it in your `.toc` before any file that uses it:
+
+   ```
+   UI\Style.lua
+   UI\MyWindow.lua
+   ```
+
+3. Read it from the addon table in your own files:
+
+   ```lua
+   local _, NS = ...
+   local S = NS.Style
+   ```
+
+### Keeping the Copy Up to Date
+
+`tools/sync_style.py` copies `Style.lua` into an addon and stamps its first line with the commit it came from,
+so you can always tell which version an addon ships:
+
+```bash
+py -I -X utf8 tools/sync_style.py "<addon repo>" "<addon folder>"
+```
+
+It writes `<addon repo>/<addon folder>/UI/Style.lua`. A small wrapper in the addon's own `tools/` folder makes
+this one command. This one assumes MaterialCraftUI is checked out next to the addon's repo, and the
+`MATERIALCRAFTUI` environment variable can point it somewhere else:
+
+```python
+import os, runpy, sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LIB = os.environ.get('MATERIALCRAFTUI', os.path.join(ROOT, '..', 'MaterialCraftUI'))
+sys.argv = [sys.argv[0], ROOT, 'MyAddon']
+runpy.run_path(os.path.join(LIB, 'tools', 'sync_style.py'), run_name='__main__')
+```
+
+Commit the copy in your addon. Releases then need nothing from this repo.
+
+## Example
+
+```lua
+local _, NS = ...
+local S = NS.Style
+local C = S.colors
+
+local f = CreateFrame("Frame", "MyAddonWindow", UIParent)
+f:SetSize(320, 160)
+f:SetPoint("CENTER")
+S.RefreshFonts()
+S.Panel(f, C.window, C.border)
+
+local title = S.Text(f, "large", C.heading)
+title:SetPoint("TOPLEFT", S.PAD, -S.PAD)
+title:SetText("My Addon")
+
+local name = S.Input(f, "MyAddonName", 180, "Character Name")
+name:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -S.GAP)
+
+local mode = S.Dropdown(f, 120, function(value) print("Picked", value) end)
+mode:SetOptions({ { value = 1, text = "Fast" }, { value = 2, text = "Thorough", tooltip = "Slower, checks more." } })
+mode:SetText("Fast")
+mode:SetPoint("LEFT", name, "RIGHT", S.GAP, 0)
+
+local save = S.Button(f, "Save", "primary", 90, function() print(name:GetText()) end, "Save the name.")
+save:SetPoint("BOTTOMRIGHT", -S.PAD, S.PAD)
+
+f:SetScript("OnHide", S.Dismiss)
+```
+
+## Reference
+
+### Colors and Spacing
+
+`S.colors` holds `{ r, g, b, a }` tables, ready for `unpack`:
+
+| Role | Use |
+| --- | --- |
+| `window`, `sidebar`, `panel`, `well` | Surfaces, from the window background down to sunken areas like inputs and lists |
+| `border`, `outline` | The soft 1px border, and the stronger one for hover |
+| `accent`, `accentHover`, `onAccent` | The accent fill, its hover, and text on top of it |
+| `text`, `heading`, `muted`, `disabled` | Body text, headings (accent), secondary text, disabled text |
+| `hover`, `selected` | Translucent layers for hovered and selected rows |
+| `good`, `warn`, `bad`, `badDim` | Status colors |
+
+The accent is `#ffc400`. Your addon can add its own colors to `S.colors` after the kit loads. Button kinds read
+the scheme directly, so changing an existing role doesn't recolor buttons.
+
+`S.PAD` (12) is the padding inside a panel, `S.GAP` (8) the space between controls, and `S.CONTROL_H` (24) the
+height of every button, input and dropdown, so a row of controls lines up.
+
+### Helpers
+
+- `S.Count(n, singular, plural)`: `"1 item"`, `"3 items"`.
+- `S.Hex(color, text)`: wraps text in a color escape.
+- `S.QualityColor(quality)`: an item quality's color, cached.
+
+### Shapes
+
+- `S.Panel(frame, bg, border)`: a flat backdrop with an optional 1px border.
+- `S.Solid(parent, layer, color)`: a solid texture.
+- `S.Rule(parent, "TOP" or "BOTTOM")`: a 1px line along one edge.
+- `S.SectionHeading(parent, text, x, y, rightInset)`: dim small text with a rule to the right, for grouping a
+  navigation list. Returns the label and the line.
+- `S.ScrollBar(scroll, scrollName)`: restyles a `UIPanelScrollFrameTemplate` bar as a thin track and thumb.
+
+### Text
+
+- `S.Text(parent, size, color, layer)`: a left-aligned font string.
+- `S.FontString(parent, size, layer)`: the same without a color or alignment.
+- `S.SetFont(region, size)`: gives an existing font string or edit box one of the kit's fonts.
+- `S.RefreshFonts()`: reads the client's fonts again. Call it when building a window, so it picks up UI addons
+  that restyle fonts after yours loads.
+
+Sizes are `small`, `normal`, `large`, `huge` and `edit`. `S.FONTS[size]` is the font object.
+
+### Controls
+
+- `S.Button(parent, label, kind, width, onClick, tooltip, template)`: kinds are `primary` (filled, one per view),
+  `secondary` (tonal, the default), `ghost` (text only), `danger`, and `selected` (the chosen half of a segmented
+  button). Methods: `SetText` (keeps the width), `SetLabel` (grows to fit), `SetKind`. With a secure `template`,
+  `onClick` is ignored and the template's own click handler stays.
+- `S.AddArrow(button)`: adds a dropdown arrow and left-aligns the label, for buttons that open a list.
+- `S.Check(parent, size, onClick)`: a square checkbox with `SetChecked` and `SetEnabled`. Set `tooltipText` for a
+  tooltip.
+- `S.Dropdown(parent, width, onSelect)`: `SetOptions({ { value, text, tooltip } })`, then `SetText` for the shown
+  choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others.
+- `S.Input(parent, name, width, placeholder, maxLetters, lines)`: an edit box with a placeholder. With `lines`
+  above 1 it wraps across several lines, and `GetText` turns line breaks into spaces.
+
+### Closing Menus and Inputs
+
+A click outside an open menu or popup closes it, and a click outside a focused input clears its focus. A menu
+that's covered by another view doesn't close on its own, so call `S.Dismiss()` when a view is replaced: switching
+tabs, opening a dialog or closing the window.
+
+- `S.Dismiss()`: closes every menu, clears focus from every input, and runs the `S.OnDismiss` callbacks.
+- `S.CloseMenus()`: closes every menu.
+- `S.TrackPopup(popup)`: makes your own popup close like a menu. Set `popup.owner` to the button that opens it.
+- `S.TrackInput(editBox, area)`: makes your own edit box lose focus like an `S.Input`. `area` is the frame that
+  counts as clicking on it, if it's larger than the box.
+- `S.OnDismiss(fn)`: runs `fn` on every `S.Dismiss`.
 
 ## Tests
+
+The tests load `Style.lua` into a mocked client, so they run without the game:
+
+```bash
+py -m pip install lupa
+```
 
 ```bash
 py -I -X utf8 test/run.py
 ```
 
-The tests need [lupa](https://pypi.org/project/lupa/).
+## License
+
+[MIT](LICENSE). Material Design is Google's; this project isn't affiliated with Google.

@@ -322,7 +322,7 @@ end
 
 -- Closes every dropdown menu and takes keyboard focus from every edit box. Neither goes away when its view is
 -- covered or replaced (a menu only hides with its dropdown, and a hidden edit box keeps the keyboard), so views
--- that do that (another tab, another build, the review sheet, a dialog, closing the window) call this.
+-- that do that (switching tabs, opening a dialog, closing the window) call this.
 function S.Dismiss()
 	S.CloseMenus()
 	for _, e in ipairs(inputs) do
