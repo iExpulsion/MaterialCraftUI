@@ -414,7 +414,10 @@ local function build()
 	f:SetMovable(true)
 	f:SetClampedToScreen(true)
 	f:EnableMouse(true)
+	-- whole screen pixels per unit, so every edge and 1px border inside lands on real pixels
+	S.PixelScale(f)
 	f:SetPoint(unpack(state.point or { "CENTER" }))
+	S.SnapPosition(f)
 	S.Frame(f, "window")
 	f:SetScript("OnHide", S.Dismiss)
 
@@ -427,6 +430,7 @@ local function build()
 	bar:SetScript("OnDragStart", function() f:StartMoving() end)
 	bar:SetScript("OnDragStop", function()
 		f:StopMovingOrSizing()
+		S.SnapPosition(f)
 		local point, _, relativePoint, x, y = f:GetPoint()
 		state.point = { point, UIParent, relativePoint, x, y }
 	end)

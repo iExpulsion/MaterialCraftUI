@@ -48,7 +48,12 @@ local function Stub()
 		elseif k == "IsVisible" then f = function(self) return self.shown end
 		elseif k == "GetRight" then f = function() return 400 end
 		elseif k == "GetCenter" then f = function() return 300, 200 end
-		elseif k == "GetEffectiveScale" then f = function() return 1 end
+		elseif k == "GetEffectiveScale" then f = function(self)
+			local parent = self.parent
+			return (parent and parent.GetEffectiveScale and parent:GetEffectiveScale() or 1) * (self.scale or 1)
+		end
+		elseif k == "SetScale" then f = function(self, s) self.scale = s end
+		elseif k == "GetScale" then f = function(self) return self.scale or 1 end
 		elseif k == "SetPoint" then f = function(self, ...) self.point = { ... } end
 		elseif k == "SetSize" then f = function(self, w, h) self.width, self.height = w, h end
 		elseif k == "SetWidth" then f = function(self, w) self.width = w end
@@ -101,6 +106,9 @@ CreateFrame = function(_, name, parent)
 	return f
 end
 UIParent = Stub()
+-- the screen: its resolution, as the gxResolution setting holds it
+mock.resolution = "1920x1080"
+GetCVar = function(name) return name == "gxResolution" and mock.resolution or nil end
 Minimap = Stub()
 Minimap.GetWidth = function() return 140 end
 Minimap.GetCenter = function() return 500, 500 end

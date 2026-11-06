@@ -171,6 +171,21 @@ changes the addon that sets it.
 `S.PAD` (12) is the padding inside a panel, `S.GAP` (8) the space between controls, and `S.CONTROL_H` (24) the
 height of every button, input and dropdown, so a row of controls lines up.
 
+### Pixels
+
+The client lays out in UI units, and one unit is `effective scale × screen height / 768` screen pixels, rarely a
+whole number. So a 1px border or an edge can fall between two rows of pixels and blur, or come out a pixel off from
+its neighbor. Give each top-level window, dialog and popup `S.PixelScale(frame)`: it scales the frame so one of its
+units is a whole number of screen pixels, the number nearest to the UI scale, and keeps it so when the UI scale or
+the screen size changes. Every whole-unit position and size inside it then lands on real pixels. At a UI scale
+that's already pixel-perfect (0.71 at 1080p, say) nothing changes size; at others the window comes out a little
+larger or smaller. `S.PixelScale(frame, false)` turns it off.
+
+- `S.SnapPosition(frame)`: moves a frame's top left corner onto a whole pixel. Run it after placing a window and
+  after it's dragged.
+- `S.PixelSize(region)`: one screen pixel in a region's units.
+- `S.Snap(region, v)`: a length rounded to whole screen pixels.
+
 ### Skins
 
 A skin decides how buttons, inputs, window frames, sidebars, hover states and navigation entries are drawn. The
