@@ -148,7 +148,7 @@ S.RegisterSkin("cognac", {
 		c.scrollThumb = c.accent
 		c.scrollThumbHover = { 1, 0.95, 0.75, 1 }
 	end,
-	metrics = { edge = EDGE, inset = EDGE, navInset = 8 },
+	metrics = { edge = EDGE, inset = EDGE, navInset = 8, wellInset = 6 },
 	button = plate,
 	paintButton = function(b, enabled)
 		local piece = platePiece(b, enabled)
@@ -159,17 +159,19 @@ S.RegisterSkin("cognac", {
 		b.plate:SetVertexColor(shade, shade, shade)
 		b.label:SetTextColor(unpack(S.colors[enabled and TEXT[b.kind] or "disabled"] or S.colors.text))
 	end,
+	-- windows and popups are the same glass in the gold border; a menu stays a small flat panel
 	frame = function(f, role)
-		if role == "window" then
+		if role == "menu" then
+			S.Panel(f, S.colors.panel, S.colors.border)
+		else
 			f:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16 })
 			f:SetBackdropColor(unpack(S.colors.window))
 			chrome(f)
-		elseif role == "popup" then
-			S.Panel(f, S.colors.panel)
-			chrome(f)
-		else
-			S.Panel(f, S.colors.panel, S.colors.border)
 		end
+	end,
+	-- the framed card, like the sidebar's
+	well = function(f)
+		card(f)
 	end,
 	-- the card behind the entries, and the spear dividing it from the page, which paints over both
 	sidebar = function(side)

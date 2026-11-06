@@ -6,6 +6,8 @@ local function near(a, b) return math.abs(a - b) < 1e-4 end
 
 -- The kit starts on Material, with no frame edge, and buttons drawn as flat backdrops.
 MOCK.check("material by default", S.Skin() == "material" and S.metrics.edge == 0 and S.metrics.inset == S.PAD)
+-- A Material well is the flat sunken panel.
+MOCK.check("material well", S.Well(CreateFrame("Frame")).backdrop ~= nil)
 local flat = S.Button(parent, "Flat", "secondary", 80)
 MOCK.check("material button is a backdrop", flat.backdrop ~= nil and flat.plate == nil)
 -- The new color roles start out as the scheme's own colors.
@@ -70,6 +72,16 @@ S.Frame(win, "window")
 MOCK.check("window glass", win.backdrop and win.backdrop.bgFile:find("Tooltip"))
 win.scripts.OnSizeChanged(win)
 MOCK.check("window chrome", win.scripts.OnSizeChanged ~= nil)
+-- A popup gets the same glass as a window.
+local pop = CreateFrame("Frame")
+pop:SetSize(300, 200)
+S.Frame(pop, "popup")
+MOCK.check("popup glass", pop.backdrop and pop.backdrop.bgFile:find("Tooltip"))
+-- A well is the framed card, with no flat backdrop.
+local well = CreateFrame("Frame")
+well:SetSize(200, 100)
+S.Well(well)
+MOCK.check("well card", well.backdrop == nil)
 -- A menu stays a flat panel.
 local menu = S.Frame(CreateFrame("Frame"), "menu")
 MOCK.check("menu flat", menu.backdrop and menu.backdrop.edgeFile ~= nil)

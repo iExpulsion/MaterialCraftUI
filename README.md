@@ -199,7 +199,9 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
   a dialog or picker, or `"menu"` for a small list dropped from a control.
 - `S.metrics.edge`: how far in from a window's edges its content has to start (0 for Material, 18 for Cognac).
   Grow the window by twice this, so its content keeps the same size. `S.metrics.inset` is the padding inside a
-  popup, and `S.metrics.navInset` how far in from a sidebar's sides its entries sit.
+  popup, `S.metrics.navInset` how far in from a sidebar's sides its entries sit, and `S.metrics.wellInset` the
+  extra padding a well's frame needs.
+- `S.Well(frame)`: a sunken area holding text or a list, such as the surround of a multi-line text box.
 - `S.Sidebar(frame)`: a navigation sidebar's background and dividing edge.
 - `S.NavEntry(button, text)`: a sidebar entry with its label as `button.label`. `button:SetSelected(on)` repaints it.
 - `S.Highlight(frame)`: the hover look for a clickable row, menu item or column heading.
@@ -210,7 +212,7 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
 
 `S.RegisterSkin(key, def)` adds one. `def` has a `label`, an optional `credit`, an optional scheme as `roles`, and
 `colors(c)` to set colors apart from the scheme. Its `metrics` override `S.metrics`. Its drawing functions are
-`button(b)` and `paintButton(b, enabled)`, `frame(f, role)`, `sidebar(side)`, `highlight(f)`, `navEntry(b)` and
+`button(b)` and `paintButton(b, enabled)`, `frame(f, role)`, `well(f)`, `sidebar(side)`, `highlight(f)`, `navEntry(b)` and
 `paintNav(b, on)`, and `input(e, tall)` and `paintInput(e)`. `Skins/Cognac/Skin.lua` is a full example.
 
 Painted skins draw from an atlas. `tools/pack_art.py` packs the pieces named in a `pieces.json` from their source
