@@ -1,4 +1,4 @@
-"""Runs LuaMaterialUI's offline tests against a mocked 3.3.5 client.
+"""Runs MaterialCraftUI's offline tests against a mocked 3.3.5 client.
 
 Usage: py -I -X utf8 test/run.py [test.lua ...]   (default: every test/*_test.lua)
 Each test loads Style.lua as an addon would, with an addon name and an addon table.

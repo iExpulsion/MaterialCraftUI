@@ -1,4 +1,4 @@
--- LuaMaterialUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
+-- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
 -- as NS.Style from its addon table; font objects are named after the addon, so copies never clash.
 local ADDON, NS = ...

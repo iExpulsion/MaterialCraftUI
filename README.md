@@ -1,4 +1,4 @@
-# LuaMaterialUI
+# MaterialCraftUI
 
 A flat dark style kit for World of Warcraft 3.3.5 addons, built on Material 3 color roles: surfaces, one accent
 color, 1px borders, hover and press state layers, and Material's filled, tonal and text button kinds.
