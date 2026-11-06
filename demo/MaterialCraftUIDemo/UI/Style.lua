@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.0.0-8-g04152d1. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.0.0-11-ged8e08d. Change it there, then run tools/sync_style.py.
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
 -- as NS.Style from its addon table; font objects are named after the addon, so copies never clash.
