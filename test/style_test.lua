@@ -59,3 +59,22 @@ MOCK.check("unknown quality falls back to text", S.QualityColor(99) == S.colors.
 -- A section heading is a label with a rule beside it.
 local label, line = S.SectionHeading(parent, "Loot", 12, -8)
 MOCK.check("section heading", label.text == "Loot" and line ~= nil)
+
+-- A theme recolors the roles it names in place, keeps colors an addon added, and reaches new buttons.
+local function near(c, r, g, b) return math.abs(c[1] - r) < 0.01 and math.abs(c[2] - g) < 0.01 and math.abs(c[3] - b) < 0.01 end
+local colors, defaultText = S.colors, S.colors.text
+S.colors.custom = { 0, 1, 0, 1 }
+S.SetTheme({ primary = "#3399ff" })
+MOCK.check("theme sets the accent", near(S.colors.accent, 0.2, 0.6, 1) and near(S.colors.heading, 0.2, 0.6, 1))
+MOCK.check("theme keeps the colors table", S.colors == colors and S.colors.custom ~= nil)
+MOCK.check("roles left out keep the default", near(S.colors.text, defaultText[1], defaultText[2], defaultText[3]))
+MOCK.check("light accent gets dark text", S.colors.onAccent[1] < 0.2 and S.colors.onAccent[3] < 0.3)
+local themed = S.Button(parent, "Go", "primary", 80)
+MOCK.check("primary button takes the theme", near(themed.label.color, S.colors.onAccent[1], S.colors.onAccent[2], S.colors.onAccent[3]))
+MOCK.check("dark accent gets light text", (function() S.SetTheme({ primary = { 0.2, 0.1, 0.4 } }) return S.colors.onAccent[1] > 0.8 end)())
+S.SetTheme({ primary = "112233", onPrimary = "ffffff" })
+MOCK.check("given onPrimary is kept", near(S.colors.onAccent, 1, 1, 1))
+MOCK.check("unknown role is an error", not pcall(S.SetTheme, { primry = "ff0000" }))
+S.SetTheme()
+MOCK.check("reset to the default scheme", near(S.colors.accent, 1, 0.769, 0))
+MOCK.check("theme refreshes quality fallback", S.QualityColor(99) == S.colors.text)

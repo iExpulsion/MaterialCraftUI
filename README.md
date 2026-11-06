@@ -10,6 +10,7 @@ runtime, so two addons using different versions never affect each other.
 ## Features
 
 - **Color Roles:** window, panel and well surfaces, borders, an accent, text, and good, warning and bad colors.
+- **Themes:** swap in your own accent or a whole Material 3 scheme with one call.
 - **Controls:** buttons in five kinds, checkboxes, dropdowns, and one-line or multi-line inputs with placeholders.
 - **Dropdown Behavior:** menus and popups close on a click anywhere else, and inputs give up the keyboard the same
   way. Nothing grabs focus on its own.
@@ -108,8 +109,34 @@ f:SetScript("OnHide", S.Dismiss)
 | `hover`, `selected` | Translucent layers for hovered and selected rows |
 | `good`, `warn`, `bad`, `badDim` | Status colors |
 
-The accent is `#ffc400`. Your addon can add its own colors to `S.colors` after the kit loads. Button kinds read
-the scheme directly, so changing an existing role doesn't recolor buttons.
+Your addon can also add its own colors to `S.colors`. They stay there when the theme changes.
+
+### Themes
+
+The default scheme is Material 3's dark scheme for the seed color `#ffc400`, a warm yellow. `S.SetTheme` swaps in
+your own colors by Material 3 role name, as `"rrggbb"` hex (with or without `#`) or `{ r, g, b }`. Roles you
+leave out keep the default:
+
+```lua
+S.SetTheme({ primary = "#7cacf8" })
+```
+
+| Role | Drives |
+| --- | --- |
+| `primary`, `onPrimary` | The accent, headings, primary buttons and their text |
+| `surfaceLowest`, `surface`, `surfaceLow`, `surfaceContainer`, `surfaceHigh` | Wells, the window, the sidebar, panels, and secondary buttons |
+| `onSurface`, `onSurfaceVariant` | Body text and muted text |
+| `outline`, `outlineVariant` | The hover border and the resting border |
+| `error`, `errorContainer`, `success`, `warning` | `bad`, `badDim`, `good` and `warn` |
+
+If you set `primary` without `onPrimary`, the kit works one out: a dark shade of a light accent, or a light tint
+of a dark one. For a full matching scheme from one seed color, generate it with Google's
+[Material Theme Builder](https://material-foundation.github.io/material-theme-builder/) and pass in its dark
+scheme roles.
+
+Call `S.SetTheme` once, before your addon builds any frames, since frames take their colors when they're made.
+`S.SetTheme()` with nothing goes back to the default. Each addon has its own copy of the kit, so a theme only
+changes the addon that sets it.
 
 `S.PAD` (12) is the padding inside a panel, `S.GAP` (8) the space between controls, and `S.CONTROL_H` (24) the
 height of every button, input and dropdown, so a row of controls lines up.
