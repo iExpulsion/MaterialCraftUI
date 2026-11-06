@@ -206,7 +206,7 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
 - `S.NavEntry(button, text)`: a sidebar entry with its label as `button.label`. `button:SetSelected(on)` repaints it.
 - `S.Highlight(frame)`: the hover look for a clickable row, menu item or column heading.
 
-**Cognac** is painted gold frames, plates and chips on dark panels.
+**Cognac** is painted gold frames, plates and chips on dark glass.
 
 #### Making a Skin
 
@@ -216,8 +216,11 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
 `paintNav(b, on)`, and `input(e, tall)` and `paintInput(e)`. `Skins/Cognac/Skin.lua` is a full example.
 
 Painted skins draw from an atlas. `tools/pack_art.py` packs the pieces named in a `pieces.json` from their source
-sheets into one power-of-two texture without losing any pixels, trims their empty margins, and writes the
-`S.RegisterAtlas` call:
+sheets into one power-of-two texture, trims their empty margins, and writes the `S.RegisterAtlas` call. The 3.3.5
+client has no mipmaps for TGA textures, so art drawn much smaller than it's painted turns grainy: give a piece its
+`draw` scale (screen pixels per art pixel) and the packer shrinks it cleanly to `prepare` times that size (1.5 for
+Cognac). Pieces without one are packed pixel for pixel. The skin's code keeps counting in the source sheets'
+pixels either way:
 
 ```bash
 py -I -X utf8 tools/pack_art.py art/cognac/pieces.json

@@ -1,17 +1,21 @@
-"""Packs the pieces a skin uses from its painted sheets into one atlas, losslessly, and writes the Lua table of
-where each piece landed.
+"""Packs the pieces a skin uses from its painted sheets into one atlas and writes the Lua table of where each piece
+landed.
 
     py -I -X utf8 tools/pack_art.py art/cognac/pieces.json
 
 pieces.json names each piece's rectangle on its source sheet ([x0, y0, x1, y1], pixels, end exclusive). A piece
 with "trim" loses its fully transparent margins; the table records how much, as fractions of the original
-rectangle, so the skin can still place it as if it were whole. Each piece is packed with a margin copied from
-around it on its source sheet, so filtering at its edges samples the same pixels it did on the original. The atlas
-is a power of two on each side, as the 3.3.5 client needs, saved as a run-length encoded TGA.
+rectangle, so the skin can still place it as if it were whole. A piece with "draw" (the screen pixels per art
+pixel the skin draws it at) is shrunk to "prepare" times that size: the 3.3.5 client has no mipmaps for TGA
+textures, so art drawn several times smaller than it's painted turns grainy unless it's shrunk well beforehand.
+Raise "prepare" for sharper art at high UI scales; the source sheets keep their full size, and the skin's code
+still counts in their pixels. A piece without "draw" is packed exactly as painted. Each piece is packed with a
+margin copied from around it on its source sheet, so filtering at its edges samples what it did on the original.
+The atlas is a power of two on each side, as the 3.3.5 client needs, saved as a run-length encoded TGA.
 
     --check    rebuild in memory and fail if the committed atlas or table differ, or if any piece's pixels changed
 """
-import json, os, sys
+import json, math, os, sys
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -57,6 +61,30 @@ def max_rects(sizes, width, height):
     return spots
 
 
+def factor(spec, p):
+    """How much a piece is shrunk when packed: to `prepare` times the size the skin draws it at ("draw", screen
+    pixels per art pixel), never enlarged."""
+    return min(1.0, spec.get('prepare', 1.0) * p.get('draw', 1.0)) if 'draw' in p else 1.0
+
+
+def prepared(sheet, inner, f):
+    """The piece with MARGIN pixels of what surrounds it on its sheet, shrunk by f. Shrinking works on premultiplied
+    alpha, so transparent edges don't darken, and with a Lanczos filter, since the 3.3.5 client has no mipmaps for
+    TGA textures and filters badly when it shrinks one far."""
+    ms = MARGIN if f == 1.0 else math.ceil(MARGIN / f) + 1
+    ex0, ey0, ex1, ey1 = inner[0] - ms, inner[1] - ms, inner[2] + ms, inner[3] + ms
+    block = Image.new('RGBA', (ex1 - ex0, ey1 - ey0), (0, 0, 0, 0))
+    cx0, cy0, cx1, cy1 = max(ex0, 0), max(ey0, 0), min(ex1, sheet.width), min(ey1, sheet.height)
+    block.paste(sheet.crop((cx0, cy0, cx1, cy1)), (cx0 - ex0, cy0 - ey0))
+    iw, ih = inner[2] - inner[0], inner[3] - inner[1]
+    if f != 1.0:
+        block = block.convert('RGBa').resize((round(block.width * f), round(block.height * f)),
+                                              Image.Resampling.LANCZOS).convert('RGBA')
+    ix, iy = round(ms * f), round(ms * f)
+    sw, sh = max(1, round(iw * f)), max(1, round(ih * f))
+    return block.crop((ix - MARGIN, iy - MARGIN, ix + sw + MARGIN, iy + sh + MARGIN)), sw, sh
+
+
 def build(spec):
     sheets = {k: Image.open(os.path.join(ROOT, p)).convert('RGBA') for k, p in spec['sheets'].items()}
     pieces = {}
@@ -64,8 +92,9 @@ def build(spec):
         sheet = sheets[p['sheet']]
         full = tuple(p['rect'])
         inner = trimmed(sheet, full) if p.get('trim') else full
-        pieces[name] = (sheet, full, inner)
-    sizes = [(n, i[2] - i[0] + 2 * MARGIN, i[3] - i[1] + 2 * MARGIN) for n, (_, _, i) in pieces.items()]
+        block, sw, sh = prepared(sheet, inner, factor(spec, p))
+        pieces[name] = (full, inner, block, sw, sh)
+    sizes = [(n, b.width, b.height) for n, (_, _, b, _, _) in pieces.items()]
     # the smallest power-of-two sheet they fit in, the squarer one on a tie
     tries = sorted(((a, b) for a in (256, 512, 1024, 2048) for b in (256, 512, 1024, 2048)),
                    key=lambda s: (s[0] * s[1], abs(s[0] - s[1]), -s[0]))
@@ -75,21 +104,15 @@ def build(spec):
             break
     atlas = Image.new('RGBA', (w, h), (0, 0, 0, 0))
     table = {}
-    for name, (sheet, full, inner) in pieces.items():
+    for name, (full, inner, block, sw, sh) in pieces.items():
         x, y = spots[name]
-        # the piece plus MARGIN pixels of what surrounds it on its sheet, clamped at the sheet's edges
-        sx0, sy0 = inner[0] - MARGIN, inner[1] - MARGIN
-        block = Image.new('RGBA', (inner[2] - inner[0] + 2 * MARGIN, inner[3] - inner[1] + 2 * MARGIN), (0, 0, 0, 0))
-        cx0, cy0 = max(sx0, 0), max(sy0, 0)
-        cx1, cy1 = min(inner[2] + MARGIN, sheet.width), min(inner[3] + MARGIN, sheet.height)
-        block.paste(sheet.crop((cx0, cy0, cx1, cy1)), (cx0 - sx0, cy0 - sy0))
         atlas.paste(block, (x, y))
         px, py = x + MARGIN, y + MARGIN
         fw, fh = full[2] - full[0], full[3] - full[1]
         table[name] = {
-            'coords': ((px) / w, (px + inner[2] - inner[0]) / w, (py) / h, (py + inner[3] - inner[1]) / h),
+            'coords': (px / w, (px + sw) / w, py / h, (py + sh) / h),
             'trim': ((inner[0] - full[0]) / fw, (inner[1] - full[1]) / fh, (full[2] - inner[2]) / fw, (full[3] - inner[3]) / fh),
-            'at': (px, py, inner),
+            'at': (px, py, inner, sw, sh),
             'size': (fw, fh),
         }
     return atlas, table
@@ -98,15 +121,18 @@ def build(spec):
 def verify(spec, atlas, table):
     sheets = {k: Image.open(os.path.join(ROOT, p)).convert('RGBA') for k, p in spec['sheets'].items()}
     for name, p in spec['pieces'].items():
-        px, py, inner = table[name]['at']
-        w, h = inner[2] - inner[0], inner[3] - inner[1]
-        got = atlas.crop((px, py, px + w, py + h))
-        want = sheets[p['sheet']].crop(inner)
+        px, py, inner, sw, sh = table[name]['at']
+        got = atlas.crop((px, py, px + sw, py + sh))
+        f = factor(spec, p)
+        # a piece packed at full size has to be exactly its source pixels; a shrunk one, exactly the shrink of them
+        want = sheets[p['sheet']].crop(inner) if f == 1.0 else prepared(sheets[p['sheet']], inner, f)[0].crop(
+            (MARGIN, MARGIN, MARGIN + sw, MARGIN + sh))
         if got.tobytes() != want.tobytes():
             sys.exit(f'{name}: packed pixels differ from the source')
         # what trimming dropped has to be fully transparent
+        source = sheets[p['sheet']].crop(inner)
         full = Image.new('RGBA', (p['rect'][2] - p['rect'][0], p['rect'][3] - p['rect'][1]), (0, 0, 0, 0))
-        full.paste(want, (inner[0] - p['rect'][0], inner[1] - p['rect'][1]))
+        full.paste(source, (inner[0] - p['rect'][0], inner[1] - p['rect'][1]))
         if full.getchannel('A').tobytes() != sheets[p['sheet']].crop(tuple(p['rect'])).getchannel('A').tobytes():
             sys.exit(f'{name}: trimming dropped visible pixels')
 

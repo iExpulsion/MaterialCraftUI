@@ -4,12 +4,13 @@
 
 - **Skins:** `S.UseSkin` switches how controls are drawn, not just their colors. Material, the flat look, is built
   in and stays the default. `S.Skins` lists them for a picker and `S.RegisterSkin` adds one.
-- **Cognac Skin:** painted gold frames, plates and chips on dark panels, in `Skins/Cognac`.
+- **Cognac Skin:** painted gold frames, plates and chips on dark glass, in `Skins/Cognac`.
 - **Skin-Aware Helpers:** `S.Frame`, `S.Well`, `S.Sidebar`, `S.NavEntry` and `S.Highlight` draw window frames,
   wells, sidebars, navigation entries and hover states in the current skin, and `S.metrics` says how much room a skin's border needs.
 - **New Color Roles:** `rowHover`, `rowSelected`, `navSelected`, `arrow`, `scrollThumb` and `scrollThumbHover`.
-- **Atlas Packer:** `tools/pack_art.py` packs a skin's art into one texture without losing pixels, and `S.Art` and
-  `S.PlaceArt` draw from it.
+- **Atlas Packer:** `tools/pack_art.py` packs a skin's art into one texture, shrinking each piece cleanly to suit
+  the size it's drawn at, since the client has no mipmaps for TGA textures. `S.Art`, `S.PlaceArt`, `S.ArtPart` and
+  `S.NineSlice` draw from it.
 - **Sync Script:** names skins to copy along with the kit.
 - **Demo:** the theme dropdown includes Cognac.
 
