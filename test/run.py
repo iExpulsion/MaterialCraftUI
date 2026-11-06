@@ -14,6 +14,7 @@ def run(path):
     L = lua51.LuaRuntime(unpack_returned_tuples=True)
     L.execute(open(os.path.join(HERE, 'mock.lua'), encoding='utf8').read())
     L.execute('NS = {}')
+    L.globals().ROOT = ROOT
     loader = L.eval('function(src) local f, err = loadstring(src, "Style.lua") if not f then error(err) end f("TestAddon", NS) end')
     loader(open(os.path.join(ROOT, 'Style.lua'), encoding='utf8').read())
     L.execute(open(path, encoding='utf8').read())

@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title: MaterialCraftUI Demo
+## Notes: Every MaterialCraftUI control in one window, for trying the kit and taking screenshots. /mcui
+## Author: Expulsion
+## Version: 1.0.0
+
+UI\Style.lua
+Demo.lua

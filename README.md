@@ -94,6 +94,19 @@ save:SetPoint("BOTTOMRIGHT", -S.PAD, S.PAD)
 f:SetScript("OnHide", S.Dismiss)
 ```
 
+## Demo
+
+`demo/MaterialCraftUIDemo` is a small addon that shows every control in one window: each button kind and its
+disabled look, a segmented button, a popup, inputs, dropdowns, checkboxes, every color role and a scrolling list.
+A dropdown in its title bar switches between a few themes. Copy the folder into `Interface\AddOns` and type
+`/mcui` in game.
+
+Its `UI/Style.lua` is a synced copy like any addon's. After changing `Style.lua`, refresh it with:
+
+```bash
+py -I -X utf8 tools/sync_style.py demo MaterialCraftUIDemo
+```
+
 ## Reference
 
 ### Colors and Spacing
