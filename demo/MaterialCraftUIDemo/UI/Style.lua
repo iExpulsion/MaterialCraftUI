@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.0.0-1-g9c55a59. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.0.0-3-g1e8beed. Change it there, then run tools/sync_style.py.
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
 -- as NS.Style from its addon table; font objects are named after the addon, so copies never clash.
@@ -124,8 +124,8 @@ S.SetTheme()
 S.PAD, S.GAP, S.CONTROL_H = 12, 8, 24
 
 -- What a skin's frame decoration takes up: edge, the border S.Frame draws around a "window", which its content
--- stays inside; inset, the padding inside a "popup".
-local METRICS = { edge = 0, inset = S.PAD }
+-- stays inside; inset, the padding inside a "popup"; navInset, how far in from a sidebar's sides its entries sit.
+local METRICS = { edge = 0, inset = S.PAD, navInset = 0 }
 S.metrics = {}
 for k, v in pairs(METRICS) do S.metrics[k] = v end
 

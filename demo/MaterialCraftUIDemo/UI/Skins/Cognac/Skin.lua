@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.0.0-1-g9c55a59. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.0.0-3-g1e8beed. Change it there, then run tools/sync_style.py.
 -- Cognac: gold-framed painted controls on warm brown glass. Load it after Style.lua and Atlas.lua;
 -- S.UseSkin("cognac") switches to it.
 local _, NS = ...
@@ -149,7 +149,7 @@ S.RegisterSkin("cognac", {
 		c.scrollThumb = c.accent
 		c.scrollThumbHover = { 1, 0.95, 0.75, 1 }
 	end,
-	metrics = { edge = EDGE, inset = EDGE },
+	metrics = { edge = EDGE, inset = EDGE, navInset = 8 },
 	button = plate,
 	paintButton = function(b, enabled)
 		local piece = platePiece(b, enabled)
