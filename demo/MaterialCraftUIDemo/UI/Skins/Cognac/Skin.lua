@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.0.0-21-ge8a7c87. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.0.0-23-g86ca3f5. Change it there, then run tools/sync_style.py.
 -- Cognac: gold-framed painted controls on dark glass. Load it after Style.lua and Atlas.lua;
 -- S.UseSkin("cognac") switches to it.
 local _, NS = ...
