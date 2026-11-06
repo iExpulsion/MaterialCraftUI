@@ -19,6 +19,8 @@ runtime, so two addons using different versions never affect each other.
 
 - **Color Roles:** window, panel and well surfaces, borders, an accent, text, and good, warning and bad colors.
 - **Themes:** swap in your own accent or a whole Material 3 scheme with one call.
+- **Skins:** change how the controls are drawn, not just their colors. The flat Material skin is built in, and the
+  optional painted Cognac skin comes in its own folder.
 - **Controls:** buttons in five kinds, checkboxes, dropdowns, and one-line or multi-line inputs with placeholders.
 - **Dropdown Behavior:** menus and popups close on a click anywhere else, and inputs give up the keyboard the same
   way. Nothing grabs focus on its own.
@@ -57,7 +59,8 @@ an addon ships:
 py -I -X utf8 tools/sync_style.py "<addon repo>" "<addon folder>"
 ```
 
-It writes `<addon repo>/<addon folder>/UI/Style.lua`. A small wrapper in the addon's own `tools/` folder makes
+It writes `<addon repo>/<addon folder>/UI/Style.lua`. Name skins after the folder to copy them too, such as
+`Cognac`; each goes to `UI/Skins/<Skin>`. A small wrapper in the addon's own `tools/` folder makes
 this one command. This one assumes MaterialCraftUI is checked out next to the addon's repo, and the
 `MATERIALCRAFTUI` environment variable can point it somewhere else:
 
@@ -107,13 +110,13 @@ f:SetScript("OnHide", S.Dismiss)
 
 `demo/MaterialCraftUIDemo` is a small addon that shows every control in one window: each button kind and its
 disabled look, a segmented button, a popup, inputs, dropdowns, checkboxes, every color role and a scrolling list.
-A dropdown in its title bar switches between a few themes. Copy the folder into `Interface\AddOns` and type
-`/mcui` in game.
+A dropdown in its title bar switches between a few themes and the Cognac skin. Copy the folder into
+`Interface\AddOns` and type `/mcui` in game.
 
-Its `UI/Style.lua` is a synced copy like any addon's. After changing `Style.lua`, refresh it with:
+Its `UI/Style.lua` and `UI/Skins` are synced copies like any addon's. After changing the kit, refresh them with:
 
 ```bash
-py -I -X utf8 tools/sync_style.py demo MaterialCraftUIDemo
+py -I -X utf8 tools/sync_style.py demo MaterialCraftUIDemo Cognac
 ```
 
 ## Reference
@@ -128,7 +131,10 @@ py -I -X utf8 tools/sync_style.py demo MaterialCraftUIDemo
 | `border`, `outline` | The soft 1px border, and the stronger one for hover |
 | `accent`, `accentHover`, `onAccent` | The accent fill, its hover, and text on top of it |
 | `text`, `heading`, `muted`, `disabled` | Body text, headings (accent), secondary text, disabled text |
-| `hover`, `selected` | Translucent layers for hovered and selected rows |
+| `hover`, `selected` | Translucent layers for hovered and selected controls |
+| `rowHover`, `rowSelected` | The same for table and list rows (`hover` and `selected` unless a skin sets them) |
+| `navSelected` | The selected entry's label in a navigation sidebar (`heading` unless a skin sets it) |
+| `arrow`, `scrollThumb`, `scrollThumbHover` | Dropdown arrows and scrollbar thumbs |
 | `good`, `warn`, `bad`, `badDim` | Status colors |
 
 Your addon can also add its own colors to `S.colors`. They stay there when the theme changes.
@@ -164,6 +170,59 @@ changes the addon that sets it.
 
 `S.PAD` (12) is the padding inside a panel, `S.GAP` (8) the space between controls, and `S.CONTROL_H` (24) the
 height of every button, input and dropdown, so a row of controls lines up.
+
+### Skins
+
+A skin decides how buttons, inputs, window frames, sidebars, hover states and navigation entries are drawn. The
+flat **Material** skin is built in and is the default. Others live in `Skins/<Name>`, each as an `Atlas.lua`, a
+`Skin.lua` and its texture. List them in your `.toc` after `Style.lua`:
+
+```
+UI\Style.lua
+UI\Skins\Cognac\Atlas.lua
+UI\Skins\Cognac\Skin.lua
+```
+
+Pick one with `S.UseSkin(key, roles)` before building any frames. A skin with a scheme of its own ignores
+`roles`; Material uses them, so an addon keeps its own accent:
+
+```lua
+S.UseSkin(MyAddonDB.skin or "material", { primary = "ffc400" })
+```
+
+Frames take their look when they're made, so switching skins needs a `/reload` (or rebuilding the window).
+`S.Skin()` is the skin in use, and `S.Skins()` lists `{ key, label, credit }` for a picker, Material first.
+
+To keep layouts working in every skin, build windows with the skin-aware helpers:
+
+- `S.Frame(frame, role)`: the frame's background and border. `role` is `"window"` for a main window, `"popup"` for
+  a dialog or picker, or `"menu"` for a small list dropped from a control.
+- `S.metrics.edge`: how far in from a window's edges its content has to start (0 for Material, 18 for Cognac).
+  Grow the window by twice this, so its content keeps the same size. `S.metrics.inset` is the padding inside a
+  popup.
+- `S.Sidebar(frame)`: a navigation sidebar's background and dividing edge.
+- `S.NavEntry(button, text)`: a sidebar entry with its label as `button.label`. `button:SetSelected(on)` repaints it.
+- `S.Highlight(frame)`: the hover look for a clickable row, menu item or column heading.
+
+**Cognac** is painted gold frames, plates and chips on warm brown glass.
+
+#### Making a Skin
+
+`S.RegisterSkin(key, def)` adds one. `def` has a `label`, an optional `credit`, an optional scheme as `roles`, and
+`colors(c)` to set colors apart from the scheme. Its `metrics` override `S.metrics`. Its drawing functions are
+`button(b)` and `paintButton(b, enabled)`, `frame(f, role)`, `sidebar(side)`, `highlight(f)`, `navEntry(b)` and
+`paintNav(b, on)`, and `input(e, tall)` and `paintInput(e)`. `Skins/Cognac/Skin.lua` is a full example.
+
+Painted skins draw from an atlas. `tools/pack_art.py` packs the pieces named in a `pieces.json` from their source
+sheets into one power-of-two texture without losing any pixels, trims their empty margins, and writes the
+`S.RegisterAtlas` call:
+
+```bash
+py -I -X utf8 tools/pack_art.py art/cognac/pieces.json
+```
+
+`S.Art(texture, atlas, piece, u0, u1, v0, v1)` shows a piece, or a fraction of it, and
+`S.PlaceArt(texture, frame, atlas, piece, x, y, w, h)` places it as if its trimmed margins were still there.
 
 ### Helpers
 
@@ -232,4 +291,5 @@ py -I -X utf8 test/run.py
 
 ## License
 
-[MIT](LICENSE). Material Design is Google's; this project isn't affiliated with Google.
+The code is [MIT](LICENSE). The Cognac art in `art/cognac` and `Skins/Cognac` isn't covered by it.
+Material Design is Google's; this project isn't affiliated with Google.

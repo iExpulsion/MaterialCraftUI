@@ -11,6 +11,8 @@ local THEMES = {
 	{ value = 3, text = "Amber", tooltip = "S.SetTheme({ primary = \"ffc400\" })", roles = { primary = "ffc400" } },
 	{ value = 4, text = "Green", tooltip = "S.SetTheme({ primary = \"7dd99c\" })", roles = { primary = "7dd99c" } },
 	{ value = 5, text = "Rose", tooltip = "S.SetTheme({ primary = \"ffb1c8\" })", roles = { primary = "ffb1c8" } },
+	{ value = 6, text = "Cognac", skin = "cognac",
+		tooltip = "S.UseSkin(\"cognac\"): the painted skin. Art by Jeff, from AttuneNext." },
 }
 
 local NAV = {
@@ -135,7 +137,7 @@ function PAGE.Buttons(page)
 	popup:SetFrameStrata("FULLSCREEN_DIALOG")
 	popup:SetPoint("TOPLEFT", optionsButton, "BOTTOMLEFT", 0, -2)
 	popup:SetSize(180, 2 * S.PAD + 3 * 14 + 2 * S.GAP)
-	S.Panel(popup, S.colors.panel, S.colors.border)
+	S.Frame(popup, "menu")
 	popup:EnableMouse(true)
 	popup:Hide()
 	popup.owner = optionsButton
@@ -344,9 +346,9 @@ function PAGE.Items(page)
 	for i, item in ipairs(ITEMS) do
 		local r = CreateFrame("Button", nil, child)
 		r:SetHeight(ROW_H)
-		local hover = S.Solid(r, "HIGHLIGHT", S.colors.hover)
+		local hover = S.Solid(r, "HIGHLIGHT", S.colors.rowHover)
 		hover:SetAllPoints()
-		r.selection = S.Solid(r, "BACKGROUND", S.colors.selected)
+		r.selection = S.Solid(r, "BACKGROUND", S.colors.rowSelected)
 		r.selection:SetAllPoints()
 		r.selection:Hide()
 		local itemName = S.Text(r, "small", S.QualityColor(item[2]))
@@ -402,21 +404,23 @@ local function build()
 	generation = generation + 1
 	S.RefreshFonts()
 	local C = S.colors
+	-- the skin's window border sits around the same content area in every skin
+	local inset = S.metrics.edge + 1
 
 	local f = CreateFrame("Frame", WINDOW, UIParent)
-	f:SetSize(W, H)
+	f:SetSize(W + 2 * S.metrics.edge, H + 2 * S.metrics.edge)
 	f:SetFrameStrata("HIGH")
 	f:SetToplevel(true)
 	f:SetMovable(true)
 	f:SetClampedToScreen(true)
 	f:EnableMouse(true)
 	f:SetPoint(unpack(state.point or { "CENTER" }))
-	S.Panel(f, C.window, C.border)
+	S.Frame(f, "window")
 	f:SetScript("OnHide", S.Dismiss)
 
 	local bar = CreateFrame("Frame", nil, f)
-	bar:SetPoint("TOPLEFT", 1, -1)
-	bar:SetPoint("TOPRIGHT", -1, -1)
+	bar:SetPoint("TOPLEFT", inset, -inset)
+	bar:SetPoint("TOPRIGHT", -inset, -inset)
 	bar:SetHeight(TITLE_H)
 	bar:EnableMouse(true)
 	bar:RegisterForDrag("LeftButton")
@@ -447,20 +451,17 @@ local function build()
 
 	local nav = CreateFrame("Frame", nil, f)
 	nav:SetPoint("TOPLEFT", bar, "BOTTOMLEFT")
-	nav:SetPoint("BOTTOMLEFT", 1, 1)
+	nav:SetPoint("BOTTOMLEFT", inset, inset)
 	nav:SetWidth(NAV_W)
-	S.Panel(nav, C.sidebar)
-	local edge = S.Solid(nav, "BORDER", C.border)
-	edge:SetWidth(1)
-	edge:SetPoint("TOPRIGHT")
-	edge:SetPoint("BOTTOMRIGHT")
+	nav:SetHeight(H - TITLE_H - 2)
+	S.Sidebar(nav)
 	local hint = S.Text(nav, "small", C.outline)
 	hint:SetPoint("BOTTOMLEFT", S.PAD, S.PAD)
 	hint:SetText("/mcui Toggles This Window")
 
 	local content = CreateFrame("Frame", nil, f)
 	content:SetPoint("TOPLEFT", nav, "TOPRIGHT")
-	content:SetPoint("BOTTOMRIGHT", -1, 1)
+	content:SetPoint("BOTTOMRIGHT", -inset, inset)
 
 	local pages, entries = {}, {}
 	local function show(name)
@@ -469,11 +470,7 @@ local function build()
 		for key, p in pairs(pages) do
 			if key == name then p:Show() else p:Hide() end
 		end
-		for _, e in ipairs(entries) do
-			local on = e.page == name
-			if on then e.selection:Show() else e.selection:Hide() end
-			e.text:SetTextColor(unpack(on and C.accent or C.text))
-		end
+		for _, e in ipairs(entries) do e:SetSelected(e.page == name) end
 	end
 
 	local y = -S.PAD
@@ -485,13 +482,7 @@ local function build()
 			e:SetHeight(S.CONTROL_H)
 			e:SetPoint("TOPLEFT", 4, y)
 			e:SetPoint("TOPRIGHT", -5, y)
-			local hover = S.Solid(e, "HIGHLIGHT", C.hover)
-			hover:SetAllPoints()
-			e.selection = S.Solid(e, "BACKGROUND", C.selected)
-			e.selection:SetAllPoints()
-			e.text = S.Text(e, "normal")
-			e.text:SetPoint("LEFT", S.PAD - 4, 0)
-			e.text:SetText(name)
+			S.NavEntry(e, name)
 			e.page = name
 			e:SetScript("OnClick", function() show(name) end)
 			entries[#entries + 1] = e
@@ -512,7 +503,7 @@ end
 setTheme = function(index)
 	state.theme = index
 	window:Hide()
-	S.SetTheme(THEMES[index].roles)
+	S.UseSkin(THEMES[index].skin or "material", THEMES[index].roles)
 	window = build()
 	window:Show()
 end

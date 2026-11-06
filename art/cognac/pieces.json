@@ -1,0 +1,28 @@
+{
+  "output": "Skins/Cognac/Cognac.tga",
+  "atlas": "Skins/Cognac/Atlas.lua",
+  "name": "cognac",
+  "sheets": {
+    "controls": "art/cognac/ui_controls.tga",
+    "chrome": "art/cognac/ui_chrome.tga"
+  },
+  "pieces": {
+    "button_normal": { "sheet": "controls", "rect": [16, 84, 241, 172] },
+    "button_hover": { "sheet": "controls", "rect": [271, 89, 498, 167] },
+    "button_pressed": { "sheet": "controls", "rect": [527, 87, 752, 170] },
+    "button_disabled": { "sheet": "controls", "rect": [784, 84, 1008, 172] },
+    "chip_selected": { "sheet": "controls", "rect": [784, 349, 1008, 419] },
+    "card": { "sheet": "controls", "rect": [784, 565, 1009, 714] },
+    "search": { "sheet": "controls", "rect": [15, 591, 173, 690] },
+    "corner_nw": { "sheet": "chrome", "rect": [0, 0, 256, 256], "trim": true },
+    "corner_ne": { "sheet": "chrome", "rect": [256, 0, 512, 256], "trim": true },
+    "corner_sw": { "sheet": "chrome", "rect": [512, 0, 768, 256], "trim": true },
+    "corner_se": { "sheet": "chrome", "rect": [768, 0, 1024, 256], "trim": true },
+    "border_top": { "sheet": "chrome", "rect": [0, 256, 256, 512], "trim": true },
+    "border_bottom": { "sheet": "chrome", "rect": [256, 256, 512, 512], "trim": true },
+    "border_left": { "sheet": "chrome", "rect": [512, 256, 768, 512], "trim": true },
+    "border_right": { "sheet": "chrome", "rect": [768, 256, 1024, 512], "trim": true },
+    "divider_v": { "sheet": "chrome", "rect": [256, 512, 512, 768], "trim": true },
+    "bezel": { "sheet": "chrome", "rect": [529, 530, 750, 751], "trim": true }
+  }
+}

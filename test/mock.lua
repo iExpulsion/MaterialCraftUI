@@ -38,6 +38,8 @@ local function Stub()
 			self.scripts[s] = function(...) if old then old(...) end fn(...) end
 		end
 		elseif k == "GetScript" then f = function(self, s) return self.scripts[s] end
+		elseif k == "GetParent" then f = function(self) return self.parent end
+		elseif k == "SetAlpha" then f = function(self, a) self.alpha = a end
 		elseif k == "SetText" then f = function(self, v) self.text = v end
 		elseif k == "SetTextColor" then f = function(self, r, g, b) self.color = { r, g, b } end
 		elseif k == "SetFontObject" then f = function(self, font) self.fontObject = font end
@@ -48,6 +50,15 @@ local function Stub()
 		elseif k == "GetCenter" then f = function() return 300, 200 end
 		elseif k == "GetEffectiveScale" then f = function() return 1 end
 		elseif k == "SetPoint" then f = function(self, ...) self.point = { ... } end
+		elseif k == "SetSize" then f = function(self, w, h) self.width, self.height = w, h end
+		elseif k == "SetWidth" then f = function(self, w) self.width = w end
+		elseif k == "SetHeight" then f = function(self, h) self.height = h end
+		elseif k == "GetWidth" then f = function(self) return self.width end
+		elseif k == "GetHeight" then f = function(self) return self.height end
+		elseif k == "SetTexture" then f = function(self, path) self.texture = path end
+		elseif k == "SetTexCoord" then f = function(self, ...) self.coords = { ... } end
+		elseif k == "SetVertexColor" then f = function(self, r, g, b) self.vertex = { r, g, b } end
+		elseif k == "SetBackdrop" then f = function(self, bd) self.backdrop = bd end
 		elseif k == "SetFocus" then f = function(self)
 			if self.scripts.OnEditFocusGained then self.scripts.OnEditFocusGained(self) end
 		end

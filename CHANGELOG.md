@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- **Skins:** `S.UseSkin` switches how controls are drawn, not just their colors. Material, the flat look, is built
+  in and stays the default. `S.Skins` lists them for a picker and `S.RegisterSkin` adds one.
+- **Cognac Skin:** painted gold frames, plates and chips on warm brown glass, in `Skins/Cognac`.
+- **Skin-Aware Helpers:** `S.Frame`, `S.Sidebar`, `S.NavEntry` and `S.Highlight` draw window frames, sidebars,
+  navigation entries and hover states in the current skin, and `S.metrics` says how much room a skin's border needs.
+- **New Color Roles:** `rowHover`, `rowSelected`, `navSelected`, `arrow`, `scrollThumb` and `scrollThumbHover`.
+- **Atlas Packer:** `tools/pack_art.py` packs a skin's art into one texture without losing pixels, and `S.Art` and
+  `S.PlaceArt` draw from it.
+- **Sync Script:** names skins to copy along with the kit.
+- **Demo:** the theme dropdown includes Cognac.
+
 ## 1.0.0
 
 The first public release.

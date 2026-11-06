@@ -17,6 +17,8 @@ def run(path):
     L.globals().ROOT = ROOT
     loader = L.eval('function(src) local f, err = loadstring(src, "Style.lua") if not f then error(err) end f("TestAddon", NS) end')
     loader(open(os.path.join(ROOT, 'Style.lua'), encoding='utf8').read())
+    # LOAD("Skins/Cognac/Skin.lua") loads another kit file the way an addon's .toc would
+    L.globals().LOAD = lambda rel: loader(open(os.path.join(ROOT, rel), encoding='utf8').read())
     L.execute(open(path, encoding='utf8').read())
     return L.globals().MOCK.failures
 

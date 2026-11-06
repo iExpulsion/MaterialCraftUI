@@ -1,5 +1,8 @@
--- The demo addon: it loads on the kit, opens with /mcui, builds every page, and rebuilds itself for each theme.
+-- The demo addon: it loads on the kit, opens with /mcui, builds every page, and rebuilds itself for each theme,
+-- the Cognac skin included.
 local S = NS.Style
+LOAD("Skins/Cognac/Atlas.lua")
+LOAD("Skins/Cognac/Skin.lua")
 
 local file = io.open(ROOT .. "/demo/MaterialCraftUIDemo/Demo.lua", "r")
 local src = file:read("*a")
@@ -27,4 +30,12 @@ for i, roles in ipairs({ false, { primary = "7cacf8" }, { primary = "ffc400" }, 
 end
 MOCK.check("old window hidden after a theme change", not first:IsShown())
 
-S.SetTheme()
+-- The Cognac entry rebuilds the window in that skin, larger by its border so the content keeps its size.
+NS.Demo.setTheme(6)
+local cognac = NS.Demo.window()
+MOCK.check("cognac rebuilds", S.Skin() == "cognac" and cognac:IsShown() and cognac.width == 680 + 36)
+-- Back to a Material theme after it.
+NS.Demo.setTheme(1)
+MOCK.check("material again", S.Skin() == "material" and NS.Demo.window().width == 680)
+
+S.UseSkin("material")
