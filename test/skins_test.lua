@@ -25,13 +25,18 @@ S.UseSkin("cognac")
 MOCK.check("cognac scheme", S.Skin() == "cognac" and near(S.colors.accent[1], 0xf0 / 255) and near(S.colors.navSelected[2], 1))
 MOCK.check("cognac metrics", S.metrics.edge == 18 and S.metrics.inset == 18 and S.metrics.navInset == 8)
 
--- A Cognac button is a plate from the addon's own copy of the atlas, not a backdrop.
+-- A Cognac button is a nine-sliced plate from the addon's own copy of the atlas, not a backdrop.
 local b = S.Button(parent, "Plate", "secondary", 90)
-MOCK.check("plate, no backdrop", b.backdrop == nil and b.plate.shown
-	and b.plate.texture == "Interface\\AddOns\\TestAddon\\UI\\Skins\\Cognac\\Cognac")
+local corner = b.plate.textures[1]
+MOCK.check("plate, no backdrop", b.backdrop == nil and corner.shown
+	and corner.texture == "Interface\\AddOns\\TestAddon\\UI\\Skins\\Cognac\\Cognac")
 local face = parent:CreateTexture()
 S.Art(face, "cognac", "button_normal")
-MOCK.check("normal face", near(b.plate.coords[1], face.coords[1]) and near(b.plate.coords[3], face.coords[3]))
+MOCK.check("normal face", b.plate.piece == "button_normal" and near(corner.coords[1], face.coords[1])
+	and near(corner.coords[3], face.coords[3]))
+-- Its corners keep the art's shape: 18 of the plate's 88 art pixels high, scaled to the button's height.
+local _, ph = S.ArtSize("cognac", "button_normal")
+MOCK.check("plate corners keep their scale", near(corner.width, 18 * S.CONTROL_H / ph) and near(corner.height, corner.width))
 -- Pressing shows the pressed face; letting go goes back.
 b.scripts.OnMouseDown(b)
 MOCK.check("pressed face", b.platePiece == "button_pressed")
@@ -50,7 +55,9 @@ MOCK.check("selected chip", seg.platePiece == "chip_selected")
 -- The plate follows the button's size.
 b:SetWidth(140)
 b.scripts.OnSizeChanged(b)
-MOCK.check("plate resized", b.plate.width == 140 and b.plate.height == S.CONTROL_H)
+local p = b.plate.textures
+MOCK.check("plate resized", near(p[1].width + p[2].width + p[3].width, 140)
+	and near(p[1].height + p[4].height + p[7].height, S.CONTROL_H) and near(p[3].width, p[1].width))
 
 -- Part of a piece maps through to the matching part of its atlas coordinates.
 local t, whole = parent:CreateTexture(), parent:CreateTexture()
@@ -72,11 +79,11 @@ S.Frame(win, "window")
 MOCK.check("window glass", win.backdrop and win.backdrop.bgFile:find("Tooltip"))
 win.scripts.OnSizeChanged(win)
 MOCK.check("window chrome", win.scripts.OnSizeChanged ~= nil)
--- A popup gets the same glass as a window.
+-- A popup is the window's tint but solid, so what's under it doesn't show through.
 local pop = CreateFrame("Frame")
 pop:SetSize(300, 200)
 S.Frame(pop, "popup")
-MOCK.check("popup glass", pop.backdrop and pop.backdrop.bgFile:find("Tooltip"))
+MOCK.check("popup solid", pop.backdrop and not pop.backdrop.bgFile:find("Tooltip") and not pop.backdrop.edgeFile)
 -- A well is the framed card, with no flat backdrop.
 local well = CreateFrame("Frame")
 well:SetSize(200, 100)
@@ -96,10 +103,9 @@ MOCK.check("sidebar divider", #MOCK.created == before + 1 and MOCK.created[#MOCK
 -- A navigation entry shows the chip and the mint label while selected.
 local nav = S.NavEntry(CreateFrame("Button", nil, side), "Page")
 nav:SetSize(140, 30)
-MOCK.check("nav unselected", not nav.plate.shown and nav.label.color[1] == S.colors.text[1])
+MOCK.check("nav unselected", not nav.plate.textures[5].shown and nav.label.color[1] == S.colors.text[1])
 nav:SetSelected(true)
-MOCK.check("nav selected", nav.plate.shown and nav.platePiece == "chip_selected" and near(nav.label.color[2], 1))
-
+MOCK.check("nav selected", nav.plate.textures[5].shown and nav.platePiece == "chip_selected" and near(nav.label.color[2], 1))
 -- A one-line input is three slices of the search plate that brighten on focus; a tall one keeps a backdrop.
 local e = S.Input(parent, nil, 200, "Search")
 MOCK.check("input slices", #e.slices == 3 and e.backdrop == nil)
