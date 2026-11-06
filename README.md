@@ -225,6 +225,10 @@ py -I -X utf8 tools/pack_art.py art/cognac/pieces.json
 
 `S.Art(texture, atlas, piece, u0, u1, v0, v1)` shows a piece, or a fraction of it, and
 `S.PlaceArt(texture, frame, atlas, piece, x, y, w, h)` places it as if its trimmed margins were still there.
+`S.ArtSize(atlas, piece)` is a piece's size in pixels, and `S.ArtPart(texture, frame, atlas, piece, x0, x1, y0, y1,
+x, y, w, h)` shows part of it, given in its own pixels. `S.NineSlice(frame, layer, atlas, piece, cut, scale)` draws
+a piece as a nine-slice: its corners keep their shape, its edges stretch only along their length. Call
+`:Layout(w, h)` when the frame's size changes and `:SetPiece` to swap in another piece with the same cuts.
 
 ### Helpers
 
