@@ -21,8 +21,6 @@
     "corner_se": { "sheet": "chrome", "rect": [768, 0, 1024, 256], "trim": true, "draw": 0.16 },
     "border_top": { "sheet": "chrome", "rect": [0, 256, 256, 512], "trim": true, "draw": 0.13 },
     "border_bottom": { "sheet": "chrome", "rect": [256, 256, 512, 512], "trim": true, "draw": 0.13 },
-    "border_left": { "sheet": "chrome", "rect": [512, 256, 768, 512], "trim": true, "draw": 0.2 },
-    "border_right": { "sheet": "chrome", "rect": [768, 256, 1024, 512], "trim": true, "draw": 0.2 },
     "divider_v": { "sheet": "chrome", "rect": [256, 512, 512, 768], "trim": true, "draw": 0.24 },
     "bezel": { "sheet": "chrome", "rect": [529, 530, 750, 751], "trim": true, "draw": 0.11 }
   }
