@@ -7,6 +7,14 @@ and press states, and Material's filled, tonal and text buttons.
 It's a single file, `Style.lua`, with no dependencies. Each addon ships its own copy, and nothing is shared at
 runtime, so two addons using different versions never affect each other.
 
+![Buttons in the demo window](docs/screenshots/buttons.png)
+
+| Forms | Items |
+| --- | --- |
+| ![Inputs, dropdowns and checkboxes](docs/screenshots/forms.png) | ![A scrolling list of items](docs/screenshots/items.png) |
+| **Popups** | **Color Roles** |
+| ![A popup of checkboxes](docs/screenshots/popup.png) | ![Every color role](docs/screenshots/colors.png) |
+
 ## Features
 
 - **Color Roles:** window, panel and well surfaces, borders, an accent, text, and good, warning and bad colors.
@@ -133,6 +141,8 @@ leave out keep the default:
 ```lua
 S.SetTheme({ primary = "#7cacf8" })
 ```
+
+![The baseline scheme, then primary set to ffc400 and 7dd99c](docs/screenshots/themes.png)
 
 | Role | Drives |
 | --- | --- |
