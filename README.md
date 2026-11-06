@@ -113,7 +113,7 @@ Your addon can also add its own colors to `S.colors`. They stay there when the t
 
 ### Themes
 
-The default scheme is Material 3's dark scheme for the seed color `#ffc400`, a warm yellow. `S.SetTheme` swaps in
+The default is Material 3's baseline dark scheme, with a lavender accent on cool dark grays. `S.SetTheme` swaps in
 your own colors by Material 3 role name, as `"rrggbb"` hex (with or without `#`) or `{ r, g, b }`. Roles you
 leave out keep the default:
 
