@@ -456,7 +456,10 @@ local function build()
 	nav:SetHeight(H - TITLE_H - 2)
 	S.Sidebar(nav)
 	local hint = S.Text(nav, "small", C.outline)
-	hint:SetPoint("BOTTOMLEFT", S.PAD + S.metrics.navInset, S.PAD + S.metrics.navInset)
+	local hintInset = S.PAD + S.metrics.navInset
+	hint:SetPoint("BOTTOMLEFT", hintInset, hintInset)
+	hint:SetWidth(NAV_W - 2 * hintInset)
+	hint:SetWordWrap(true)
 	hint:SetText("/mcui Toggles This Window")
 
 	local content = CreateFrame("Frame", nil, f)

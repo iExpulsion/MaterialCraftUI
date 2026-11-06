@@ -72,18 +72,18 @@ MOCK.check("trimmed piece placed inside", near(t.point[4], 7.0312) and near(t.wi
 S.Art(t, "cognac", "search", 1, 0)
 MOCK.check("mirrored", t.coords[1] > t.coords[2])
 
--- A window gets the glass and the gold chrome, laid out for its size.
+-- A window gets a near-solid tint, no flat border, and the gold chrome laid out for its size.
 local win = CreateFrame("Frame")
 win:SetSize(400, 300)
 S.Frame(win, "window")
-MOCK.check("window glass", win.backdrop and win.backdrop.bgFile:find("Tooltip"))
+MOCK.check("window tint", win.backdrop and not win.backdrop.edgeFile and S.colors.window[4] >= 0.98)
 win.scripts.OnSizeChanged(win)
 MOCK.check("window chrome", win.scripts.OnSizeChanged ~= nil)
--- A popup is the window's tint but solid, so what's under it doesn't show through.
+-- A popup gets the same.
 local pop = CreateFrame("Frame")
 pop:SetSize(300, 200)
 S.Frame(pop, "popup")
-MOCK.check("popup solid", pop.backdrop and not pop.backdrop.bgFile:find("Tooltip") and not pop.backdrop.edgeFile)
+MOCK.check("popup tint", pop.backdrop and not pop.backdrop.edgeFile)
 -- A well is the framed card, with no flat backdrop.
 local well = CreateFrame("Frame")
 well:SetSize(200, 100)

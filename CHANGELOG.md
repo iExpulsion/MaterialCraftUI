@@ -4,7 +4,7 @@
 
 - **Skins:** `S.UseSkin` switches how controls are drawn, not just their colors. Material, the flat look, is built
   in and stays the default. `S.Skins` lists them for a picker and `S.RegisterSkin` adds one.
-- **Cognac Skin:** painted gold frames, plates and chips on warm brown glass, in `Skins/Cognac`.
+- **Cognac Skin:** painted gold frames, plates and chips on dark panels, in `Skins/Cognac`.
 - **Skin-Aware Helpers:** `S.Frame`, `S.Well`, `S.Sidebar`, `S.NavEntry` and `S.Highlight` draw window frames,
   wells, sidebars, navigation entries and hover states in the current skin, and `S.metrics` says how much room a skin's border needs.
 - **New Color Roles:** `rowHover`, `rowSelected`, `navSelected`, `arrow`, `scrollThumb` and `scrollThumbHover`.

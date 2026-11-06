@@ -206,7 +206,7 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
 - `S.NavEntry(button, text)`: a sidebar entry with its label as `button.label`. `button:SetSelected(on)` repaints it.
 - `S.Highlight(frame)`: the hover look for a clickable row, menu item or column heading.
 
-**Cognac** is painted gold frames, plates and chips on warm brown glass.
+**Cognac** is painted gold frames, plates and chips on dark panels.
 
 #### Making a Skin
 
