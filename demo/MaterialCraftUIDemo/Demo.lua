@@ -91,7 +91,7 @@ end
 
 local function checkRow(parent, text, on, enabled)
 	local usable = enabled ~= false
-	local c = S.Check(parent, 14, function(box) box:SetChecked(not box.on) end)
+	local c = S.Check(parent, nil, function(box) box:SetChecked(not box.on) end)
 	c:SetChecked(on)
 	c:SetEnabled(usable)
 	c.text = S.Text(parent, "small", usable and S.colors.text or S.colors.disabled)
@@ -139,7 +139,7 @@ function PAGE.Buttons(page)
 	local popup = CreateFrame("Frame", nil, optionsButton)
 	popup:SetFrameStrata("FULLSCREEN_DIALOG")
 	popup:SetPoint("TOPLEFT", optionsButton, "BOTTOMLEFT", 0, -2)
-	popup:SetSize(180, 2 * S.PAD + 3 * 14 + 2 * S.GAP)
+	popup:SetSize(180, 2 * S.PAD + 3 * S.CONTROL_H + 2 * S.GAP)
 	S.Frame(popup, "menu")
 	popup:EnableMouse(true)
 	popup:Hide()

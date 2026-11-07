@@ -262,6 +262,12 @@ function S.ArtSize(atlas, piece)
 	return p[9], p[10]
 end
 
+-- The size in pixels of what's left of a piece after trimming: the art itself, for centering it.
+function S.ArtTrimmedSize(atlas, piece)
+	local p = atlases[atlas].pieces[piece]
+	return p[9] * (1 - p[5] - p[7]), p[10] * (1 - p[6] - p[8])
+end
+
 -- Shows part of a piece, given in its own pixels (x0..x1, y0..y1), at x, y (down from the frame's top left) at
 -- w by h.
 function S.ArtPart(tex, frame, atlas, piece, x0, x1, y0, y1, x, y, w, h)
@@ -477,10 +483,11 @@ local function paintCheck(b)
 	checkSkin().paintCheck(b)
 end
 
--- Square checkbox: SetChecked(on) and SetEnabled(on) repaint it; clicks go to onClick(box).
+-- Square checkbox, as tall as the other controls by default: SetChecked(on) and SetEnabled(on) repaint it; clicks
+-- go to onClick(box).
 function S.Check(parent, size, onClick)
 	local b = CreateFrame("Button", nil, parent)
-	b:SetSize(size or 14, size or 14)
+	b:SetSize(size or S.CONTROL_H, size or S.CONTROL_H)
 	b.on, b.usable = false, true
 	checkSkin().check(b)
 	function b:SetChecked(on) self.on = on and true or false paintCheck(self) end
@@ -1172,8 +1179,10 @@ S.RegisterSkin("material", {
 	check = function(b)
 		S.Panel(b, S.colors.well, S.colors.outline)
 		b.fill = S.Solid(b, "ARTWORK", S.colors.accent)
-		b.fill:SetPoint("TOPLEFT", 3, -3)
-		b.fill:SetPoint("BOTTOMRIGHT", -3, 3)
+		-- the gap round the fill grows with the box, 3 at 14
+		local gap = math.floor((b:GetWidth() or 14) * 0.22 + 0.5)
+		b.fill:SetPoint("TOPLEFT", gap, -gap)
+		b.fill:SetPoint("BOTTOMRIGHT", -gap, gap)
 		b.fill:Hide()
 	end,
 	paintCheck = function(b)
