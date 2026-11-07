@@ -280,6 +280,21 @@ S.RegisterSkin("cognac", {
 			b.tick:SetHeight(gh * k)
 		end)
 	end,
+	-- the hover glow and, on the selected tab, the teal chip, both at a control's height in the middle of the tab
+	tab = function(b)
+		b.plate = S.NineSlice(b, "BORDER", ATLAS, "chip_selected", PLATE_CUT)
+		b.glow = S.NineSlice(b, "HIGHLIGHT", ATLAS, "button_hover", PLATE_CUT)
+		b.glow:SetBlendMode("ADD")
+		follow(b, function(w, h)
+			local ch = math.min(S.CONTROL_H, h)
+			local y = math.floor((h - ch) / 2)
+			b.plate:Layout(w, ch, 0, y)
+			b.glow:Layout(w, ch, 0, y)
+		end)
+	end,
+	paintTab = function(b, on)
+		if on then b.plate:Show() else b.plate:Hide() end
+	end,
 	paintCheck = function(b)
 		if b.on then b.tick:Show() else b.tick:Hide() end
 		local shade = not b.usable and 0.45 or b.hovered and 1 or 0.85

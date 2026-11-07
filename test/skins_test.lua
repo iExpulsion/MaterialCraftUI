@@ -106,6 +106,15 @@ MOCK.check("sidebar card only", #MOCK.created == before)
 local split, splitW = S.VerticalDivider(win)
 MOCK.check("vertical divider spear", splitW == 12 and split.width == 12)
 
+-- A tab shows the teal chip only while selected, at a control's height in the middle of a taller tab.
+local tabB = CreateFrame("Button", nil, win)
+tabB:SetSize(80, 32)
+S.Tab(tabB, "Actions")
+MOCK.check("tab unselected", not tabB.plate.textures[5].shown and tabB.label.color[1] == S.colors.muted[1])
+tabB:SetSelected(true)
+MOCK.check("tab selected chip", tabB.plate.textures[5].shown and tabB.plate.piece == "chip_selected"
+	and tabB.plate.textures[1].point[5] == -4 and tabB.underline == nil)
+
 -- A navigation entry shows the chip and the mint label while selected.
 local nav = S.NavEntry(CreateFrame("Button", nil, side), "Page")
 nav:SetSize(140, 30)

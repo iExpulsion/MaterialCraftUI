@@ -28,6 +28,12 @@ MOCK.check("dropdown pick", picked == 2)
 d:SetText("Two")
 MOCK.check("dropdown text", d.label.text == "Two")
 
+-- A tab in Material has the accent underline only while selected, and its label brightens.
+local tabB = S.Tab(CreateFrame("Button", nil, parent), "Actions")
+MOCK.check("tab unselected", not tabB.underline.shown and tabB.label.color[1] == S.colors.muted[1])
+tabB:SetSelected(true)
+MOCK.check("tab selected", tabB.underline.shown and tabB.label.color[1] == S.colors.text[1])
+
 -- A vertical divider in Material is the 1px divider line standing on end.
 local split, splitW = S.VerticalDivider(parent)
 MOCK.check("vertical divider line", splitW == 1 and split.width == 1)

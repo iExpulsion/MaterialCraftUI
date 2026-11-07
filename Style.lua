@@ -294,8 +294,9 @@ end
 
 -- A nine-slice of a piece: corners `cut` pixels of the art square (or { left, top, right, bottom }), drawn at
 -- `scale` (default: whatever fits the frame's height), edges stretched only along their length, the middle
--- filling the rest. :SetPiece swaps in another piece with the same cuts; :Layout(w, h) lays it over a w by h
--- frame; :SetVertexColor, :SetAlpha, :SetBlendMode, :Show and :Hide apply to all nine.
+-- filling the rest. :SetPiece swaps in another piece with the same cuts; :Layout(w, h, x, y) lays it over a w by h
+-- area of the frame (x, y in from its top left, default 0); :SetVertexColor, :SetAlpha, :SetBlendMode, :Show and
+-- :Hide apply to all nine.
 function S.NineSlice(frame, layer, atlas, piece, cut, scale)
 	local cuts = type(cut) == "table" and cut or { cut, cut, cut, cut }
 	local ns = { textures = {}, piece = piece }
@@ -308,16 +309,17 @@ function S.NineSlice(frame, layer, atlas, piece, cut, scale)
 	function ns:SetBlendMode(m) each("SetBlendMode", m) end
 	function ns:Show() each("Show") end
 	function ns:Hide() each("Hide") end
-	function ns:SetPiece(p) self.piece = p if self.w then self:Layout(self.w, self.h) end end
-	function ns:Layout(w, h)
-		self.w, self.h = w, h
+	function ns:SetPiece(p) self.piece = p if self.w then self:Layout(self.w, self.h, self.x, self.y) end end
+	function ns:Layout(w, h, x, y)
+		x, y = x or 0, y or 0
+		self.w, self.h, self.x, self.y = w, h, x, y
 		local pw, ph = S.ArtSize(atlas, self.piece)
 		local k = scale or h / ph
 		local sx = { 0, cuts[1], pw - cuts[3], pw }
 		local sy = { 0, cuts[2], ph - cuts[4], ph }
 		local dl, dt, dr, db = cuts[1] * k, cuts[2] * k, cuts[3] * k, cuts[4] * k
-		local dx = { 0, dl, w - dr, w }
-		local dy = { 0, dt, h - db, h }
+		local dx = { x, x + dl, x + w - dr, x + w }
+		local dy = { y, y + dt, y + h - db, y + h }
 		for row = 1, 3 do
 			for col = 1, 3 do
 				S.ArtPart(self.textures[(row - 1) * 3 + col], frame, atlas, self.piece, sx[col], sx[col + 1],
@@ -795,6 +797,25 @@ function S.NavEntry(b, text)
 	return b
 end
 
+-- A tab in a tab bar: its label (b.label, in the "normal" size, S.PAD in from its left) and the skin's hover and
+-- selected look, in a button the caller has given its height. b:SetSelected(on) repaints it. The caller sizes and
+-- places the tabs, and draws the bar's rule (S.Rule).
+function S.Tab(b, text)
+	b.label = S.Text(b, "normal")
+	b.label:SetPoint("LEFT", S.PAD, 0)
+	b.label:SetText(text)
+	local paintTab = skin.paintTab or skins.material.paintTab
+	local drawTab = skin.tab or skins.material.tab
+	drawTab(b)
+	function b:SetSelected(on)
+		self.selected = on
+		paintTab(self, on)
+		self.label:SetTextColor(unpack(on and S.colors.text or S.colors.muted))
+	end
+	b:SetSelected(false)
+	return b
+end
+
 -- Tables: a virtual table, a fixed pool of rows drawn over any number of items, with sortable column headers, a
 -- thin scroll bar and mouse wheel scrolling, in an S.Well. The first column can carry an icon.
 local Table = {}
@@ -1141,7 +1162,7 @@ function Table:Hide() self.frame:Hide() end
 -- label names it in a picker, credit says who made it. The drawing functions: button(b) and
 -- paintButton(b, enabled) (b.kind, b.hovered, b.down), frame(f, role), well(f), line(parent, kind) -> texture,
 -- thickness (kind "rule", "header" or "heading"), optionally split(holder) -> width for S.VerticalDivider,
--- sidebar(side), highlight(f), navEntry(b) and
+-- sidebar(side), highlight(f), optionally tab(b) and paintTab(b, on) (falling back to Material's), navEntry(b) and
 -- paintNav(b, on), input(e, tall) and paintInput(e) (e.focused, e.hovered; a tall one draws on e.box), and
 -- optionally check(b) and
 -- paintCheck(b) (b.on, b.usable, b.hovered); a skin without them gets Material's checkbox.
@@ -1209,6 +1230,17 @@ S.RegisterSkin("material", {
 	end,
 	highlight = function(f)
 		S.Solid(f, "HIGHLIGHT", S.colors.hover):SetAllPoints()
+	end,
+	-- the hover tint, and an accent underline under the selected tab
+	tab = function(b)
+		S.Highlight(b)
+		b.underline = S.Solid(b, "OVERLAY", S.colors.accent)
+		b.underline:SetHeight(2)
+		b.underline:SetPoint("BOTTOMLEFT", 6, 0)
+		b.underline:SetPoint("BOTTOMRIGHT", -6, 0)
+	end,
+	paintTab = function(b, on)
+		if on then b.underline:Show() else b.underline:Hide() end
 	end,
 	-- a tint and an accent bar on the selected entry, whose label sits in from its section heading
 	navEntry = function(b)

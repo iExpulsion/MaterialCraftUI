@@ -223,6 +223,9 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
 - `S.Well(frame)`: a sunken area holding text or a list, such as the surround of a multi-line text box.
 - `S.Sidebar(frame)`: a navigation sidebar's background and dividing edge.
 - `S.NavEntry(button, text)`: a sidebar entry with its label as `button.label`. `button:SetSelected(on)` repaints it.
+- `S.Tab(button, text)`: a tab in a tab bar, with its label as `button.label`. `button:SetSelected(on)` repaints
+  it: Material's accent underline, Cognac's teal chip, or Classic's Interface Options tab art. Give the button its
+  height first; you size and place the tabs and draw the bar's `S.Rule`.
 - `S.Highlight(frame)`: the hover look for a clickable row, menu item or column heading.
 
 **Classic** is the default UI's own look: dialog-box windows, red panel buttons, gold text, tooltip-bordered menus

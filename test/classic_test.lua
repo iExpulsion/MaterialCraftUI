@@ -31,6 +31,16 @@ local seg = S.Button(parent, "On", "secondary", 80)
 seg:SetKind("selected")
 MOCK.check("selected pushed", seg.face.parts[1].texture == "Interface\\Buttons\\UI-Panel-Button-Down" and seg.label.color[2] == 1)
 
+-- A tab is the Interface Options tab art along its bottom: the active one while selected, the inactive otherwise.
+local tabB = CreateFrame("Button", nil, parent)
+tabB:SetHeight(32)
+S.Tab(tabB, "Actions")
+MOCK.check("tab inactive", tabB.inactive.parts[1].shown and not tabB.active.parts[1].shown
+	and tabB.inactive.parts[1].texture:find("InActiveTab") and tabB.inactive.parts[1].height == 24)
+tabB:SetSelected(true)
+MOCK.check("tab active", tabB.active.parts[2].shown and not tabB.inactive.parts[2].shown
+	and tabB.active.parts[2].texture:find("UI%-OptionsFrame%-ActiveTab"))
+
 -- A navigation entry lights the quest log highlight in gold while selected.
 local nav = S.NavEntry(CreateFrame("Button", nil, parent), "Page")
 nav:SetSelected(true)
