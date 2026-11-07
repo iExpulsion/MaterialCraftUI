@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0
 
 - **Skins:** `S.UseSkin` switches how controls are drawn, not just their colors. Material, the flat look, is built
   in and stays the default. `S.Skins` lists them for a picker and `S.RegisterSkin` adds one.
