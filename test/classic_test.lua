@@ -45,4 +45,23 @@ local tall = S.Input(parent, nil, 200, "Notes", 200, 3)
 tall:SetFocus()
 MOCK.check("tall input", tall.backdrop.edgeFile:find("UI%-Tooltip%-Border"))
 
+-- A checkbox is the stock box and tick, drawn larger than the box, with the disabled tick when it can't be used.
+local c = S.Check(parent, 14)
+MOCK.check("stock checkbox", c.box.texture == "Interface\\Buttons\\UI-CheckBox-Up" and c.box.width > 14 and not c.tick.shown)
+c:SetChecked(true)
+MOCK.check("checked", c.tick.shown and c.tick.texture == "Interface\\Buttons\\UI-CheckBox-Check")
+c:SetEnabled(false)
+MOCK.check("disabled tick", c.tick.texture == "Interface\\Buttons\\UI-CheckBox-Check-Disabled")
+
+-- A dropdown's menu is tooltip-bordered like the other menus.
+local d = S.Dropdown(parent, 120, function() end)
+MOCK.check("dropdown menu", d.menu.backdrop.edgeFile:find("UI%-Tooltip%-Border"))
+
+S.UseSkin("material")
+-- Material keeps its flat checkbox, and a skin without one (Cognac) gets it too.
+MOCK.check("material checkbox", S.Check(parent, 14).fill ~= nil)
+LOAD("Skins/Cognac/Atlas.lua")
+LOAD("Skins/Cognac/Skin.lua")
+S.UseSkin("cognac")
+MOCK.check("fallback checkbox", S.Check(parent, 14).fill ~= nil)
 S.UseSkin("material")

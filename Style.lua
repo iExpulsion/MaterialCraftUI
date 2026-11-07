@@ -456,22 +456,19 @@ function S.Button(parent, label, kind, width, onClick, tooltip, template)
 	return b
 end
 
+-- a skin without its own checkbox draws Material's
+local function checkSkin() return skin.check and skin or skins.material end
+
 local function paintCheck(b)
-	if b.on then b.fill:Show() else b.fill:Hide() end
-	b.fill:SetAlpha(b.usable and 1 or 0.4)
-	b:SetBackdropBorderColor(unpack(b.hovered and b.usable and S.colors.accent or S.colors.outline))
+	checkSkin().paintCheck(b)
 end
 
--- Square flat checkbox: SetChecked(on) and SetEnabled(on) repaint it; clicks go to onClick(box).
+-- Square checkbox: SetChecked(on) and SetEnabled(on) repaint it; clicks go to onClick(box).
 function S.Check(parent, size, onClick)
 	local b = CreateFrame("Button", nil, parent)
 	b:SetSize(size or 14, size or 14)
-	S.Panel(b, S.colors.well, S.colors.outline)
-	b.fill = S.Solid(b, "ARTWORK", S.colors.accent)
-	b.fill:SetPoint("TOPLEFT", 3, -3)
-	b.fill:SetPoint("BOTTOMRIGHT", -3, 3)
-	b.fill:Hide()
 	b.on, b.usable = false, true
+	checkSkin().check(b)
 	function b:SetChecked(on) self.on = on and true or false paintCheck(self) end
 	function b:SetEnabled(on) self.usable = on and true or false paintCheck(self) end
 	b:SetScript("OnEnter", function(self)
@@ -592,7 +589,7 @@ function S.Dropdown(parent, width, onSelect)
 	menu:SetFrameStrata("FULLSCREEN_DIALOG")
 	menu:SetPoint("TOPLEFT", b, "BOTTOMLEFT", 0, -2)
 	menu:SetWidth(width)
-	S.Panel(menu, S.colors.panel, S.colors.border)
+	S.Frame(menu, "menu")
 	menu:EnableMouse(true)
 	menu:Hide()
 	menus[#menus + 1] = menu
@@ -730,7 +727,8 @@ end
 -- set colors apart from the scheme (colors(c, M3), run after the scheme fills S.colors), and change S.metrics.
 -- label names it in a picker, credit says who made it. The drawing functions: button(b) and
 -- paintButton(b, enabled) (b.kind, b.hovered, b.down), frame(f, role), well(f), sidebar(side), highlight(f), navEntry(b) and
--- paintNav(b, on), input(e, tall) and paintInput(e) (e.focused, e.hovered).
+-- paintNav(b, on), input(e, tall) and paintInput(e) (e.focused, e.hovered), and optionally check(b) and
+-- paintCheck(b) (b.on, b.usable, b.hovered); a skin without them gets Material's checkbox.
 function S.RegisterSkin(key, def)
 	skins[key] = def
 end
@@ -808,6 +806,19 @@ S.RegisterSkin("material", {
 	end,
 	input = function(e)
 		S.Panel(e, S.colors.well, S.colors.border)
+	end,
+	-- a square well with an accent fill while checked, outlined in the accent on hover
+	check = function(b)
+		S.Panel(b, S.colors.well, S.colors.outline)
+		b.fill = S.Solid(b, "ARTWORK", S.colors.accent)
+		b.fill:SetPoint("TOPLEFT", 3, -3)
+		b.fill:SetPoint("BOTTOMRIGHT", -3, 3)
+		b.fill:Hide()
+	end,
+	paintCheck = function(b)
+		if b.on then b.fill:Show() else b.fill:Hide() end
+		b.fill:SetAlpha(b.usable and 1 or 0.4)
+		b:SetBackdropBorderColor(unpack(b.hovered and b.usable and S.colors.accent or S.colors.outline))
 	end,
 	-- the soft border at rest, the stronger outline on hover, the accent while focused
 	paintInput = function(e)
