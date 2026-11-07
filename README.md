@@ -293,6 +293,20 @@ Sizes are `small`, `normal`, `large`, `huge` and `edit`. `S.FONTS[size]` is the 
 - `S.Input(parent, name, width, placeholder, maxLetters, lines)`: an edit box with a placeholder. With `lines`
   above 1 it wraps across several lines, and `GetText` turns line breaks into spaces.
 
+### Tables
+
+`S.Table.New(parent, name, width, height, opts)` is a virtual table: a fixed pool of rows drawn over any number of
+items, in an `S.Well`, with sortable column headers, a thin scroll bar and the mouse wheel. Its frame is `.frame`.
+
+- `opts.columns`: `{ { key, label, width, justify, sortable, defaultDesc, tooltip, stretch } }`. Each column is at
+  least as wide as its header needs, and the one marked `stretch` (else the last) takes the rest.
+- `opts.cell(item, key)` returns a cell's text and color. `opts.rowH` sets the row height (20), and `opts.icons`
+  with `opts.icon(item)` puts an icon in the first column.
+- `opts.tooltip(tooltip, item)`, `opts.onClick(item, button)`, `opts.isSelected(item)`, `opts.onSort(key, desc)`,
+  and `opts.header(item)` for group header rows.
+- Methods: `SetItems(items, emptyText, keepScroll)`, `Redraw`, `ScrollTo`, `SetSort`, `SetColumnShown`,
+  `SetColumnLabel`, `Show` and `Hide`.
+
 ### Closing Menus and Inputs
 
 A click outside an open menu or popup closes it, and a click outside a focused input clears its focus. A menu

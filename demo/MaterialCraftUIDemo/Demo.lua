@@ -1,9 +1,11 @@
-local ADDON, NS = ...
+local _, NS = ...
 local S = NS.Style
 
 local WINDOW = "MaterialCraftUIDemoWindow"
 local W, H, TITLE_H, NAV_W, ROW_H = 680, 460, 44, 150, 22
 local CONTENT_W = W - NAV_W - 2
+-- the Items page's table, from below its search box to the page's bottom padding
+local ITEMS_H = 300
 
 local THEMES = {
 	{ value = 1, text = "Baseline", tooltip = "Material 3's baseline dark scheme, the kit's default." },
@@ -62,7 +64,6 @@ local ITEMS = {
 
 local state = { theme = 1, page = "Buttons" }
 local window
-local generation = 0
 local PAGE = {}
 
 local function heading(page, title, blurb)
@@ -307,95 +308,62 @@ function PAGE.Colors(page)
 end
 
 function PAGE.Items(page)
-	local top = heading(page, "Items", "A list in a well with the kit's thin scroll bar. Rows show hover and "
-		.. "selection, and the search box filters by name.")
+	local top = heading(page, "Items", "An S.Table: sortable columns, a thin scroll bar and the mouse wheel. Rows show "
+		.. "hover and selection, and the search box filters by name.")
 
 	local search = S.Input(page, nil, 220, "Search Items", 40)
 	search:SetPoint("TOPLEFT", top, "BOTTOMLEFT", 0, -14)
 	local count = S.Text(page, "small", S.colors.muted)
 	count:SetPoint("LEFT", search, "RIGHT", 12, 0)
 
-	local well = CreateFrame("Frame", nil, page)
-	well:SetPoint("TOPLEFT", search, "BOTTOMLEFT", 0, -S.GAP)
-	well:SetPoint("BOTTOMRIGHT", -S.PAD, S.PAD)
-	S.Panel(well, S.colors.well, S.colors.border)
-
-	local header = CreateFrame("Frame", nil, well)
-	header:SetPoint("TOPLEFT", 1, -1)
-	header:SetPoint("TOPRIGHT", -1, -1)
-	header:SetHeight(ROW_H)
-	S.Rule(header, "BOTTOM")
-	local columns = { { "Name", 8 }, { "Slot", 250 } }
-	for _, c in ipairs(columns) do
-		local t = S.Text(header, "small", S.colors.outline)
-		t:SetPoint("LEFT", c[2], 0)
-		t:SetText(c[1])
-	end
-	local levelHeader = S.Text(header, "small", S.colors.outline)
-	levelHeader:SetPoint("RIGHT", -20, 0)
-	levelHeader:SetText("Level")
-
-	local scrollName = ADDON .. "ItemsScroll" .. generation
-	local scroll = CreateFrame("ScrollFrame", scrollName, well, "UIPanelScrollFrameTemplate")
-	scroll:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, 0)
-	scroll:SetPoint("BOTTOMRIGHT", -12, 1)
-	S.ScrollBar(scroll, scrollName)
-	local child = CreateFrame("Frame", nil, scroll)
-	child:SetSize(CONTENT_W - 2 * S.PAD - 14, 1)
-	scroll:SetScrollChild(child)
-
-	local rows, selected = {}, nil
-	for i, item in ipairs(ITEMS) do
-		local r = CreateFrame("Button", nil, child)
-		r:SetHeight(ROW_H)
-		local hover = S.Solid(r, "HIGHLIGHT", S.colors.rowHover)
-		hover:SetAllPoints()
-		r.selection = S.Solid(r, "BACKGROUND", S.colors.rowSelected)
-		r.selection:SetAllPoints()
-		r.selection:Hide()
-		local itemName = S.Text(r, "small", S.QualityColor(item[2]))
-		itemName:SetPoint("LEFT", 8, 0)
-		itemName:SetText(item[1])
-		local slot = S.Text(r, "small", S.colors.muted)
-		slot:SetPoint("LEFT", 250, 0)
-		slot:SetText(item[3])
-		local level = S.Text(r, "small", S.colors.muted)
-		level:SetPoint("RIGHT", -8, 0)
-		level:SetJustifyH("RIGHT")
-		level:SetText(item[4])
-		r.item = item
-		r:SetScript("OnClick", function(self)
-			if selected then selected.selection:Hide() end
-			selected = self
-			self.selection:Show()
-		end)
-		r:SetScript("OnEnter", function(self)
-			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			GameTooltip:SetText(S.Hex(S.QualityColor(item[2]), item[1]))
-			GameTooltip:AddLine(item[3] .. ", level " .. item[4], 1, 1, 1)
-			GameTooltip:Show()
-		end)
-		r:SetScript("OnLeave", function() GameTooltip:Hide() end)
-		rows[i] = r
-	end
+	local selected
+	local sortKey, sortDesc = "level", false
+	local SORT = { name = 1, slot = 3, level = 4 }
+	local list
+	list = S.Table.New(page, nil, CONTENT_W - 2 * S.PAD, ITEMS_H, {
+		rowH = ROW_H,
+		columns = {
+			{ key = "name", label = "Name", width = 220, stretch = true },
+			{ key = "slot", label = "Slot", width = 120 },
+			{ key = "level", label = "Level", width = 64, defaultDesc = true },
+		},
+		cell = function(item, key)
+			if key == "name" then return item[1], S.QualityColor(item[2]) end
+			if key == "slot" then return item[3], S.colors.muted end
+			return tostring(item[4]), S.colors.muted
+		end,
+		tooltip = function(tt, item)
+			tt:SetText(S.Hex(S.QualityColor(item[2]), item[1]))
+			tt:AddLine(item[3] .. ", level " .. item[4], 1, 1, 1)
+		end,
+		isSelected = function(item) return item == selected end,
+		onClick = function(item)
+			selected = item
+			list:Redraw()
+		end,
+	})
+	list.frame:SetPoint("TOPLEFT", search, "BOTTOMLEFT", 0, -S.GAP)
 
 	local function refresh()
 		local query = (search:GetText() or ""):lower()
-		local shown = 0
-		for _, r in ipairs(rows) do
-			if query == "" or r.item[1]:lower():find(query, 1, true) then
-				r:ClearAllPoints()
-				r:SetPoint("TOPLEFT", 0, -shown * ROW_H)
-				r:SetPoint("TOPRIGHT", 0, -shown * ROW_H)
-				r:Show()
-				shown = shown + 1
-			else
-				r:Hide()
-			end
+		local shown = {}
+		for _, item in ipairs(ITEMS) do
+			if query == "" or item[1]:lower():find(query, 1, true) then shown[#shown + 1] = item end
 		end
-		child:SetHeight(math.max(shown * ROW_H, 1))
-		count:SetText(S.Count(shown, "Item"))
+		local field = SORT[sortKey]
+		table.sort(shown, function(a, b)
+			if a[field] == b[field] then return a[1] < b[1] end
+			if sortDesc then return a[field] > b[field] end
+			return a[field] < b[field]
+		end)
+		list:SetItems(shown, "Nothing Matches")
+		count:SetText(S.Count(#shown, "Item"))
 	end
+	list.onSort = function(key, desc)
+		sortKey, sortDesc = key, desc
+		refresh()
+	end
+	list:SetSort(sortKey, sortDesc)
 	search:HookScript("OnTextChanged", refresh)
 	refresh()
 end
@@ -403,7 +371,6 @@ end
 local setTheme
 
 local function build()
-	generation = generation + 1
 	S.RefreshFonts()
 	local C = S.colors
 	-- the skin's window border sits around the same content area in every skin
