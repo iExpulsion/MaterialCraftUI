@@ -35,6 +35,15 @@ MOCK.check("input text", one:GetText() == "abc")
 local tall = S.Input(parent, nil, 100, "Notes", 200, 3)
 tall:SetText("a\nb")
 MOCK.check("tall input flattens line breaks", tall:GetText() == "a b")
+-- A tall input's box keeps the height it was made with, however the edit box sizes itself to its text.
+tall:SetHeight(14)
+MOCK.check("tall input keeps its height", tall:GetHeight() == 3 * 13 + 12 and tall.box.height == 3 * 13 + 12
+	and tall.box.backdrop ~= nil)
+-- Hiding and showing it takes its box along.
+tall:Hide()
+local hidden = not tall.box.shown
+tall:Show()
+MOCK.check("tall input box follows", hidden and tall.box.shown)
 
 -- A tracked popup closes on a click outside it and its owner, like a dropdown menu.
 local popup = CreateFrame("Frame")

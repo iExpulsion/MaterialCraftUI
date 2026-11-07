@@ -43,7 +43,7 @@ local e = S.Input(parent, nil, 200, "Search")
 MOCK.check("edit box border", e.border.parts[1].texture == "Interface\\Common\\Common-Input-Border" and e.backdrop == nil)
 local tall = S.Input(parent, nil, 200, "Notes", 200, 3)
 tall:SetFocus()
-MOCK.check("tall input", tall.backdrop.edgeFile:find("UI%-Tooltip%-Border"))
+MOCK.check("tall input", tall.box.backdrop.edgeFile:find("UI%-Tooltip%-Border") and tall.backdrop == nil)
 
 -- A checkbox is the stock box and tick, drawn larger than the box, with the disabled tick when it can't be used.
 local c = S.Check(parent, 14)

@@ -23,6 +23,9 @@
   the size it's drawn at, since the client has no mipmaps for TGA textures. `S.Art`, `S.PlaceArt`, `S.ArtPart` and
   `S.NineSlice` draw from it.
 - **Sync Script:** names skins to copy along with the kit.
+- **Multi-Line Inputs Keep Their Height:** a multi-line edit box sizes itself to its text, so a tall `S.Input`
+  shrank or grew with what it held and layouts read the wrong height. Its box is now drawn on `e.box`, held at the
+  height asked for, and `GetHeight` reports that height. Its text sits inside a skin's well frame.
 - **Demo:** the theme dropdown includes Cognac and Classic.
 
 ## 1.0.0

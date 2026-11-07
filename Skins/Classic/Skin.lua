@@ -170,7 +170,7 @@ S.RegisterSkin("classic", {
 	input = function(e, tall)
 		e.tall = tall
 		if tall then
-			tooltipPanel(e, 0.75)
+			tooltipPanel(e.box, 0.75)
 		else
 			e.border = threeSlice(e, "BACKGROUND", INPUT, 8, 0, 0.0625, 0.9375, 1, 0.625)
 		end
@@ -178,7 +178,7 @@ S.RegisterSkin("classic", {
 	-- a field brightens while hovered or focused; a tall box's border turns gold while focused
 	paintInput = function(e)
 		if e.tall then
-			if e.focused then e:SetBackdropBorderColor(1, 0.82, 0, 1) else e:SetBackdropBorderColor(0.6, 0.6, 0.6, 1) end
+			if e.focused then e.box:SetBackdropBorderColor(1, 0.82, 0, 1) else e.box:SetBackdropBorderColor(0.6, 0.6, 0.6, 1) end
 		else
 			local v = (e.focused or e.hovered) and 1 or 0.8
 			e.border:SetVertexColor(v, v, v)

@@ -310,7 +310,7 @@ S.RegisterSkin("cognac", {
 	-- a tall box is the framed card, a one-line field the search plate
 	input = function(e, tall)
 		e.tall = tall
-		if tall then e.card = card(e) else searchField(e) end
+		if tall then e.card = card(e.box) else searchField(e) end
 	end,
 	-- both brighten while hovered and warm while focused
 	paintInput = function(e)

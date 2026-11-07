@@ -115,6 +115,8 @@ e:SetFocus()
 MOCK.check("input focus tint", e.slices[1].vertex[3] < 1)
 local tall = S.Input(parent, nil, 200, "Notes", 200, 3)
 MOCK.check("tall input card", tall.backdrop == nil and tall.card ~= nil and tall.slices == nil)
+-- Its text and height make room for the card's frame.
+MOCK.check("tall input inset", tall:GetHeight() == 3 * 13 + 12 + 2 * S.metrics.wellInset)
 
 -- A checkbox is S.CHECK_H by default: the gold square frame, nine-sliced at a fixed scale so its rim stays about
 -- 2px (corners 40 art pixels at 0.15), with the gem diamond centered over it while checked, overflowing it.
