@@ -26,8 +26,9 @@
   `S.NineSlice` draw from it.
 - **Sync Script:** names skins to copy along with the kit.
 - **Multi-Line Inputs Keep Their Height:** a multi-line edit box sizes itself to its text, so a tall `S.Input`
-  shrank or grew with what it held and layouts read the wrong height. Its box is now drawn on `e.box`, held at the
-  height asked for, and `GetHeight` reports that height. Its text sits inside a skin's well frame.
+  shrank or grew with what it held, and layouts and anything anchored below it used the wrong height. The edit box
+  is now pinned inside `e.box`, a frame at the height asked for that its box is drawn on, and placing or sizing the
+  input places or sizes `e.box`. Its text sits inside a skin's well frame.
 - **Demo:** the theme dropdown includes Cognac and Classic.
 
 ## 1.0.0

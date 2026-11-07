@@ -45,10 +45,13 @@ MOCK.check("input text", one:GetText() == "abc")
 local tall = S.Input(parent, nil, 100, "Notes", 200, 3)
 tall:SetText("a\nb")
 MOCK.check("tall input flattens line breaks", tall:GetText() == "a b")
--- A tall input's box keeps the height it was made with, however the edit box sizes itself to its text.
-tall:SetHeight(14)
+-- A tall input's edit box is pinned inside its box, so it can't size itself to its text, and placing it places the
+-- box, so what's anchored below it lands below the whole box.
+tall:SetPoint("TOPLEFT", parent, "TOPLEFT", 5, -5)
 MOCK.check("tall input keeps its height", tall:GetHeight() == 3 * 13 + 12 and tall.box.height == 3 * 13 + 12
 	and tall.box.backdrop ~= nil)
+MOCK.check("tall input pinned in its box", tall.box.point[2] == parent and tall.box.point[4] == 5
+	and rawget(tall, "point")[1] == "BOTTOMRIGHT" and rawget(tall, "point")[2] == tall.box)
 -- Hiding and showing it takes its box along.
 tall:Hide()
 local hidden = not tall.box.shown
