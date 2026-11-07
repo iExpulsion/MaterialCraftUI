@@ -84,3 +84,91 @@ S.UseSkin("material")
 local plain = S.Table.New(UIParent, nil, 200, 100, { plain = true, columns = { { key = "a", label = "", width = 50 } }, cell = cell })
 MOCK.check("plain list", plain.frame.backdrop == nil and plain.bodyTop == 0 and plain.columns[1].width == 200
 	and not plain.headers[1].shown and plain.visible == 5)
+
+-- Dragging rows to reorder: the drop slot under the cursor, the dimmed row and drop line, edge scrolling, and the
+-- move reported on release.
+local moved
+local drag = S.Table.New(UIParent, nil, 300, 140, {
+	columns = { { key = "n", label = "Name", width = 100 } },
+	cell = function(item) return item.n end,
+	onClick = function(item) moved = { click = item.n } end,
+	onMove = function(from, to) moved = { from, to } end,
+})
+local dragItems = {}
+for i = 1, 10 do dragItems[i] = { n = "Item " .. i } end
+drag:SetItems(dragItems)
+drag.content.GetTop = function() return 400 end
+local function cursorAt(slot) MOCK.cursorY = 400 - drag.bodyTop - (slot - drag.offset) * drag.rowH end
+local function hold() MOCK.mouseDown = true end
+local function release()
+	MOCK.mouseDown = false
+	drag.dragLayer.scripts.OnUpdate(drag.dragLayer, 0)
+end
+-- a plain table makes no drag parts and its rows don't drag
+MOCK.check("no drag without onMove", list.dragLayer == nil and list.rows[1].scripts.OnDragStart == nil)
+
+-- Dragging the second row below the fourth moves it to index 4, dims it while held and shows the drop line.
+hold()
+cursorAt(1)
+drag.rows[2].scripts.OnDragStart(drag.rows[2])
+MOCK.check("drag starts on the row", drag.drag.from == 2 and drag.rows[2].alpha == 0.4 and drag.rows[1].alpha == 1
+	and drag.ghost.shown and drag.ghost.text.text == "Item 2")
+drag.dragLayer.scripts.OnUpdate(drag.dragLayer, 0)
+MOCK.check("no line where the row already is", not drag.dropLine.shown)
+cursorAt(4)
+drag.dragLayer.scripts.OnUpdate(drag.dragLayer, 0)
+MOCK.check("drop line under the fourth row", drag.dropLine.shown and drag.dropLine.point[3] == -drag.bodyTop - 4 * drag.rowH + 1)
+release()
+MOCK.check("moved down", moved[1] == 2 and moved[2] == 4 and not drag.drag and not drag.dragLayer.shown
+	and drag.rows[2].alpha == 1)
+-- The release that ends a drag doesn't also click the row.
+moved = nil
+drag.rows[2].scripts.OnClick(drag.rows[2], "LeftButton")
+MOCK.check("drop isn't a click", moved == nil)
+MOCK.time = MOCK.time + 1
+drag.rows[2].scripts.OnClick(drag.rows[2], "LeftButton")
+MOCK.check("later clicks still select", moved and moved.click == "Item 2")
+
+-- Dragging up to the top gap moves to index 1; letting go where it started reports nothing.
+hold()
+drag.rows[3].scripts.OnDragStart(drag.rows[3])
+cursorAt(0.2)
+drag.dragLayer.scripts.OnUpdate(drag.dragLayer, 0)
+release()
+MOCK.check("moved to the top", moved[1] == 3 and moved[2] == 1)
+moved = nil
+hold()
+drag.rows[3].scripts.OnDragStart(drag.rows[3])
+cursorAt(3)
+drag.dragLayer.scripts.OnUpdate(drag.dragLayer, 0)
+release()
+MOCK.check("dropping in place reports nothing", moved == nil)
+
+-- Holding at the bottom edge scrolls down a row at a time, and the drop can reach the end of the list.
+hold()
+drag.rows[1].scripts.OnDragStart(drag.rows[1])
+for _ = 1, 20 do
+	MOCK.time = MOCK.time + 1
+	MOCK.cursorY = 400 - drag.bodyTop - drag.visible * drag.rowH
+	drag.dragLayer.scripts.OnUpdate(drag.dragLayer, 0)
+end
+MOCK.check("edge scrolls to the end", drag.offset == 10 - drag.visible and drag.drag.slot == 10)
+release()
+MOCK.check("moved to the bottom", moved[1] == 1 and moved[2] == 10)
+
+-- Hiding the table mid-drag cancels it without a move.
+moved = nil
+hold()
+drag.rows[1].scripts.OnDragStart(drag.rows[1])
+drag.dragLayer.scripts.OnHide(drag.dragLayer)
+MOCK.check("hiding cancels", moved == nil and not drag.drag and not drag.ghost.shown)
+
+-- Group header rows don't drag.
+local grouped = S.Table.New(UIParent, nil, 300, 140, {
+	columns = { { key = "n", label = "Name", width = 100 } }, cell = cell,
+	header = function(item) return item.group end, onMove = function() end,
+})
+grouped:SetItems({ { group = "Group" }, { n = "A" } })
+grouped.rows[1].scripts.OnDragStart(grouped.rows[1])
+MOCK.check("headers don't drag", grouped.drag == nil)
+MOCK.mouseDown, MOCK.cursorY = false, nil

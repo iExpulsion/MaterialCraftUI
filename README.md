@@ -320,6 +320,9 @@ items, in an `S.Well`, with sortable column headers, a thin scroll bar and the m
   and `opts.header(item)` for group header rows.
 - `opts.plain`: a bare list, with no well frame and no column headers, for a list inside a menu or popup that
   already has a frame of its own.
+- `opts.onMove(from, to)`: rows can be dragged to reorder. `from` and `to` are item indexes, `to` as it is after
+  the move; the table only reports it, so move the item and call `SetItems` again. While a row is dragged it dims,
+  an accent line marks where it will land, and holding it at the top or bottom edge scrolls the list.
 - Methods: `SetItems(items, emptyText, keepScroll)`, `Redraw`, `ScrollTo`, `SetSort`, `SetColumnShown`,
   `SetColumnLabel`, `Show` and `Hide`.
 

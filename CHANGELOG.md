@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Drag to Reorder:** `S.Table`'s `onMove(from, to)` option lets rows be dragged into a new order. The dragged
+  row dims, an accent line shows where it will land, its name follows the cursor, and holding it at the top or
+  bottom edge scrolls the list. Group header rows don't drag, and the release that ends a drag isn't a click.
+
 ## 1.1.0
 
 - **Skins:** `S.UseSkin` switches how controls are drawn, not just their colors. Material, the flat look, is built
