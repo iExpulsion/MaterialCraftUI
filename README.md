@@ -289,8 +289,8 @@ Sizes are `small`, `normal`, `large`, `huge` and `edit`. `S.FONTS[size]` is the 
   button). Methods: `SetText` (keeps the width), `SetLabel` (grows to fit), `SetKind`. With a secure `template`,
   `onClick` is ignored and the template's own click handler stays.
 - `S.AddArrow(button)`: adds a dropdown arrow and left-aligns the label, for buttons that open a list.
-- `S.Check(parent, size, onClick)`: a square checkbox with `SetChecked` and `SetEnabled`, as tall as the other
-  controls unless `size` says otherwise. Set `tooltipText` for a tooltip.
+- `S.Check(parent, size, onClick)`: a square checkbox with `SetChecked` and `SetEnabled`, `S.CHECK_H` (18) square
+  unless `size` says otherwise. Set `tooltipText` for a tooltip.
 - `S.Dropdown(parent, width, onSelect)`: `SetOptions({ { value, text, tooltip } })`, then `SetText` for the shown
   choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others.
 - `S.Input(parent, name, width, placeholder, maxLetters, lines)`: an edit box with a placeholder. With `lines`

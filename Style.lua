@@ -121,6 +121,8 @@ S.SetTheme()
 -- One spacing scale for every panel: PAD inside a panel's edges (the same on all sides), GAP between neighboring
 -- controls, and one height for every button, input and dropdown so rows line up.
 S.PAD, S.GAP, S.CONTROL_H = 12, 8, 24
+-- a checkbox's size: smaller than the other controls, which a box that tall overpowers, but big enough to read
+S.CHECK_H = 18
 
 -- What a skin's frame decoration takes up: edge, the border S.Frame draws around a "window", which its content
 -- stays inside; inset, the padding inside a "popup"; navInset, how far in from a sidebar's sides its entries sit;
@@ -483,11 +485,11 @@ local function paintCheck(b)
 	checkSkin().paintCheck(b)
 end
 
--- Square checkbox, as tall as the other controls by default: SetChecked(on) and SetEnabled(on) repaint it; clicks
+-- Square checkbox, S.CHECK_H by default: SetChecked(on) and SetEnabled(on) repaint it; clicks
 -- go to onClick(box).
 function S.Check(parent, size, onClick)
 	local b = CreateFrame("Button", nil, parent)
-	b:SetSize(size or S.CONTROL_H, size or S.CONTROL_H)
+	b:SetSize(size or S.CHECK_H, size or S.CHECK_H)
 	b.on, b.usable = false, true
 	checkSkin().check(b)
 	function b:SetChecked(on) self.on = on and true or false paintCheck(self) end
