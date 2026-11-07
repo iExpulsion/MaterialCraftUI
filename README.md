@@ -350,5 +350,6 @@ py -I -X utf8 test/run.py
 
 ## License
 
-The code is [MIT](LICENSE). The Cognac art in `art/cognac` and `Skins/Cognac` isn't covered by it.
+The code is [MIT](LICENSE). The Cognac art in `art/cognac` and `Skins/Cognac` is from
+[AttuneNext](https://github.com/speedyrulz/AttuneNext) and isn't covered by it.
 Material Design is Google's; this project isn't affiliated with Google.
