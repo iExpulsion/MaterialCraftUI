@@ -116,11 +116,13 @@ MOCK.check("input focus tint", e.slices[1].vertex[3] < 1)
 local tall = S.Input(parent, nil, 200, "Notes", 200, 3)
 MOCK.check("tall input card", tall.backdrop == nil and tall.card ~= nil and tall.slices == nil)
 
--- A checkbox is the gold bezel, with the teal one over it while checked.
+-- A checkbox is the gold square frame, nine-sliced at a fixed scale so its rim stays about 2px at 14px (corners 40
+-- art pixels at 0.15), with the gem diamond centered inside while checked.
 local box = S.Check(parent, 14)
-MOCK.check("bezel checkbox", box.box.texture:find("Cognac") and not box.tick.shown)
+local boxCorner = box.box.textures[1]
+MOCK.check("framed checkbox", boxCorner.texture:find("Cognac") and near(boxCorner.width, 6) and not box.tick.shown)
 box:SetChecked(true)
-MOCK.check("teal when checked", box.tick.shown)
+MOCK.check("diamond when checked", box.tick.shown and box.tick.width < 14 and box.tick.point[4] > 0)
 
 -- No rule under a title bar; the gold divider beside section headings.
 MOCK.check("no title rule", not S.Rule(parent, "BOTTOM").shown)
