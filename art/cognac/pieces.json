@@ -21,6 +21,7 @@
     "border_top": { "sheet": "chrome", "rect": [0, 256, 256, 512], "trim": true, "draw": 0.13 },
     "divider_h": { "sheet": "chrome", "rect": [0, 512, 256, 768], "trim": true, "draw": 0.15 },
     "check_diamond": { "sheet": "chrome", "rect": [632, 836, 751, 956], "trim": true, "draw": 0.24 },
+    "divider_v": { "sheet": "chrome", "rect": [256, 512, 512, 768], "trim": true, "draw": 0.24 },
     "bezel": { "sheet": "chrome", "rect": [529, 530, 750, 751], "trim": true, "draw": 0.15 }
   }
 }

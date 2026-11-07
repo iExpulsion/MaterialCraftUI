@@ -342,6 +342,22 @@ function S.Divider(parent, kind)
 	return line(parent, kind or "heading")
 end
 
+-- A vertical divider between two panes side by side: a frame to anchor by its top and bottom, centered in the gap
+-- between them, and its width. A skin without a split of its own stands its divider line on end.
+function S.VerticalDivider(parent)
+	local holder = CreateFrame("Frame", nil, parent)
+	local width
+	if skin.split then
+		width = skin.split(holder)
+	else
+		local t
+		t, width = line(holder, "heading")
+		t:SetAllPoints()
+	end
+	holder:SetWidth(width)
+	return holder, width
+end
+
 function S.Rule(parent, where)
 	local t, h = line(parent, "rule")
 	t:SetHeight(h)
@@ -1124,7 +1140,8 @@ function Table:Hide() self.frame:Hide() end
 -- set colors apart from the scheme (colors(c, M3), run after the scheme fills S.colors), and change S.metrics.
 -- label names it in a picker, credit says who made it. The drawing functions: button(b) and
 -- paintButton(b, enabled) (b.kind, b.hovered, b.down), frame(f, role), well(f), line(parent, kind) -> texture,
--- thickness (kind "rule", "header" or "heading"), sidebar(side), highlight(f), navEntry(b) and
+-- thickness (kind "rule", "header" or "heading"), optionally split(holder) -> width for S.VerticalDivider,
+-- sidebar(side), highlight(f), navEntry(b) and
 -- paintNav(b, on), input(e, tall) and paintInput(e) (e.focused, e.hovered; a tall one draws on e.box), and
 -- optionally check(b) and
 -- paintCheck(b) (b.on, b.usable, b.hovered); a skin without them gets Material's checkbox.

@@ -15,6 +15,7 @@
   checkboxes and the dividers under title bars, table headers and beside section headings. Classic and Cognac
   leave out the title bar rule; Cognac draws its gold divider, bezel checkboxes and card-framed text boxes, and its
   menus in the chamfered frame of the tooltip art. `S.Table`'s `plain` option is a bare list for inside a menu.
+- **Vertical Dividers:** `S.VerticalDivider` divides two panes side by side: a 1px line, or Cognac's gold spear.
 - **Pixel Alignment:** `S.PixelScale` scales a window so its units are whole screen pixels, so every edge and 1px
   border inside it lands on real pixels; `S.SnapPosition`, `S.PixelSize` and `S.Snap` go with it. The demo uses it.
 - **Window Placement:** `S.PlaceWindow` puts a window at the shared default spot, top middle of the screen.

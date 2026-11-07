@@ -102,6 +102,10 @@ local before = #MOCK.created
 S.Sidebar(side)
 MOCK.check("sidebar card only", #MOCK.created == before)
 
+-- A vertical divider between two panes is the spear, in a holder 12 wide.
+local split, splitW = S.VerticalDivider(win)
+MOCK.check("vertical divider spear", splitW == 12 and split.width == 12)
+
 -- A navigation entry shows the chip and the mint label while selected.
 local nav = S.NavEntry(CreateFrame("Button", nil, side), "Page")
 nav:SetSize(140, 30)

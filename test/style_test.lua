@@ -28,6 +28,10 @@ MOCK.check("dropdown pick", picked == 2)
 d:SetText("Two")
 MOCK.check("dropdown text", d.label.text == "Two")
 
+-- A vertical divider in Material is the 1px divider line standing on end.
+local split, splitW = S.VerticalDivider(parent)
+MOCK.check("vertical divider line", splitW == 1 and split.width == 1)
+
 -- A one-line input keeps its text; a tall one turns line breaks into spaces.
 local one = S.Input(parent, nil, 100, "Search")
 one:SetText("abc")
