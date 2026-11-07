@@ -106,13 +106,24 @@ nav:SetSize(140, 30)
 MOCK.check("nav unselected", not nav.plate.textures[5].shown and nav.label.color[1] == S.colors.text[1])
 nav:SetSelected(true)
 MOCK.check("nav selected", nav.plate.textures[5].shown and nav.platePiece == "chip_selected" and near(nav.label.color[2], 1))
--- A one-line input is three slices of the search plate that brighten on focus; a tall one keeps a backdrop.
+-- A one-line input is three slices of the search plate that brighten on focus; a tall one is the framed card.
 local e = S.Input(parent, nil, 200, "Search")
 MOCK.check("input slices", #e.slices == 3 and e.backdrop == nil)
 e:SetFocus()
 MOCK.check("input focus tint", e.slices[1].vertex[3] < 1)
 local tall = S.Input(parent, nil, 200, "Notes", 200, 3)
-MOCK.check("tall input backdrop", tall.backdrop ~= nil and tall.slices == nil)
+MOCK.check("tall input card", tall.backdrop == nil and tall.card ~= nil and tall.slices == nil)
+
+-- A checkbox is the gold bezel, with the teal one over it while checked.
+local box = S.Check(parent, 14)
+MOCK.check("bezel checkbox", box.box.texture:find("Cognac") and not box.tick.shown)
+box:SetChecked(true)
+MOCK.check("teal when checked", box.tick.shown)
+
+-- No rule under a title bar; the gold divider beside section headings.
+MOCK.check("no title rule", not S.Rule(parent, "BOTTOM").shown)
+local _, divider = S.SectionHeading(parent, "Loot", 0, 0)
+MOCK.check("gold divider", divider.texture:find("Cognac") and divider.height == 3)
 
 -- Going back to Material with a scheme of the addon's own.
 S.UseSkin("material", { primary = "ffc400" })

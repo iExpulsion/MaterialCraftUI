@@ -60,10 +60,17 @@ MOCK.check("dropdown menu", d.menu.backdrop.edgeFile:find("UI%-Tooltip%-Border")
 	and d.menu.height == 2 * S.CONTROL_H + 8)
 
 S.UseSkin("material")
--- Material keeps its flat checkbox, and a skin without one (Cognac) gets it too.
+-- Material keeps its flat checkbox, and a skin without one gets it too, and Material's divider lines.
 MOCK.check("material checkbox", S.Check(parent, 14).fill ~= nil)
-LOAD("Skins/Cognac/Atlas.lua")
-LOAD("Skins/Cognac/Skin.lua")
-S.UseSkin("cognac")
-MOCK.check("fallback checkbox", S.Check(parent, 14).fill ~= nil)
+S.RegisterSkin("bare", { label = "Bare" })
+S.UseSkin("bare")
+local _, ruleLine = S.SectionHeading(parent, "Heading", 0, 0)
+MOCK.check("fallback checkbox and line", S.Check(parent, 14).fill ~= nil and ruleLine.height == 1)
+S.UseSkin("material")
+
+-- Classic leaves out the rule under a title bar, and keeps a soft line beside section headings.
+S.UseSkin("classic")
+MOCK.check("no title rule", not S.Rule(parent, "BOTTOM").shown)
+local _, soft = S.SectionHeading(parent, "Loot", 0, 0)
+MOCK.check("heading line kept", soft.shown and soft.height == 1)
 S.UseSkin("material")

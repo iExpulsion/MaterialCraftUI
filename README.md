@@ -264,7 +264,10 @@ a piece as a nine-slice: its corners keep their shape, its edges stretch only al
 
 - `S.Panel(frame, bg, border)`: a flat backdrop with an optional 1px border.
 - `S.Solid(parent, layer, color)`: a solid texture.
-- `S.Rule(parent, "TOP" or "BOTTOM")`: a 1px line along one edge.
+- `S.Rule(parent, "TOP" or "BOTTOM")`: a divider along one edge, such as under a title bar: a 1px line in
+  Material, left out by skins whose frames are drawn borders.
+- `S.Divider(parent, kind)`: the skin's divider between groups of content, as a texture to anchor and the
+  thickness to give it.
 - `S.SectionHeading(parent, text, x, y, rightInset)`: dim small text with a rule to the right, for grouping a
   navigation list. Returns the label and the line.
 - `S.ScrollBar(scroll, scrollName)`: restyles a `UIPanelScrollFrameTemplate` bar as a thin track and thumb.

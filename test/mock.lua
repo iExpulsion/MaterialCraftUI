@@ -84,7 +84,12 @@ local function Stub()
 		elseif k == "Enable" then f = function(self) self.enabled = true end
 		elseif k == "Disable" then f = function(self) self.enabled = false end
 		elseif k == "IsEnabled" then f = function(self) return self.enabled ~= false and 1 or nil end
-		elseif k:match("^Create") then f = function() return Stub() end
+		-- textures and font strings start shown, as they do in the client
+		elseif k:match("^Create") then f = function()
+			local region = Stub()
+			region.shown = true
+			return region
+		end
 		else f = function() end end
 		rawset(t, k, f)
 		return f

@@ -116,6 +116,15 @@ S.RegisterSkin("classic", {
 	well = function(f)
 		tooltipPanel(f, 0.75)
 	end,
+	-- no rule under a title bar, which the dialog frame already sets apart; a soft gray line under table headers
+	-- and beside section headings, like the tooltip border's
+	line = function(parent, kind)
+		local t = parent:CreateTexture(nil, "BORDER")
+		t:SetTexture("Interface\\Buttons\\WHITE8X8")
+		t:SetVertexColor(0.6, 0.6, 0.6, 0.45)
+		if kind == "rule" then t:Hide() end
+		return t, 1
+	end,
 	sidebar = function(side)
 		tooltipPanel(side, 0.6)
 	end,

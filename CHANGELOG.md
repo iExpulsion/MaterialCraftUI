@@ -11,7 +11,9 @@
   wells, sidebars, navigation entries and hover states in the current skin, and `S.metrics` says how much room a skin's border needs.
 - **Tables:** `S.Table` is a virtual table with sortable, stretching columns, icons, group header rows, selection,
   a thin scroll bar and the mouse wheel, drawn in the current skin's well. The demo's Items page uses it.
-- **Skinned Menus and Checkboxes:** dropdown menus draw in the skin's menu style, and skins can draw checkboxes.
+- **Skinned Menus, Checkboxes and Dividers:** dropdown menus draw in the skin's menu style, and skins can draw
+  checkboxes and the dividers under title bars, table headers and beside section headings. Classic and Cognac
+  leave out the title bar rule; Cognac draws its gold divider, bezel checkboxes and card-framed text boxes.
 - **Pixel Alignment:** `S.PixelScale` scales a window so its units are whole screen pixels, so every edge and 1px
   border inside it lands on real pixels; `S.SnapPosition`, `S.PixelSize` and `S.Snap` go with it. The demo uses it.
 - **New Color Roles:** `rowHover`, `rowSelected`, `navSelected`, `arrow`, `scrollThumb` and `scrollThumbHover`.
