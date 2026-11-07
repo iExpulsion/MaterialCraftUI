@@ -6,7 +6,8 @@
   in and stays the default. `S.Skins` lists them for a picker and `S.RegisterSkin` adds one.
 - **Cognac Skin:** painted gold frames, plates and chips on dark glass, in `Skins/Cognac`.
 - **Classic Skin:** the default UI's own look, in `Skins/Classic`: dialog-box windows, red panel buttons, gold text,
-  tooltip-bordered menus and lists, and the quest log's row highlight, all from textures the client ships.
+  tooltip-bordered menus and lists, the quest log's row highlight, and the Interface Options tabs, all from
+  textures the client ships. A black fill over the see-through dialog background keeps windows and popups readable.
 - **Skin-Aware Helpers:** `S.Frame`, `S.Well`, `S.Sidebar`, `S.NavEntry`, `S.Tab` and `S.Highlight` draw window
   frames, wells, sidebars, navigation entries, tabs and hover states in the current skin, and `S.metrics` says how much room a skin's border needs.
 - **Tables:** `S.Table` is a virtual table with sortable, stretching columns, icons, group header rows, selection,

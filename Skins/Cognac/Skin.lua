@@ -254,13 +254,13 @@ S.RegisterSkin("cognac", {
 	well = function(f)
 		card(f)
 	end,
-	-- no rule under a title bar, which the painted border already sets apart; the gold divider's straight run under
-	-- table headers and beside section headings
+	-- no rule under a title bar, which the painted border already sets apart, or under the tab chips; the gold
+	-- divider's straight run under table headers and beside section headings
 	line = function(parent, kind)
 		local t = parent:CreateTexture(nil, "BORDER")
 		local pw, ph = S.ArtSize(ATLAS, "divider_h")
 		S.Art(t, ATLAS, "divider_h", DIVIDER_COLS[1] / pw, DIVIDER_COLS[2] / pw, DIVIDER_ROWS[1] / ph, DIVIDER_ROWS[2] / ph)
-		if kind == "rule" then t:Hide() end
+		if kind == "rule" or kind == "tabs" then t:Hide() end
 		return t, DIVIDER_H
 	end,
 	-- the gold square frame, nine-sliced so its rim stays visible at a checkbox's size, with the gem diamond over it,

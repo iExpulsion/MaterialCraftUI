@@ -12,6 +12,12 @@ MOCK.check("classic on", S.Skin() == "classic" and S.colors.heading[2] == 0.82 a
 local win = S.Frame(CreateFrame("Frame"), "window")
 MOCK.check("dialog frame", win.backdrop.bgFile:find("UI%-DialogBox%-Background") and win.backdrop.edgeFile:find("UI%-DialogBox%-Border")
 	and win.backdrop.edgeSize == 32)
+-- Black over the see-through dialog background, heavier on a popup, which sits over a window.
+local pop = S.Frame(CreateFrame("Frame"), "popup")
+MOCK.check("dialog fill", win.fill.vertex[4] == 0.5 and pop.fill.vertex[4] == 0.8)
+-- Tabs get room for the tab art's caps, and the rule under a tab bar is drawn where the title bar's isn't.
+MOCK.check("tab padding", S.metrics.tabPad == 20)
+MOCK.check("tab bar rule", S.Rule(parent, "BOTTOM", "tabs").shown and not S.Rule(parent, "BOTTOM").shown)
 -- A menu and a well are tooltip-bordered.
 MOCK.check("tooltip menu", S.Frame(CreateFrame("Frame"), "menu").backdrop.edgeFile:find("UI%-Tooltip%-Border"))
 MOCK.check("tooltip well", S.Well(CreateFrame("Frame")).backdrop.edgeFile:find("UI%-Tooltip%-Border"))

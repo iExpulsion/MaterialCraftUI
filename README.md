@@ -219,13 +219,15 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
 - `S.metrics.edge`: how far in from a window's edges its content has to start (0 for Material, 18 for Cognac).
   Grow the window by twice this, so its content keeps the same size. `S.metrics.inset` is the padding inside a
   popup, `S.metrics.navInset` how far in from a sidebar's sides its entries sit, `S.metrics.wellInset` the
-  extra padding a well's frame needs, and `S.metrics.menuInset` how far in from a menu's edges its rows sit.
+  extra padding a well's frame needs, `S.metrics.menuInset` how far in from a menu's edges its rows sit, and
+  `S.metrics.tabPad` the room either side of a tab's label.
 - `S.Well(frame)`: a sunken area holding text or a list, such as the surround of a multi-line text box.
 - `S.Sidebar(frame)`: a navigation sidebar's background and dividing edge.
 - `S.NavEntry(button, text)`: a sidebar entry with its label as `button.label`. `button:SetSelected(on)` repaints it.
 - `S.Tab(button, text)`: a tab in a tab bar, with its label as `button.label`. `button:SetSelected(on)` repaints
   it: Material's accent underline, Cognac's teal chip, or Classic's Interface Options tab art. Give the button its
-  height first; you size and place the tabs and draw the bar's `S.Rule`.
+  height first; you size each tab to its label plus `S.metrics.tabPad` either side, place them, and draw the
+  bar's `S.Rule(bar, "BOTTOM", "tabs")`.
 - `S.Highlight(frame)`: the hover look for a clickable row, menu item or column heading.
 
 **Classic** is the default UI's own look: dialog-box windows, red panel buttons, gold text, tooltip-bordered menus
@@ -270,8 +272,9 @@ a piece as a nine-slice: its corners keep their shape, its edges stretch only al
 
 - `S.Panel(frame, bg, border)`: a flat backdrop with an optional 1px border.
 - `S.Solid(parent, layer, color)`: a solid texture.
-- `S.Rule(parent, "TOP" or "BOTTOM")`: a divider along one edge, such as under a title bar: a 1px line in
-  Material, left out by skins whose frames are drawn borders.
+- `S.Rule(parent, "TOP" or "BOTTOM", kind)`: a divider along one edge, such as under a title bar: a 1px line in
+  Material, left out by skins whose frames are drawn borders. Pass kind `"tabs"` under a tab bar, which Classic
+  draws.
 - `S.Divider(parent, kind)`: the skin's divider between groups of content, as a texture to anchor and the
   thickness to give it.
 - `S.VerticalDivider(parent)`: the skin's divider between two panes side by side, as a frame and its width.

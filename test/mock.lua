@@ -62,7 +62,7 @@ local function Stub()
 		elseif k == "GetHeight" then f = function(self) return self.height end
 		elseif k == "SetTexture" then f = function(self, path) self.texture = path end
 		elseif k == "SetTexCoord" then f = function(self, ...) self.coords = { ... } end
-		elseif k == "SetVertexColor" then f = function(self, r, g, b) self.vertex = { r, g, b } end
+		elseif k == "SetVertexColor" then f = function(self, r, g, b, a) self.vertex = { r, g, b, a } end
 		elseif k == "SetBackdrop" then f = function(self, bd) self.backdrop = bd end
 		elseif k == "SetFocus" then f = function(self)
 			if self.scripts.OnEditFocusGained then self.scripts.OnEditFocusGained(self) end
