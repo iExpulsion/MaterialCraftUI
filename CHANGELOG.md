@@ -2,9 +2,10 @@
 
 ## Unreleased
 
-- **Drag to Reorder:** `S.Table`'s `onMove(from, to)` option lets rows be dragged into a new order. The dragged
-  row dims, an accent line shows where it will land, its name follows the cursor, and holding it at the top or
-  bottom edge scrolls the list. Group header rows don't drag, and the release that ends a drag isn't a click.
+- **Drag to Reorder:** `S.Reorder` lets the rows of any list be dragged into a new order, and `S.Table`'s
+  `onMove(from, to)` option uses it. The dragged row dims, an accent line shows where it will land, its name
+  follows the cursor, and holding it at the top or bottom edge scrolls the list. Group header rows don't drag, and
+  the release that ends a drag isn't a click.
 
 ## 1.1.0
 

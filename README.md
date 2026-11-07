@@ -320,11 +320,27 @@ items, in an `S.Well`, with sortable column headers, a thin scroll bar and the m
   and `opts.header(item)` for group header rows.
 - `opts.plain`: a bare list, with no well frame and no column headers, for a list inside a menu or popup that
   already has a frame of its own.
-- `opts.onMove(from, to)`: rows can be dragged to reorder. `from` and `to` are item indexes, `to` as it is after
-  the move; the table only reports it, so move the item and call `SetItems` again. While a row is dragged it dims,
-  an accent line marks where it will land, and holding it at the top or bottom edge scrolls the list.
+- `opts.onMove(from, to)`: rows can be dragged to reorder, through `S.Reorder` below. `from` and `to` are item
+  indexes, `to` as it is after the move; the table only reports it, so move the item and call `SetItems` again.
 - Methods: `SetItems(items, emptyText, keepScroll)`, `Redraw`, `ScrollTo`, `SetSort`, `SetColumnShown`,
   `SetColumnLabel`, `Show` and `Hide`.
+
+### Drag to Reorder
+
+`S.Reorder.New(opts)` lets the rows of any list be dragged into a new order, whether it's an `S.Table`, a scroll
+frame of pooled rows or a few fixed frames. A row is any frame with `moveIndex` set to its item's index (nil for a
+row that doesn't move, like a header); keep it current as rows are reused. While a row is dragged it dims, an
+accent line marks the gap it would land in, its name follows the cursor, and holding it at the top or bottom edge
+of the list scrolls. Letting go anywhere drops it.
+
+- `opts.rows`: the array of row frames, pooled ones included. Rows added to it later count too.
+- `opts.lineParent`: the frame the drop line draws in, normally the rows' parent, so a scroll frame clips it.
+- `opts.area` and `opts.scroll(step)`: the frame whose top and bottom edges scroll the list, and how to scroll it
+  (`-1` up, `1` down). Both are optional.
+- `opts.onMove(from, to)`: the drop, with `to` as the index after the move. Move the item yourself.
+- Methods: `Attach(button, label, row)` makes a button start a drag of `row` (the button itself unless given),
+  with `label(row)` as the text by the cursor. `Busy()` is true during a drag and on the frame it ends, so a
+  click handler can ignore the release that drops a row.
 
 ### Closing Menus and Inputs
 
