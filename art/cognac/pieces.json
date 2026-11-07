@@ -14,6 +14,7 @@
     "button_disabled": { "sheet": "controls", "rect": [784, 84, 1008, 172], "draw": 0.34 },
     "chip_selected": { "sheet": "controls", "rect": [784, 349, 1008, 419], "draw": 0.43 },
     "card": { "sheet": "controls", "rect": [784, 565, 1009, 714], "draw": 0.76 },
+    "menu_frame": { "sheet": "controls", "rect": [609, 584, 750, 688], "draw": 0.35 },
     "search": { "sheet": "controls", "rect": [15, 591, 173, 690], "draw": 0.24 },
     "corner_nw": { "sheet": "chrome", "rect": [0, 0, 256, 256], "trim": true, "draw": 0.16 },
     "corner_ne": { "sheet": "chrome", "rect": [256, 0, 512, 256], "trim": true, "draw": 0.16 },

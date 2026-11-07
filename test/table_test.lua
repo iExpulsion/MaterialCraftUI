@@ -79,3 +79,8 @@ MOCK.check("inside the well border", framed.content.point[1] == "BOTTOMRIGHT" an
 	and framed.columns[1].width == 300 - 2 * inset
 	and framed.frame.backdrop.edgeFile:find("Tooltip"))
 S.UseSkin("material")
+
+-- A plain list has no well frame and no header: its rows start at the top and fill the whole width.
+local plain = S.Table.New(UIParent, nil, 200, 100, { plain = true, columns = { { key = "a", label = "", width = 50 } }, cell = cell })
+MOCK.check("plain list", plain.frame.backdrop == nil and plain.bodyTop == 0 and plain.columns[1].width == 200
+	and not plain.headers[1].shown and plain.visible == 5)

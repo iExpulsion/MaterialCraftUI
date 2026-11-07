@@ -22,6 +22,9 @@ local HBAR, HBAND, DIAMOND = { 103, 160 }, { 93, 163 }, { 96, 160 }
 -- the divider's spear: a tip at each end and a diamond in the middle keep their shape; the shafts between stretch
 local SPEAR_W, SPEAR_COLS = 12, { 102, 153 }
 local SPEAR = { { 16, 60, false }, { 60, 100, true }, { 100, 156, false }, { 156, 196, true }, { 196, 240, false } }
+-- The menu frame, the 141x103 box of the tooltip art: its corners (MENU_CUT art pixels each way, drawn at
+-- MENU_SCALE), and the columns its edges and middle are sampled from, left of the pointer on its bottom edge.
+local MENU_W, MENU_H, MENU_CUT, MENU_SCALE, MENU_MID = 141, 104, 14, 0.35, { 14, 53 }
 -- the gold divider's straight run (columns along it, rows across), drawn DIVIDER_H pixels thick
 local DIVIDER_COLS, DIVIDER_ROWS, DIVIDER_H = { 60, 100 }, { 116, 140 }, 3
 -- art pixels of corner kept unstretched on button plates and chips, on the card, and the search field's left cap
@@ -125,6 +128,26 @@ local function chrome(f)
 	end)
 end
 
+-- A menu: the chamfered gold frame of the tooltip art, without its pointer. Its corners keep their shape, and its
+-- edges and middle are sampled from left of the pointer, so the pointer never shows or stretches.
+local function menuFrame(f)
+	local cols = { { 0, MENU_CUT }, MENU_MID, { MENU_W - MENU_CUT, MENU_W } }
+	local rows = { { 0, MENU_CUT }, { MENU_CUT, MENU_H - MENU_CUT }, { MENU_H - MENU_CUT, MENU_H } }
+	local parts = {}
+	for i = 1, 9 do parts[i] = f:CreateTexture(nil, "BACKGROUND") end
+	follow(f, function(w, h)
+		local c = S.Snap(f, MENU_CUT * MENU_SCALE)
+		local xs, ws = { 0, c, w - c }, { c, w - 2 * c, c }
+		local ys, hs = { 0, c, h - c }, { c, h - 2 * c, c }
+		for row = 1, 3 do
+			for col = 1, 3 do
+				S.ArtPart(parts[(row - 1) * 3 + col], f, ATLAS, "menu_frame", cols[col][1], cols[col][2], rows[row][1],
+					rows[row][2], xs[col], ys[row], ws[col], hs[row])
+			end
+		end
+	end)
+end
+
 -- The framed card: a nine-slice of the card art, so its filigree corners keep their size.
 local function card(f)
 	local slices = S.NineSlice(f, "BACKGROUND", ATLAS, "card", CARD_CUT, CARD_CORNER / CARD_CUT)
@@ -192,7 +215,7 @@ S.RegisterSkin("cognac", {
 		c.scrollThumb = c.accent
 		c.scrollThumbHover = { 1, 0.95, 0.75, 1 }
 	end,
-	metrics = { edge = EDGE, inset = EDGE, navInset = 8, wellInset = 6 },
+	metrics = { edge = EDGE, inset = EDGE, navInset = 8, wellInset = 6, menuInset = 5 },
 	button = plate,
 	paintButton = function(b, enabled)
 		local piece = platePiece(b, enabled)
@@ -221,7 +244,7 @@ S.RegisterSkin("cognac", {
 			f:SetBackdropColor(c[1], c[2], c[3], 0.98)
 			chrome(f)
 		else
-			S.Panel(f, S.colors.panel, S.colors.border)
+			menuFrame(f)
 		end
 	end,
 	-- the framed card, like the sidebar's

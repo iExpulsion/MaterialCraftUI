@@ -89,9 +89,11 @@ local well = CreateFrame("Frame")
 well:SetSize(200, 100)
 S.Well(well)
 MOCK.check("well card", well.backdrop == nil)
--- A menu stays a flat panel.
-local menu = S.Frame(CreateFrame("Frame"), "menu")
-MOCK.check("menu flat", menu.backdrop and menu.backdrop.edgeFile ~= nil)
+-- A menu is the chamfered frame of the tooltip art, not a flat panel, and its rows sit inside its rim.
+local menu = CreateFrame("Frame")
+menu:SetSize(160, 120)
+S.Frame(menu, "menu")
+MOCK.check("menu frame", menu.backdrop == nil and S.metrics.menuInset == 5)
 
 -- A sidebar gets the card and a divider frame beside it.
 local side = CreateFrame("Frame", nil, win)
