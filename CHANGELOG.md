@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
 
 - **Drag to Reorder:** `S.Reorder` lets the rows of any list be dragged into a new order, and `S.Table`'s
   `onMove(from, to)` option uses it. The dragged row dims, an accent line shows where it will land, its name
