@@ -48,12 +48,12 @@ S.SnapPosition(win)
 MOCK.check("position snapped", win.point[1] == "TOPLEFT" and near(win.point[4], 100) and near(win.point[5], 501))
 UIParent.scale = 1
 
--- PlaceWindow puts a window's top 60 of UIParent's units below the screen's top, converted into a pixel-scaled
--- window's own units so it lands in the same place.
+-- PlaceWindow puts a window's top S.WINDOW_TOP (128) of UIParent's units below the screen's top, converted into a
+-- pixel-scaled window's own units so it lands in the same place.
 UIParent.scale = 1
 local placed = CreateFrame("Frame", nil, UIParent)
 S.PlaceWindow(placed)
-MOCK.check("place window", placed.point[1] == "TOP" and placed.point[3] == "TOP" and near(placed.point[5], -60))
+MOCK.check("place window", placed.point[1] == "TOP" and placed.point[3] == "TOP" and near(placed.point[5], -128))
 S.PixelScale(placed)
 S.PlaceWindow(placed)
-MOCK.check("place a scaled window", near(placed.point[5] * placed:GetEffectiveScale(), -60))
+MOCK.check("place a scaled window", near(placed.point[5] * placed:GetEffectiveScale(), -128))

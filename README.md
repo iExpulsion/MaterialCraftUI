@@ -182,7 +182,7 @@ that's already pixel-perfect (0.71 at 1080p, say) nothing changes size; at other
 larger or smaller. `S.PixelScale(frame, false)` turns it off.
 
 - `S.PlaceWindow(frame)`: puts a window at the default spot, centered across the screen with its top
-  `S.WINDOW_TOP` (60) units below the screen's top, so windows of different heights and different addons line up.
+  `S.WINDOW_TOP` (128) units below the screen's top, so windows of different heights and different addons line up.
   The offset is in UIParent's units, so it's the same with or without `S.PixelScale`.
 - `S.SnapPosition(frame)`: moves a frame's top left corner onto a whole pixel. Run it after placing a window and
   after it's dragged.

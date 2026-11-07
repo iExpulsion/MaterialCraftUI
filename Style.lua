@@ -211,7 +211,7 @@ end
 
 -- Where windows open by default: centered across the screen, their tops S.WINDOW_TOP of UIParent's units below the
 -- screen's top, so windows of different heights, and different addons', line up.
-S.WINDOW_TOP = 60
+S.WINDOW_TOP = 128
 
 -- Puts a window at that spot. The offset is converted from UIParent's units, so a window with a scale of its own
 -- (S.PixelScale) lands in the same place as one without.
