@@ -42,10 +42,11 @@ local tabB = CreateFrame("Button", nil, parent)
 tabB:SetHeight(32)
 S.Tab(tabB, "Actions")
 MOCK.check("tab inactive", tabB.inactive.parts[1].shown and not tabB.active.parts[1].shown
-	and tabB.inactive.parts[1].texture:find("InActiveTab") and tabB.inactive.parts[1].height == 24)
+	and tabB.inactive.parts[1].texture:find("InActiveTab") and tabB.inactive.parts[1].height == 24
+	and tabB.label.point[5] == -7)
 tabB:SetSelected(true)
 MOCK.check("tab active", tabB.active.parts[2].shown and not tabB.inactive.parts[2].shown
-	and tabB.active.parts[2].texture:find("UI%-OptionsFrame%-ActiveTab"))
+	and tabB.active.parts[2].texture:find("UI%-OptionsFrame%-ActiveTab") and tabB.label.point[5] == -4)
 
 -- A navigation entry lights the quest log highlight in gold while selected.
 local nav = S.NavEntry(CreateFrame("Button", nil, parent), "Page")

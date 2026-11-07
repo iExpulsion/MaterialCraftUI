@@ -15,7 +15,7 @@ local ROW_HIGHLIGHT = "Interface\\QuestFrame\\UI-QuestLogTitleHighlight"
 local CHECK = "Interface\\Buttons\\UI-CheckBox-"
 -- the Interface Options tabs, as their template crops them: 20 pixel caps, 0.15625 of the art each side, 24 tall
 local TAB = "Interface\\OptionsFrame\\UI-OptionsFrame-"
-local TAB_CAP, TAB_U, TAB_H = 20, 0.15625, 24
+local TAB_CAP, TAB_U, TAB_H, TAB_DROP = 20, 0.15625, 24, 3
 local TAB_HIGHLIGHT = "Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight"
 -- how much larger than the checkbox its art is drawn: the stock box fills about the middle 60% of its texture
 local CHECK_ART = 1.7
@@ -179,11 +179,14 @@ S.RegisterSkin("classic", {
 		glow:SetPoint("BOTTOMLEFT", TAB_CAP / 2, 0)
 		glow:SetPoint("BOTTOMRIGHT", -TAB_CAP / 2, 0)
 		glow:SetHeight(TAB_H)
-		b.label:SetPoint("LEFT", S.metrics.tabPad, -math.floor(((b:GetHeight() or TAB_H) - TAB_H) / 2))
+		b.labelY = -math.floor(((b:GetHeight() or TAB_H) - TAB_H) / 2)
 	end,
+	-- the inactive tab is drawn lower in its art than the active one, so its label drops to match, as the stock
+	-- tabs' does
 	paintTab = function(b, on)
 		for _, t in ipairs(b.active.parts) do if on then t:Show() else t:Hide() end end
 		for _, t in ipairs(b.inactive.parts) do if on then t:Hide() else t:Show() end end
+		b.label:SetPoint("LEFT", S.metrics.tabPad, b.labelY - (on and 0 or TAB_DROP))
 	end,
 	-- the stock checkbox, its art drawn larger than the box, since the box fills only the middle of it
 	check = function(b)
