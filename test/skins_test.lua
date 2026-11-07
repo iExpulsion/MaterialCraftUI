@@ -95,12 +95,12 @@ menu:SetSize(160, 120)
 S.Frame(menu, "menu")
 MOCK.check("menu frame", menu.backdrop == nil and S.metrics.menuInset == 5)
 
--- A sidebar gets the card and a divider frame beside it.
+-- A sidebar is just the card, with no divider frame beside it.
 local side = CreateFrame("Frame", nil, win)
 side:SetSize(150, 280)
 local before = #MOCK.created
 S.Sidebar(side)
-MOCK.check("sidebar divider", #MOCK.created == before + 1 and MOCK.created[#MOCK.created].parent == win)
+MOCK.check("sidebar card only", #MOCK.created == before)
 
 -- A navigation entry shows the chip and the mint label while selected.
 local nav = S.NavEntry(CreateFrame("Button", nil, side), "Page")
