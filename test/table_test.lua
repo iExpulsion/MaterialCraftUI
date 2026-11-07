@@ -3,26 +3,28 @@
 local S = NS.Style
 local function cell() return "" end
 
--- Hiding a column gives its width to the last shown column, and showing it again restores the layout.
+-- With no column marked stretch, the first (the primary one) takes the spare width; hiding a column gives it its
+-- width too, and the last shown column keeps the scroll bar inset. Showing it again restores the layout.
 local t = S.Table.New(UIParent, nil, 300, 200, { columns = {
 	{ key = "a", width = 100 }, { key = "b", width = 50 }, { key = "c", width = 60 },
 }, cell = cell })
 local a, b, c = t.columns[1], t.columns[2], t.columns[3]
-MOCK.check("last column stretches", c.x == 150 and c.width == 148 and c.barInset ~= nil)
+MOCK.check("first column stretches", a.width == 188 and b.x == 188 and c.x == 238 and c.width == 60 and c.barInset ~= nil)
 t:SetColumnShown("c", false)
-MOCK.check("hidden column gives its width away", c.hidden and b.width == 198 and b.barInset ~= nil and c.barInset == nil)
+MOCK.check("hidden column gives its width away", c.hidden and a.width == 248 and b.width == 50 and b.barInset ~= nil
+	and c.barInset == nil)
 t:SetColumnShown("c", true)
-MOCK.check("shown again", not c.hidden and b.width == 50 and b.barInset == nil and c.width == 148 and a.x == 0)
+MOCK.check("shown again", not c.hidden and a.width == 188 and b.barInset == nil and c.width == 60 and a.x == 0)
 
--- A column marked stretch takes the spare width instead, and the last column only keeps the scroll bar inset.
+-- A column marked stretch takes the spare width instead of the first.
 local s = S.Table.New(UIParent, nil, 300, 200, { columns = {
-	{ key = "a", width = 100, stretch = true }, { key = "b", width = 50 }, { key = "c", width = 60 },
+	{ key = "a", width = 100 }, { key = "b", width = 50, stretch = true }, { key = "c", width = 60 },
 }, cell = cell })
 local sa, sb, sc = s.columns[1], s.columns[2], s.columns[3]
-MOCK.check("stretch column takes the spare width", sa.width == 188 and sb.x == 188 and sc.x == 238
+MOCK.check("stretch column takes the spare width", sa.width == 100 and sb.width == 138 and sc.x == 238
 	and sc.width == 60 and sc.barInset ~= nil)
 s:SetColumnShown("c", false)
-MOCK.check("a hidden column's width goes to the stretch column", sa.width == 248 and sb.width == 50
+MOCK.check("a hidden column's width goes to the stretch column", sa.width == 100 and sb.width == 198
 	and sb.barInset ~= nil)
 
 -- A column too narrow for its header (mock labels measure 60px) widens to fit it, scroll bar gap included, and

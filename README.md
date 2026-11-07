@@ -299,7 +299,7 @@ Sizes are `small`, `normal`, `large`, `huge` and `edit`. `S.FONTS[size]` is the 
 items, in an `S.Well`, with sortable column headers, a thin scroll bar and the mouse wheel. Its frame is `.frame`.
 
 - `opts.columns`: `{ { key, label, width, justify, sortable, defaultDesc, tooltip, stretch } }`. Each column is at
-  least as wide as its header needs, and the one marked `stretch` (else the last) takes the rest.
+  least as wide as its header needs, and the one marked `stretch` (else the first, usually the primary one) takes the rest.
 - `opts.cell(item, key)` returns a cell's text and color. `opts.rowH` sets the row height (20), and `opts.icons`
   with `opts.icon(item)` puts an icon in the first column.
 - `opts.tooltip(tooltip, item)`, `opts.onClick(item, button)`, `opts.isSelected(item)`, `opts.onSort(key, desc)`,

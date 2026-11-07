@@ -815,19 +815,20 @@ local function headerWidth(self, c, col)
 end
 
 -- Places the shown columns left to right. Each is at least as wide as its header needs; the shown column marked
--- stretch (else the last shown) takes the spare width, such as a hidden column's, or gives up what the others
--- needed. The last shown keeps its text clear of the scroll bar, since the rows run under the bar to the table's
--- edge.
+-- stretch (else the first shown, usually the primary one) takes the spare width, such as a hidden column's, or
+-- gives up what the others needed. The last shown keeps its text clear of the scroll bar, since the rows run under
+-- the bar to the table's edge.
 local function layout(self)
-	local last, stretch = nil, nil
+	local first, last, stretch = nil, nil, nil
 	for _, col in ipairs(self.columns) do
 		col.width, col.barInset = col.baseWidth, nil
 		if not col.hidden then
+			first = first or col
 			last = col
 			if col.stretch and not stretch then stretch = col end
 		end
 	end
-	stretch = stretch or last
+	stretch = stretch or first
 	if last then
 		last.barInset = BAR_SPACE
 		local used = 0
