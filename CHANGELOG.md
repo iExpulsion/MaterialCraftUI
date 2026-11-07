@@ -17,6 +17,7 @@
   menus in the chamfered frame of the tooltip art. `S.Table`'s `plain` option is a bare list for inside a menu.
 - **Pixel Alignment:** `S.PixelScale` scales a window so its units are whole screen pixels, so every edge and 1px
   border inside it lands on real pixels; `S.SnapPosition`, `S.PixelSize` and `S.Snap` go with it. The demo uses it.
+- **Window Placement:** `S.PlaceWindow` puts a window at the shared default spot, top middle of the screen.
 - **New Color Roles:** `rowHover`, `rowSelected`, `navSelected`, `arrow`, `scrollThumb` and `scrollThumbHover`.
 - **Atlas Packer:** `tools/pack_art.py` packs a skin's art into one texture, shrinking each piece cleanly to suit
   the size it's drawn at, since the client has no mipmaps for TGA textures. `S.Art`, `S.PlaceArt`, `S.ArtPart` and

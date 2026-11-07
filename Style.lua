@@ -209,6 +209,17 @@ function S.SnapPosition(frame)
 	end
 end
 
+-- Where windows open by default: centered across the screen, their tops S.WINDOW_TOP of UIParent's units below the
+-- screen's top, so windows of different heights, and different addons', line up.
+S.WINDOW_TOP = 60
+
+-- Puts a window at that spot. The offset is converted from UIParent's units, so a window with a scale of its own
+-- (S.PixelScale) lands in the same place as one without.
+function S.PlaceWindow(frame)
+	frame:ClearAllPoints()
+	frame:SetPoint("TOP", UIParent, "TOP", 0, -S.WINDOW_TOP * UIParent:GetEffectiveScale() / frame:GetEffectiveScale())
+end
+
 -- Scales a top-level window so its units are whole screen pixels (on = false puts its scale back to 1), and keeps
 -- it so when the UI scale or the screen size changes.
 function S.PixelScale(frame, on)

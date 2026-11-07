@@ -385,7 +385,7 @@ local function build()
 	f:EnableMouse(true)
 	-- whole screen pixels per unit, so every edge and 1px border inside lands on real pixels
 	S.PixelScale(f)
-	f:SetPoint(unpack(state.point or { "CENTER" }))
+	if state.point then f:SetPoint(unpack(state.point)) else S.PlaceWindow(f) end
 	S.SnapPosition(f)
 	S.Frame(f, "window")
 	f:SetScript("OnHide", S.Dismiss)
