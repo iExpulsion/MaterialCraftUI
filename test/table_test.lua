@@ -181,3 +181,10 @@ grouped:SetItems({ { group = "Group" }, { n = "A" } })
 grouped.rows[1].scripts.OnDragStart(grouped.rows[1])
 MOCK.check("headers don't drag", grouped.reorder.from == nil and grouped.rows[2].moveIndex == 2)
 MOCK.mouseDown, MOCK.cursorY = false, nil
+
+-- A grip is two columns of three 2px dots in the muted color, and SetColor recolors every dot.
+local grip = S.Grip(UIParent)
+MOCK.check("grip dots", #grip.dots == 6 and grip.width == 6 and grip.height == 12 and grip.dots[6].point[2] == 4
+	and grip.dots[6].point[3] == -10 and grip.dots[1].vertex[1] == S.colors.muted[1])
+grip:SetColor(S.colors.text)
+MOCK.check("grip recolors", grip.dots[4].vertex[1] == S.colors.text[1])

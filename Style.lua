@@ -823,6 +823,27 @@ function S.Tab(b, text)
 	return b
 end
 
+-- A grip: two columns of three dots, the usual sign that something drags. It's a frame 6 wide and 12 tall, in the
+-- muted color unless given one; SetColor recolors it.
+local GRIP_DOT, GRIP_STEP_X, GRIP_STEP_Y = 2, 4, 5
+function S.Grip(parent, color)
+	local grip = CreateFrame("Frame", nil, parent)
+	grip:SetSize(GRIP_DOT + GRIP_STEP_X, GRIP_DOT + 2 * GRIP_STEP_Y)
+	grip.dots = {}
+	for col = 0, 1 do
+		for line = 0, 2 do
+			local dot = S.Solid(grip, "ARTWORK", color or S.colors.muted)
+			dot:SetSize(GRIP_DOT, GRIP_DOT)
+			dot:SetPoint("TOPLEFT", col * GRIP_STEP_X, -line * GRIP_STEP_Y)
+			grip.dots[#grip.dots + 1] = dot
+		end
+	end
+	function grip:SetColor(c)
+		for _, dot in ipairs(self.dots) do dot:SetVertexColor(unpack(c)) end
+	end
+	return grip
+end
+
 -- Drag to reorder: rows of a list dragged into a new order. A row is any frame with moveIndex set (its item's
 -- index, 1 to n; nil for a row that doesn't move, like a header), so pooled and scrolling lists work as long as they
 -- keep moveIndex current. While a row is dragged it dims, an accent line marks the gap it would land in, its name

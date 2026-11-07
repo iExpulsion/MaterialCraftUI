@@ -341,6 +341,9 @@ of the list scrolls. Letting go anywhere drops it.
 - Methods: `Attach(button, label, row)` makes a button start a drag of `row` (the button itself unless given),
   with `label(row)` as the text by the cursor. `Busy()` is true during a drag and on the frame it ends, so a
   click handler can ignore the release that drops a row.
+- `S.Grip(parent, color)`: two columns of three dots, 6 by 12, the usual sign that a handle drags. Muted unless
+  `color` says otherwise; `SetColor` recolors it. Use it on a handle when only part of a row starts a drag, like a
+  row that's mostly an input.
 
 ### Closing Menus and Inputs
 
