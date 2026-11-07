@@ -34,7 +34,7 @@ MOCK.check("selected pushed", seg.face.parts[1].texture == "Interface\\Buttons\\
 -- A navigation entry lights the quest log highlight in gold while selected.
 local nav = S.NavEntry(CreateFrame("Button", nil, parent), "Page")
 nav:SetSelected(true)
-MOCK.check("nav selected", nav.selectedTex.shown and nav.selectedTex.texture:find("UI%-QuestTitleHighlight"))
+MOCK.check("nav selected", nav.selectedTex.shown and nav.selectedTex.texture:find("UI%-QuestLogTitleHighlight"))
 nav:SetSelected(false)
 MOCK.check("nav unselected", not nav.selectedTex.shown)
 
@@ -53,9 +53,11 @@ MOCK.check("checked", c.tick.shown and c.tick.texture == "Interface\\Buttons\\UI
 c:SetEnabled(false)
 MOCK.check("disabled tick", c.tick.texture == "Interface\\Buttons\\UI-CheckBox-Check-Disabled")
 
--- A dropdown's menu is tooltip-bordered like the other menus.
+-- A dropdown's menu is tooltip-bordered like the other menus, with its rows inside the 4px border.
 local d = S.Dropdown(parent, 120, function() end)
-MOCK.check("dropdown menu", d.menu.backdrop.edgeFile:find("UI%-Tooltip%-Border"))
+d:SetOptions({ { value = 1, text = "One" }, { value = 2, text = "Two" } })
+MOCK.check("dropdown menu", d.menu.backdrop.edgeFile:find("UI%-Tooltip%-Border") and d.items[1].point[2] == -4
+	and d.menu.height == 2 * S.CONTROL_H + 8)
 
 S.UseSkin("material")
 -- Material keeps its flat checkbox, and a skin without one (Cognac) gets it too.

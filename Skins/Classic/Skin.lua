@@ -10,7 +10,8 @@ local TOOLTIP_BG = "Interface\\Tooltips\\UI-Tooltip-Background"
 local TOOLTIP_EDGE = "Interface\\Tooltips\\UI-Tooltip-Border"
 local BUTTON = "Interface\\Buttons\\UI-Panel-Button-"
 local INPUT = "Interface\\Common\\Common-Input-Border"
-local ROW_HIGHLIGHT = "Interface\\QuestFrame\\UI-QuestTitleHighlight"
+-- the quest log's title row highlight, made for list rows (the quest greeting's highlight glows past a short row)
+local ROW_HIGHLIGHT = "Interface\\QuestFrame\\UI-QuestLogTitleHighlight"
 local CHECK = "Interface\\Buttons\\UI-CheckBox-"
 -- how much larger than the checkbox its art is drawn: the stock box fills about the middle 60% of its texture
 local CHECK_ART = 1.7
@@ -83,7 +84,8 @@ S.RegisterSkin("classic", {
 		c.scrollThumb = { 0.55, 0.55, 0.55, 1 }
 		c.scrollThumbHover = { 0.85, 0.85, 0.85, 1 }
 	end,
-	metrics = { edge = EDGE, inset = 16, navInset = 6, wellInset = 4 },
+	-- the tooltip border on menus, wells and the sidebar is 4 pixels; rows sit inside it
+	metrics = { edge = EDGE, inset = 16, navInset = 4, wellInset = 4, menuInset = 4 },
 	-- the red panel button: its normal, pushed and disabled faces in three slices, and the stock additive highlight
 	button = function(b)
 		b.face = threeSlice(b, "BORDER", BUTTON .. "Up", CAP, 0, CAP_U, MID_U, BUTTON_RIGHT, ART_V)

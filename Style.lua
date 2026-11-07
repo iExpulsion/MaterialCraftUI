@@ -124,8 +124,9 @@ S.PAD, S.GAP, S.CONTROL_H = 12, 8, 24
 
 -- What a skin's frame decoration takes up: edge, the border S.Frame draws around a "window", which its content
 -- stays inside; inset, the padding inside a "popup"; navInset, how far in from a sidebar's sides its entries sit;
--- wellInset, extra padding inside an S.Well for its frame.
-local METRICS = { edge = 0, inset = S.PAD, navInset = 0, wellInset = 0 }
+-- wellInset, extra padding inside an S.Well for its frame; menuInset, how far in from a "menu" frame's edges its rows
+-- sit, clear of its border.
+local METRICS = { edge = 0, inset = S.PAD, navInset = 0, wellInset = 0, menuInset = 1 }
 S.metrics = {}
 for k, v in pairs(METRICS) do S.metrics[k] = v end
 
@@ -603,8 +604,9 @@ function S.Dropdown(parent, width, onSelect)
 			if not item then
 				item = CreateFrame("Button", nil, menu)
 				item:SetHeight(S.CONTROL_H)
-				item:SetPoint("TOPLEFT", 1, -1 - (i - 1) * S.CONTROL_H)
-				item:SetPoint("TOPRIGHT", -1, -1 - (i - 1) * S.CONTROL_H)
+				local m = S.metrics.menuInset
+				item:SetPoint("TOPLEFT", m, -m - (i - 1) * S.CONTROL_H)
+				item:SetPoint("TOPRIGHT", -m, -m - (i - 1) * S.CONTROL_H)
 				S.Highlight(item)
 				item.text = S.Text(item, "small")
 				item.text:SetPoint("LEFT", 8, 0)
@@ -628,7 +630,7 @@ function S.Dropdown(parent, width, onSelect)
 			item:Show()
 		end
 		for i = #options + 1, #self.items do self.items[i]:Hide() end
-		menu:SetHeight(#options * S.CONTROL_H + 2)
+		menu:SetHeight(#options * S.CONTROL_H + 2 * S.metrics.menuInset)
 	end
 	b:SetScript("OnClick", function()
 		local open = menu:IsShown()

@@ -215,8 +215,8 @@ To keep layouts working in every skin, build windows with the skin-aware helpers
   a dialog or picker, or `"menu"` for a small list dropped from a control.
 - `S.metrics.edge`: how far in from a window's edges its content has to start (0 for Material, 18 for Cognac).
   Grow the window by twice this, so its content keeps the same size. `S.metrics.inset` is the padding inside a
-  popup, `S.metrics.navInset` how far in from a sidebar's sides its entries sit, and `S.metrics.wellInset` the
-  extra padding a well's frame needs.
+  popup, `S.metrics.navInset` how far in from a sidebar's sides its entries sit, `S.metrics.wellInset` the
+  extra padding a well's frame needs, and `S.metrics.menuInset` how far in from a menu's edges its rows sit.
 - `S.Well(frame)`: a sunken area holding text or a list, such as the surround of a multi-line text box.
 - `S.Sidebar(frame)`: a navigation sidebar's background and dividing edge.
 - `S.NavEntry(button, text)`: a sidebar entry with its label as `button.label`. `button:SetSelected(on)` repaints it.
