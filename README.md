@@ -21,7 +21,8 @@ runtime, so two addons using different versions never affect each other.
 - **Themes:** swap in your own accent or a whole Material 3 scheme with one call.
 - **Skins:** change how the controls are drawn, not just their colors. The flat Material skin is built in, and the
   optional Classic (the default UI's own look) and painted Cognac skins come in their own folders.
-- **Controls:** buttons in five kinds, checkboxes, dropdowns, and one-line or multi-line inputs with placeholders.
+- **Controls:** buttons in five kinds, checkboxes, sliders, dropdowns, and one-line or multi-line inputs with
+  placeholders.
 - **Dropdown Behavior:** menus and popups close on a click anywhere else, and inputs give up the keyboard the same
   way. Nothing grabs focus on its own.
 - **Fonts Without Shadows:** text uses the client's own fonts, read again when UI addons such as ElvUI restyle them.
@@ -241,7 +242,9 @@ just a `Skin.lua`.
 `S.RegisterSkin(key, def)` adds one. `def` has a `label`, an optional `credit`, an optional scheme as `roles`, and
 `colors(c)` to set colors apart from the scheme. Its `metrics` override `S.metrics`. Its drawing functions are
 `button(b)` and `paintButton(b, enabled)`, `frame(f, role)`, `well(f)`, `sidebar(side)`, `highlight(f)`, `navEntry(b)` and
-`paintNav(b, on)`, and `input(e, tall)` and `paintInput(e)`. `Skins/Cognac/Skin.lua` is a full example.
+`paintNav(b, on)`, and `input(e, tall)` and `paintInput(e)`. Optional ones fall back to Material's: `check(b)` and
+`paintCheck(b)`, `slider(s)` and `paintSlider(s)`, and `tab(b)` and `paintTab(b, on)`. `Skins/Cognac/Skin.lua` is a
+full example.
 
 Painted skins draw from an atlas. `tools/pack_art.py` packs the pieces named in a `pieces.json` from their source
 sheets into one power-of-two texture, trims their empty margins, and writes the `S.RegisterAtlas` call. The 3.3.5
@@ -302,6 +305,11 @@ Sizes are `small`, `normal`, `large`, `huge` and `edit`. `S.FONTS[size]` is the 
 - `S.AddArrow(button)`: adds a dropdown arrow and left-aligns the label, for buttons that open a list.
 - `S.Check(parent, size, onClick)`: a square checkbox with `SetChecked` and `SetEnabled`, `S.CHECK_H` (18) square
   unless `size` says otherwise. Set `tooltipText` for a tooltip.
+- `S.Slider(parent, width, min, max, step, onChange, format)`: a horizontal slider, `S.CONTROL_H` tall; click the
+  track or drag the handle. Its value shows to its right in `S.SLIDER_VALUE_W` (40) past `S.GAP`, written by
+  `format(value)`, so leave that room. `onChange(value, slider)` runs for the user's changes, snapped to a step;
+  `SetValue` sets it without calling `onChange`, and `GetValue` and `SetEnabled` go with it. Set `tooltipText` for
+  a tooltip. Classic draws the Interface Options slider; other skins without one get Material's track and handle.
 - `S.Dropdown(parent, width, onSelect)`: `SetOptions({ { value, text, tooltip } })`, then `SetText` for the shown
   choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others.
 - `S.Input(parent, name, width, placeholder, maxLetters, lines)`: an edit box with a placeholder. With `lines`

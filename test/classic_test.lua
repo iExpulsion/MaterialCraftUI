@@ -76,6 +76,18 @@ d:SetOptions({ { value = 1, text = "One" }, { value = 2, text = "Two" } })
 MOCK.check("dropdown menu", d.menu.backdrop.edgeFile:find("UI%-Tooltip%-Border") and d.items[1].point[2] == -4
 	and d.menu.height == 2 * S.CONTROL_H + 8)
 
+-- A slider is the Interface Options groove and knob, the knob desaturated when disabled.
+local sl = S.Slider(parent, 150, 0, 10, 1)
+MOCK.check("stock slider", sl.bar.backdrop.bgFile:find("UI%-SliderBar%-Background") and sl.bar.height == 17
+	and sl:GetThumbTexture().texture:find("UI%-SliderBar%-Button%-Horizontal") and sl.fill == nil)
+sl:SetEnabled(false)
+MOCK.check("disabled knob", sl:GetThumbTexture().desaturated == true)
+
+S.UseSkin("material")
+-- A skin without a slider gets Material's.
+S.RegisterSkin("bare2", { label = "Bare" })
+S.UseSkin("bare2")
+MOCK.check("fallback slider", S.Slider(parent, 100, 0, 1, 1).fill ~= nil)
 S.UseSkin("material")
 -- Material keeps its flat checkbox, and a skin without one gets it too, and Material's divider lines.
 MOCK.check("material checkbox", S.Check(parent, 14).fill ~= nil)

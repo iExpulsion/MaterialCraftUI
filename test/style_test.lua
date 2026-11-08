@@ -28,6 +28,31 @@ MOCK.check("dropdown pick", picked == 2)
 d:SetText("Two")
 MOCK.check("dropdown text", d.label.text == "Two")
 
+-- A slider starts at its minimum, shows its value to its right, and SetValue sets it quietly, on a step.
+local changes = {}
+local sl = S.Slider(parent, 160, 50, 200, 25, function(v) changes[#changes + 1] = v end,
+	function(v) return v .. "%" end)
+MOCK.check("slider starts at min", sl:GetValue() == 50 and sl.valueText.text == "50%" and #changes == 0)
+MOCK.check("slider value beside it", sl.valueText.point[1] == "LEFT" and sl.valueText.point[3] == "RIGHT"
+	and sl.valueText.point[4] == S.GAP)
+sl:SetValue(130)
+MOCK.check("slider set quietly on a step", sl:GetValue() == 125 and sl.valueText.text == "125%" and #changes == 0)
+-- Dragging (the client's own value change) snaps to a step and reports it once, clamped to the range.
+sl.scripts.OnValueChanged(sl, 161.2)
+sl.scripts.OnValueChanged(sl, 155)
+MOCK.check("slider drag snaps", sl:GetValue() == 150 and #changes == 1 and changes[1] == 150)
+sl.scripts.OnValueChanged(sl, 999)
+MOCK.check("slider clamps", sl:GetValue() == 200 and changes[2] == 200)
+-- Fractional steps come out clean.
+local fine = S.Slider(parent, 120, 0, 1, 0.05)
+fine.scripts.OnValueChanged(fine, 0.6000001)
+MOCK.check("fractional step", fine:GetValue() == 0.6 and fine.valueText.text == "0.6")
+-- Material draws a track, an accent fill up to the handle, and an accent handle that greys out when disabled.
+MOCK.check("slider look", sl.track ~= nil and sl.fill.point[2] == sl:GetThumbTexture()
+	and sl:GetThumbTexture().vertex[1] == S.colors.accent[1])
+sl:SetEnabled(false)
+MOCK.check("slider disabled", sl:GetThumbTexture().vertex[4] == S.colors.disabled[4] and sl.valueText.color[1] == S.colors.disabled[1])
+
 -- A tab in Material has the accent underline only while selected, and its label brightens.
 local tabB = S.Tab(CreateFrame("Button", nil, parent), "Actions")
 MOCK.check("tab unselected", not tabB.underline.shown and tabB.label.color[1] == S.colors.muted[1])

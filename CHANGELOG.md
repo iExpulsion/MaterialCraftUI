@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Sliders:** `S.Slider` is a horizontal slider that snaps to its steps and shows its value beside it, formatted
+  as you like. Material draws a thin track with an accent fill and handle, and Classic the Interface Options
+  slider; skins can draw their own with `slider` and `paintSlider`. The demo's Forms page shows two.
+
 ## 1.2.0
 
 - **Drag to Reorder:** `S.Reorder` lets the rows of any list be dragged into a new order, and `S.Table`'s

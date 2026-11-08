@@ -81,6 +81,22 @@ local function Stub()
 		elseif k == "GetVerticalScrollRange" then f = function(self) return self.scrollRange or 0 end
 		elseif k == "GetFrameLevel" then f = function() return 1 end
 		elseif k == "GetThumbTexture" then f = function(self) self.thumb = self.thumb or Stub() return self.thumb end
+		-- given a texture, the slider uses it; given a file, it makes its own texture of it
+		elseif k == "SetThumbTexture" then f = function(self, tex)
+			if type(tex) == "string" then
+				self.thumb = self.thumb or Stub()
+				self.thumb.texture = tex
+			else
+				self.thumb = tex
+			end
+		end
+		-- a slider clamps its value and fires OnValueChanged, as the client does, even when the value is set in code
+		elseif k == "SetMinMaxValues" then f = function(self, lo, hi) self.minValue, self.maxValue = lo, hi end
+		elseif k == "SetValue" then f = function(self, v)
+			self.rawValue = math.max(self.minValue or v, math.min(self.maxValue or v, v))
+			if self.scripts.OnValueChanged then self.scripts.OnValueChanged(self, self.rawValue) end
+		end
+		elseif k == "SetDesaturated" then f = function(self, on) self.desaturated = on end
 		elseif k == "Enable" then f = function(self) self.enabled = true end
 		elseif k == "Disable" then f = function(self) self.enabled = false end
 		elseif k == "IsEnabled" then f = function(self) return self.enabled ~= false and 1 or nil end

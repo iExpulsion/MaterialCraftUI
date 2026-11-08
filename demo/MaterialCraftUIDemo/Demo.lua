@@ -250,6 +250,17 @@ function PAGE.Forms(page)
 	checks[3]:SetPoint("LEFT", checks[1], "LEFT", 220, 0)
 	checks[4]:SetPoint("LEFT", checks[2], "LEFT", 220, 0)
 
+	local slidersLabel = label(page, "Sliders", checks[2])
+	local scale = S.Slider(page, 160, 50, 200, 5, function() setStatus("Unsaved Changes", S.colors.warn) end,
+		function(v) return v .. "%" end)
+	scale:SetValue(100)
+	scale.tooltipText = "Click the track or drag the handle; it moves in steps of 5."
+	scale:SetPoint("TOPLEFT", slidersLabel, "BOTTOMLEFT", 0, -6)
+	local locked = S.Slider(page, 160, 0, 1, 0.05, nil, function(v) return ("%d%%"):format(v * 100 + 0.5) end)
+	locked:SetValue(0.6)
+	locked:SetEnabled(false)
+	locked:SetPoint("LEFT", scale, "LEFT", 220, 0)
+
 	local save = S.Button(page, "Save", "primary", 90, function()
 		if (name:GetText() or "") == "" then
 			setStatus("Enter a Name First", S.colors.bad)
