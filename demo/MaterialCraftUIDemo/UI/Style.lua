@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.2.0. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.2.0-1-gcd94efc. Change it there, then run tools/sync_style.py.
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
 -- as NS.Style from its addon table; font objects are named after the addon, so copies never clash.
@@ -544,6 +544,80 @@ function S.Check(parent, size, onClick)
 	end)
 	paintCheck(b)
 	return b
+end
+
+-- a skin without its own slider draws Material's
+local function sliderSkin() return skin.slider and skin or skins.material end
+
+local function paintSlider(s)
+	sliderSkin().paintSlider(s)
+end
+
+-- the room a slider's value text takes to its right, past S.GAP
+S.SLIDER_VALUE_W = 40
+
+-- Horizontal slider from min to max in steps of step, `width` wide and S.CONTROL_H tall; click the track or drag
+-- the handle. Its value shows to its right (s.valueText, S.SLIDER_VALUE_W wide, S.GAP away), written by
+-- format(value) or as a number. onChange(value, s) runs for the user's changes only; s:SetValue(v) sets it quietly.
+-- s:SetEnabled(on) greys it out.
+function S.Slider(parent, width, min, max, step, onChange, format)
+	local s = CreateFrame("Slider", nil, parent)
+	s:SetOrientation("HORIZONTAL")
+	s:SetSize(width, S.CONTROL_H)
+	s:SetMinMaxValues(min, max)
+	s:SetValueStep(step)
+	s:EnableMouse(true)
+	s.min, s.max, s.step, s.usable = min, max, step, true
+	s.format = format or function(v) return tostring(v) end
+	s.valueText = S.Text(s, "small")
+	s.valueText:SetPoint("LEFT", s, "RIGHT", S.GAP, 0)
+	s.valueText:SetWidth(S.SLIDER_VALUE_W)
+	sliderSkin().slider(s)
+	-- the client's own value drifts off the steps while dragging: snap it, and drop float noise
+	local function snap(v)
+		local n = math.floor((v - min) / step + 0.5)
+		return tonumber(("%.4f"):format(math.max(min, math.min(max, min + n * step))))
+	end
+	local quiet = false
+	local setValue = s.SetValue
+	function s:SetValue(v)
+		self.value = snap(v)
+		quiet = true
+		setValue(self, self.value)
+		quiet = false
+		self.valueText:SetText(self.format(self.value))
+	end
+	function s:GetValue() return self.value end
+	function s:SetEnabled(on)
+		self.usable = on and true or false
+		self:EnableMouse(self.usable)
+		paintSlider(self)
+	end
+	s:SetScript("OnValueChanged", function(self, v)
+		local value = snap(v)
+		if not quiet and value ~= self.value then
+			self.value = value
+			self.valueText:SetText(self.format(value))
+			if onChange then onChange(value, self) end
+		end
+	end)
+	s:SetScript("OnEnter", function(self)
+		self.hovered = true
+		paintSlider(self)
+		if self.tooltipText then
+			GameTooltip:SetOwner(self, "ANCHOR_TOP")
+			GameTooltip:SetText(self.tooltipText, nil, nil, nil, nil, true)
+			GameTooltip:Show()
+		end
+	end)
+	s:SetScript("OnLeave", function(self)
+		self.hovered = false
+		paintSlider(self)
+		GameTooltip:Hide()
+	end)
+	s:SetValue(min)
+	paintSlider(s)
+	return s
 end
 
 local menus, inputs, dismissers = {}, {}, {}
@@ -1341,7 +1415,8 @@ function Table:Hide() self.frame:Hide() end
 -- sidebar(side), highlight(f), optionally tab(b) and paintTab(b, on) (falling back to Material's), navEntry(b) and
 -- paintNav(b, on), input(e, tall) and paintInput(e) (e.focused, e.hovered; a tall one draws on e.box), and
 -- optionally check(b) and
--- paintCheck(b) (b.on, b.usable, b.hovered); a skin without them gets Material's checkbox.
+-- paintCheck(b) (b.on, b.usable, b.hovered); a skin without them gets Material's checkbox. Likewise optionally
+-- slider(s) and paintSlider(s) (s.usable, s.hovered; the handle is s:GetThumbTexture()), else Material's slider.
 function S.RegisterSkin(key, def)
 	skins[key] = def
 end
@@ -1449,6 +1524,28 @@ S.RegisterSkin("material", {
 		if b.on then b.fill:Show() else b.fill:Hide() end
 		b.fill:SetAlpha(b.usable and 1 or 0.4)
 		b:SetBackdropBorderColor(unpack(b.hovered and b.usable and S.colors.accent or S.colors.outline))
+	end,
+	-- a thin track, the accent up to an accent bar handle, which brightens on hover
+	slider = function(s)
+		local thumb = s:CreateTexture(nil, "OVERLAY")
+		thumb:SetTexture(WHITE)
+		thumb:SetSize(6, 16)
+		s:SetThumbTexture(thumb)
+		s.track = S.Solid(s, "BACKGROUND", S.colors.border)
+		s.track:SetHeight(4)
+		s.track:SetPoint("LEFT")
+		s.track:SetPoint("RIGHT")
+		s.fill = S.Solid(s, "ARTWORK", S.colors.accent)
+		s.fill:SetHeight(4)
+		s.fill:SetPoint("LEFT")
+		s.fill:SetPoint("RIGHT", thumb, "CENTER")
+	end,
+	paintSlider = function(s)
+		local thumb = s:GetThumbTexture()
+		local c = not s.usable and S.colors.disabled or s.hovered and S.colors.accentHover or S.colors.accent
+		thumb:SetVertexColor(unpack(c))
+		s.fill:SetVertexColor(unpack(s.usable and S.colors.accent or S.colors.disabled))
+		s.valueText:SetTextColor(unpack(s.usable and S.colors.text or S.colors.disabled))
 	end,
 	-- the soft border at rest, the stronger outline on hover, the accent while focused
 	paintInput = function(e)
