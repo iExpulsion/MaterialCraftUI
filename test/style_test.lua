@@ -27,6 +27,15 @@ d.items[2].scripts.OnClick(d.items[2])
 MOCK.check("dropdown pick", picked == 2)
 d:SetText("Two")
 MOCK.check("dropdown text", d.label.text == "Two")
+-- Opened from a window scaled 1.5, the menu moves to UIParent at that scale, above dialogs: inside a scroll frame
+-- it would stay in the scroll frame's layer, under the controls after it
+local scaledParent = CreateFrame("Frame")
+scaledParent:SetScale(1.5)
+local inScroll = S.Dropdown(scaledParent, 120, function() end)
+inScroll:SetOptions({ { value = 1, text = "One" } })
+inScroll.scripts.OnClick(inScroll)
+MOCK.check("menu out on UIParent", inScroll.menu.parent == UIParent and inScroll.menu.shown
+	and math.abs(inScroll.menu:GetEffectiveScale() - 1.5) < 1e-9 and inScroll.menu.strata == "FULLSCREEN_DIALOG")
 
 -- A slider starts at its minimum, shows its value to its right, and SetValue sets it quietly, on a step.
 local changes = {}

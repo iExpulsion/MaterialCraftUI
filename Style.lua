@@ -761,7 +761,14 @@ function S.Dropdown(parent, width, onSelect)
 	b:SetScript("OnClick", function()
 		local open = menu:IsShown()
 		S.CloseMenus()
-		if not open then menu:Show() end
+		if not open then
+			-- opened on UIParent at the dropdown's scale: inside a scroll frame the menu would stay in the scroll
+			-- frame's layer, under the controls after it, and be clipped at its edge
+			menu:SetParent(UIParent)
+			menu:SetScale(b:GetEffectiveScale() / UIParent:GetEffectiveScale())
+			menu:SetFrameStrata("FULLSCREEN_DIALOG")
+			menu:Show()
+		end
 	end)
 	b:HookScript("OnHide", function() menu:Hide() end)
 	return b

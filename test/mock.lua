@@ -39,6 +39,8 @@ local function Stub()
 		end
 		elseif k == "GetScript" then f = function(self, s) return self.scripts[s] end
 		elseif k == "GetParent" then f = function(self) return self.parent end
+		elseif k == "SetParent" then f = function(self, p) self.parent = p end
+		elseif k == "SetFrameStrata" then f = function(self, s) self.strata = s end
 		elseif k == "SetAlpha" then f = function(self, a) self.alpha = a end
 		elseif k == "SetText" then f = function(self, v) self.text = v end
 		elseif k == "SetTextColor" then f = function(self, r, g, b) self.color = { r, g, b } end

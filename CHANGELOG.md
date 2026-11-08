@@ -5,6 +5,8 @@
 - **Sliders:** `S.Slider` is a horizontal slider that snaps to its steps and shows its value beside it, formatted
   as you like. Material draws a thin track with an accent fill and handle, and Classic the Interface Options
   slider; skins can draw their own with `slider` and `paintSlider`. The demo's Forms page shows two.
+- **Dropdowns in scroll frames:** a dropdown's menu now opens on UIParent at the dropdown's scale. Inside a scroll
+  frame it stayed in the scroll frame's layer, under the controls below it, and was cut off at the frame's edge.
 
 ## 1.2.0
 
