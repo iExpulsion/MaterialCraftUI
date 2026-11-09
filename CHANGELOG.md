@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.0
 
 - **Pickers:** `S.Picker` is a searchable, scrolling list that opens under a button like a dropdown, for choices
   too many for a dropdown's menu, and `S.PickerButton` is the dropdown-looking button that opens it. It filters as
