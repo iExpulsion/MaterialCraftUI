@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **Pickers:** `S.Picker` is a searchable, scrolling list that opens under a button like a dropdown, for choices
+  too many for a dropdown's menu, and `S.PickerButton` is the dropdown-looking button that opens it. It filters as
+  you type and can toggle several entries in multi mode. It started in Synastria Companion.
 - **Sliders:** `S.Slider` is a horizontal slider that snaps to its steps and shows its value beside it, formatted
   as you like. Material draws a thin track with an accent fill and handle, and Classic the Interface Options
   slider; skins can draw their own with `slider` and `paintSlider`. The demo's Forms page shows two.

@@ -1413,6 +1413,118 @@ end
 function Table:Show() self.frame:Show() end
 function Table:Hide() self.frame:Hide() end
 
+-------------------------------------------------------------------------------- picker
+
+-- A searchable, scrolling list that opens under a button, for choices too many for a dropdown: a search box over a
+-- plain S.Table in a menu frame. It closes like a dropdown menu. In multi mode clicking toggles entries and it
+-- stays open.
+local Picker = {}
+S.Picker = Picker
+local PICKER_W, PICKER_H = 300, 360
+local picker, pickerSpec
+
+local function pickerRefresh()
+	local q = picker.search:GetText() or ""
+	local items
+	if pickerSpec.search then
+		items = pickerSpec.search(q)
+	else
+		items = {}
+		local lower = q:lower()
+		for _, item in ipairs(pickerSpec.items or {}) do
+			if lower == "" or item.text:lower():find(lower, 1, true) then items[#items + 1] = item end
+		end
+	end
+	picker.list:SetItems(items, pickerSpec.emptyText or "Nothing Matches", picker.keepScroll)
+	picker.keepScroll = nil
+end
+
+-- The list and search keep their size in every skin; the menu grows around them by its border.
+local function pickerCreate()
+	local C = S.colors
+	local inset, innerW, innerH = S.metrics.menuInset + 4, PICKER_W - 2 * S.PAD, PICKER_H - 2 * S.PAD
+	picker = CreateFrame("Frame", ADDON .. "Picker", UIParent)
+	picker:SetSize(innerW + 2 * inset, innerH + 2 * inset)
+	picker:SetFrameStrata("FULLSCREEN_DIALOG")
+	picker:SetToplevel(true)
+	picker:EnableMouse(true)
+	S.Frame(picker, "menu")
+	tinsert(UISpecialFrames, ADDON .. "Picker")
+
+	picker.search = S.Input(picker, ADDON .. "PickerSearch", innerW, "Search", 60)
+	picker.search:SetPoint("TOPLEFT", inset, -inset)
+	picker.search:HookScript("OnTextChanged", function(_, user)
+		if user then pickerRefresh() end
+	end)
+
+	picker.list = Table.New(picker, nil, innerW, innerH - S.GAP - S.CONTROL_H, {
+		plain = true,
+		columns = { { key = "text", label = "", width = innerW, sortable = false } },
+		cell = function(item)
+			local on = pickerSpec.isSelected and pickerSpec.isSelected(item.value)
+			if pickerSpec.multi then return (on and "|cffffc400+|r  " or "    ") .. item.text, on and C.heading or C.text end
+			return item.text, on and C.heading or C.text
+		end,
+		icon = function(item) return item.icon end,
+		tooltip = function(tt, item)
+			if item.link then
+				tt:SetHyperlink(item.link)
+			elseif item.tooltip then
+				tt:SetText(item.text, 1, 1, 1)
+				tt:AddLine(item.tooltip, nil, nil, nil, true)
+			end
+		end,
+		onClick = function(item)
+			if not pickerSpec.multi then picker:Hide() end
+			if pickerSpec.onPick then pickerSpec.onPick(item.value) end
+			if pickerSpec.multi then
+				picker.keepScroll = true
+				pickerRefresh()
+			end
+		end,
+	})
+	picker.list.frame:SetPoint("TOPLEFT", picker.search, "BOTTOMLEFT", 0, -S.GAP)
+	picker:SetScript("OnHide", function() picker.search:ClearFocus() end)
+	S.TrackPopup(picker)
+end
+
+-- Opens under anchor, at its scale; opening it from the same button again closes it. spec: items = { { value,
+-- text, tooltip, icon, link } } or search(text) -> items, placeholder, multi, isSelected(value), onPick(value),
+-- emptyText.
+function Picker.Open(anchor, spec)
+	if not picker then pickerCreate() end
+	local open = picker:IsShown() and picker.owner == anchor
+	S.CloseMenus()
+	if not open then
+		pickerSpec = spec
+		picker.owner = anchor
+		picker:SetScale(anchor:GetEffectiveScale() / UIParent:GetEffectiveScale())
+		picker:ClearAllPoints()
+		picker:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -2)
+		picker.search:SetText("")
+		picker.search.placeholder:SetText(spec.placeholder or "Search")
+		picker.search:UpdatePlaceholder()
+		pickerRefresh()
+		picker:Show()
+	end
+end
+
+function Picker.Close()
+	if picker then picker:Hide() end
+end
+
+-- A dropdown-looking button that opens the picker: getSpec() returns the spec each time it opens, so the choices
+-- and the selection are current. b:SetText(text) shows the current choice.
+function S.PickerButton(parent, width, getSpec)
+	local b = S.AddArrow(S.Button(parent, "", "secondary", width))
+	function b:SetText(text) self.label:SetText(text) end
+	b:SetScript("OnClick", function(self) Picker.Open(self, getSpec()) end)
+	b:HookScript("OnHide", function(self)
+		if picker and picker.owner == self then picker:Hide() end
+	end)
+	return b
+end
+
 -- Skins: how the controls above are drawn. A skin can carry a scheme of its own (roles, as S.SetTheme takes them),
 -- set colors apart from the scheme (colors(c, M3), run after the scheme fills S.colors), and change S.metrics.
 -- label names it in a picker, credit says who made it. The drawing functions: button(b) and

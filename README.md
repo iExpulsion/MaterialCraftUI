@@ -311,7 +311,13 @@ Sizes are `small`, `normal`, `large`, `huge` and `edit`. `S.FONTS[size]` is the 
   `SetValue` sets it without calling `onChange`, and `GetValue` and `SetEnabled` go with it. Set `tooltipText` for
   a tooltip. Classic draws the Interface Options slider; other skins without one get Material's track and handle.
 - `S.Dropdown(parent, width, onSelect)`: `SetOptions({ { value, text, tooltip } })`, then `SetText` for the shown
-  choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others.
+  choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others. Its menu doesn't
+  scroll, so keep it to a dozen or so options and use a picker for more.
+- `S.PickerButton(parent, width, getSpec)`: a dropdown-looking button that opens `S.Picker` under it, a searchable,
+  scrolling list for long choices (zones, items). `getSpec()` returns the picker's spec each time it opens:
+  `items = { { value, text, tooltip, icon, link } }` (or `search(text)` returning items), `placeholder`,
+  `isSelected(value)`, `onPick(value)`, `emptyText`, and `multi` to toggle entries and stay open. `SetText` shows
+  the current choice. `S.Picker.Open(anchor, spec)` and `S.Picker.Close()` open one from any frame.
 - `S.Input(parent, name, width, placeholder, maxLetters, lines)`: an edit box with a placeholder. With `lines`
   above 1 it wraps across several lines, and `GetText` turns line breaks into spaces.
 
