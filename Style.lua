@@ -1103,11 +1103,17 @@ local function newRow(self, i)
 	row.headerText:SetPoint("RIGHT", -6 - BAR_SPACE, 0)
 	row.headerText:Hide()
 
+	-- the row's item, or nil for an empty row or a group heading, which get no tooltip and no clicks
+	local function itemOf(r)
+		local item = r.item
+		return item and not (self.header and self.header(item)) and item or nil
+	end
 	row:SetScript("OnEnter", function(r)
 		r.hoverTex:Show()
-		if r.item and self.tooltip then
+		local item = itemOf(r)
+		if item and self.tooltip then
 			GameTooltip:SetOwner(r, "ANCHOR_RIGHT")
-			self.tooltip(GameTooltip, r.item)
+			self.tooltip(GameTooltip, item)
 			GameTooltip:Show()
 		end
 	end)
@@ -1116,8 +1122,9 @@ local function newRow(self, i)
 		GameTooltip:Hide()
 	end)
 	row:SetScript("OnClick", function(r, button)
+		local item = itemOf(r)
 		-- the release that ends a drag isn't a click
-		if r.item and self.onClick and not (self.reorder and self.reorder:Busy()) then self.onClick(r.item, button) end
+		if item and self.onClick and not (self.reorder and self.reorder:Busy()) then self.onClick(item, button) end
 	end)
 	if self.reorder then
 		self.reorder:Attach(row, function(r) return r.item and self.cell(r.item, self.columns[1].key) end)

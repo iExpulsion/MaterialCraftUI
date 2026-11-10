@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Table group headers:** `S.Table`'s group header rows no longer call `tooltip` or `onClick`, which were handed
+  the header item as if it were a row's.
+
 ## 1.3.0
 
 - **Pickers:** `S.Picker` is a searchable, scrolling list that opens under a button like a dropdown, for choices

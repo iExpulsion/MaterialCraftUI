@@ -173,14 +173,24 @@ layer.scripts.OnHide(layer)
 MOCK.check("hiding cancels", moved == nil and not drag.reorder.from and not drag.reorder.ghost.shown)
 
 -- Group header rows don't drag.
+local tipped, clickedItem = {}, {}
 local grouped = S.Table.New(UIParent, nil, 300, 140, {
 	columns = { { key = "n", label = "Name", width = 100 } }, cell = cell,
 	header = function(item) return item.group end, onMove = function() end,
+	tooltip = function(_, item) tipped[#tipped + 1] = item end,
+	onClick = function(item) clickedItem[#clickedItem + 1] = item end,
 })
 grouped:SetItems({ { group = "Group" }, { n = "A" } })
 grouped.rows[1].scripts.OnDragStart(grouped.rows[1])
 MOCK.check("headers don't drag", grouped.reorder.from == nil and grouped.rows[2].moveIndex == 2)
 MOCK.mouseDown, MOCK.cursorY = false, nil
+-- Header rows get no tooltip and no clicks; item rows below them get both
+for i = 1, 2 do
+	grouped.rows[i].scripts.OnEnter(grouped.rows[i])
+	grouped.rows[i].scripts.OnClick(grouped.rows[i], "LeftButton")
+end
+MOCK.check("headers have no tooltip or click", #tipped == 1 and tipped[1].n == "A"
+	and #clickedItem == 1 and clickedItem[1].n == "A", #tipped .. "/" .. #clickedItem)
 
 -- A grip is two columns of three 2px dots in the muted color, and SetColor recolors every dot.
 local grip = S.Grip(UIParent)
