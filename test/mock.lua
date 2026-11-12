@@ -57,6 +57,7 @@ local function Stub()
 		elseif k == "SetScale" then f = function(self, s) self.scale = s end
 		elseif k == "GetScale" then f = function(self) return self.scale or 1 end
 		elseif k == "SetPoint" then f = function(self, ...) self.point = { ... } end
+		elseif k == "GetPoint" then f = function(self) return unpack(self.point or {}) end
 		elseif k == "SetSize" then f = function(self, w, h) self.width, self.height = w, h end
 		elseif k == "SetWidth" then f = function(self, w) self.width = w end
 		elseif k == "SetHeight" then f = function(self, h) self.height = h end

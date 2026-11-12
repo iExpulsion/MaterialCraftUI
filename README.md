@@ -185,7 +185,7 @@ larger or smaller. `S.PixelScale(frame, false)` turns the snapping off.
 - `S.SetWindowScale(scale)`: sizes every window given `S.PixelScale` up or down from its designed size (1), for
   players who want bigger text on a large screen. Save the player's choice and set it before building windows. A
   snapped window snaps again only when a whole number of pixels per unit is within 5% of the size asked for, so
-  most sizes are exact and borders may blur slightly. Each window keeps its top left corner where it is; popups and
+  most sizes are exact and borders may blur slightly. Each window keeps the point it's anchored by where it is (one pinned by its top right corner grows to the left); popups and
   menus follow the scale of the button they open from.
 
 - `S.PlaceWindow(frame)`: puts a window at the default spot, centered across the screen with its top

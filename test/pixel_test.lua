@@ -76,12 +76,25 @@ MOCK.check("window scale near a multiple", near(sized:GetEffectiveScale() * 1440
 local loose = S.PixelScale(CreateFrame("Frame", nil, UIParent), false)
 S.SetWindowScale(1.3)
 MOCK.check("window scale without snapping", near(loose:GetScale(), 1.3))
--- Changing it keeps a window's top left corner on the same spot of the screen.
+-- Changing it keeps a window's top left corner on the same spot of the screen (a 100 x 50 window at 200, 600).
 loose.GetLeft = function(self) return 200 / self.scale end
 loose.GetTop = function(self) return 600 / self.scale end
+loose.GetRight = function(self) return 200 / self.scale + 100 end
+loose.GetBottom = function(self) return 600 / self.scale - 50 end
+loose:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", 200 / loose.scale, 600 / loose.scale)
 S.SetWindowScale(1.6)
 MOCK.check("window scale keeps the spot", loose.point[1] == "TOPLEFT"
 	and near(loose.point[4] * loose:GetEffectiveScale(), 200) and near(loose.point[5] * loose:GetEffectiveScale(), 600))
+-- A window pinned by its top right corner keeps that corner instead, so it grows to the left.
+local pinned = S.PixelScale(CreateFrame("Frame", nil, UIParent), false)
+pinned.GetLeft = function(self) return 1000 / self:GetEffectiveScale() - 100 end
+pinned.GetRight = function(self) return 1000 / self:GetEffectiveScale() end
+pinned.GetTop = function(self) return 700 / self:GetEffectiveScale() end
+pinned.GetBottom = function(self) return 700 / self:GetEffectiveScale() - 50 end
+pinned:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -80, -60)
+S.SetWindowScale(1.2)
+MOCK.check("window scale keeps the anchor corner", pinned.point[1] == "TOPRIGHT" and pinned.point[3] == "BOTTOMLEFT"
+	and near(pinned.point[4] * pinned:GetEffectiveScale(), 1000) and near(pinned.point[5] * pinned:GetEffectiveScale(), 700))
 S.SetWindowScale(1)
 MOCK.check("window scale back to 1", near(loose:GetScale(), 1) and near(sized:GetEffectiveScale() * 1440 / 768, 2))
 MOCK.resolution = "1920x1080"

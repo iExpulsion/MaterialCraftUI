@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Window Scale Anchors:** `S.SetWindowScale` keeps each window's own anchor point in place, so a window pinned by
+  its top right corner, such as a tracker, grows to the left instead of drifting sideways each time the size changes.
+
 ## 1.4.0
 
 - **Window Scale:** `S.SetWindowScale` makes every window given `S.PixelScale` bigger or smaller than its designed
