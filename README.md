@@ -180,7 +180,13 @@ its neighbor. Give each top-level window, dialog and popup `S.PixelScale(frame)`
 units is a whole number of screen pixels, the number nearest to the UI scale, and keeps it so when the UI scale or
 the screen size changes. Every whole-unit position and size inside it then lands on real pixels. At a UI scale
 that's already pixel-perfect (0.71 at 1080p, say) nothing changes size; at others the window comes out a little
-larger or smaller. `S.PixelScale(frame, false)` turns it off.
+larger or smaller. `S.PixelScale(frame, false)` turns the snapping off.
+
+- `S.SetWindowScale(scale)`: sizes every window given `S.PixelScale` up or down from its designed size (1), for
+  players who want bigger text on a large screen. Save the player's choice and set it before building windows. A
+  snapped window snaps again only when a whole number of pixels per unit is within 5% of the size asked for, so
+  most sizes are exact and borders may blur slightly. Each window keeps its top left corner where it is; popups and
+  menus follow the scale of the button they open from.
 
 - `S.PlaceWindow(frame)`: puts a window at the default spot, centered across the screen with its top
   `S.WINDOW_TOP` (128) units below the screen's top, so windows of different heights and different addons line up.

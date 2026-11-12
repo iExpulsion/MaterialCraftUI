@@ -191,12 +191,25 @@ function S.Snap(region, v)
 	return math.floor(v / p + 0.5) * p
 end
 
+-- frame -> true when it snaps to whole pixels, false when it only takes the window scale
 local pixelFrames = {}
 
-local function applyPixelScale(frame)
-	local parent = frame:GetParent() or UIParent
-	local perUnit = parent:GetEffectiveScale() * screenHeight() / 768
-	frame:SetScale(math.max(1, math.floor(perUnit + 0.5)) / perUnit)
+-- The player's size for this addon's windows (S.SetWindowScale), on top of the UI scale and pixel snapping.
+S.windowScale = 1
+-- A scaled pixel-snapped window snaps again only when a whole number of pixels per unit is this close to the size
+-- asked for; otherwise it takes the exact size and its borders may blur.
+local SNAP_SLACK = 0.05
+
+local function applyScale(frame)
+	local scale = S.windowScale
+	if pixelFrames[frame] then
+		local parent = frame:GetParent() or UIParent
+		local perUnit = parent:GetEffectiveScale() * screenHeight() / 768
+		local want = math.max(1, math.floor(perUnit + 0.5)) * S.windowScale
+		local whole = math.max(1, math.floor(want + 0.5))
+		scale = (math.abs(whole / want - 1) <= SNAP_SLACK and whole or want) / perUnit
+	end
+	frame:SetScale(scale)
 end
 
 -- Moves a frame so its top left corner sits on a screen pixel, anchored to UIParent's bottom left. Run it after
@@ -220,21 +233,38 @@ function S.PlaceWindow(frame)
 	frame:SetPoint("TOP", UIParent, "TOP", 0, -S.WINDOW_TOP * UIParent:GetEffectiveScale() / frame:GetEffectiveScale())
 end
 
--- Scales a top-level window so its units are whole screen pixels (on = false puts its scale back to 1), and keeps
--- it so when the UI scale or the screen size changes.
+-- Scales a top-level window so its units are whole screen pixels, and keeps it so when the UI scale or the screen
+-- size changes. Either way it takes S.windowScale; on = false leaves out the snapping.
 function S.PixelScale(frame, on)
-	pixelFrames[frame] = on ~= false or nil
-	if on == false then frame:SetScale(1) else applyPixelScale(frame) end
+	pixelFrames[frame] = on ~= false
+	applyScale(frame)
 	return frame
+end
+
+-- Sets the size of every window given S.PixelScale, from 1 (their designed size). Each keeps its top left corner
+-- where it is on the screen.
+function S.SetWindowScale(scale)
+	S.windowScale = scale
+	for frame, snap in pairs(pixelFrames) do
+		local left, top = frame:GetLeft(), frame:GetTop()
+		local before = frame:GetEffectiveScale()
+		applyScale(frame)
+		if left and top then
+			local ratio = before / frame:GetEffectiveScale()
+			frame:ClearAllPoints()
+			frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left * ratio, top * ratio)
+			if snap then S.SnapPosition(frame) end
+		end
+	end
 end
 
 local pixelWatch = CreateFrame("Frame")
 pixelWatch:RegisterEvent("UI_SCALE_CHANGED")
 pixelWatch:RegisterEvent("DISPLAY_SIZE_CHANGED")
 pixelWatch:SetScript("OnEvent", function()
-	for frame in pairs(pixelFrames) do
-		applyPixelScale(frame)
-		S.SnapPosition(frame)
+	for frame, snap in pairs(pixelFrames) do
+		applyScale(frame)
+		if snap then S.SnapPosition(frame) end
 	end
 end)
 

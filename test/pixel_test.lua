@@ -57,3 +57,31 @@ MOCK.check("place window", placed.point[1] == "TOP" and placed.point[3] == "TOP"
 S.PixelScale(placed)
 S.PlaceWindow(placed)
 MOCK.check("place a scaled window", near(placed.point[5] * placed:GetEffectiveScale(), -128))
+
+-- The window scale multiplies the snapped size: at 1080p and a UI scale of 1 a window is 1 pixel per unit, and
+-- 1.5 makes it 1.5 exactly, since no whole number is near.
+local sized = S.PixelScale(CreateFrame("Frame", nil, UIParent))
+S.SetWindowScale(1.5)
+MOCK.check("window scale", near(sized:GetEffectiveScale() * 1080 / 768, 1.5))
+-- At 2 pixels per unit (1440p), 1.5 is exactly 3 whole pixels, and 1.25 (2.5) stays exact.
+MOCK.resolution = "2560x1440"
+MOCK.Fire("UI_SCALE_CHANGED")
+MOCK.check("window scale snaps to a whole multiple", near(sized:GetEffectiveScale() * 1440 / 768, 3))
+S.SetWindowScale(1.25)
+MOCK.check("window scale between multiples", near(sized:GetEffectiveScale() * 1440 / 768, 2.5))
+-- Within 5% of a whole number of pixels it snaps to it: 2 x 1.02 is 2.04, so 2.
+S.SetWindowScale(1.02)
+MOCK.check("window scale near a multiple", near(sized:GetEffectiveScale() * 1440 / 768, 2))
+-- A window without snapping takes the window scale as it is.
+local loose = S.PixelScale(CreateFrame("Frame", nil, UIParent), false)
+S.SetWindowScale(1.3)
+MOCK.check("window scale without snapping", near(loose:GetScale(), 1.3))
+-- Changing it keeps a window's top left corner on the same spot of the screen.
+loose.GetLeft = function(self) return 200 / self.scale end
+loose.GetTop = function(self) return 600 / self.scale end
+S.SetWindowScale(1.6)
+MOCK.check("window scale keeps the spot", loose.point[1] == "TOPLEFT"
+	and near(loose.point[4] * loose:GetEffectiveScale(), 200) and near(loose.point[5] * loose:GetEffectiveScale(), 600))
+S.SetWindowScale(1)
+MOCK.check("window scale back to 1", near(loose:GetScale(), 1) and near(sized:GetEffectiveScale() * 1440 / 768, 2))
+MOCK.resolution = "1920x1080"
