@@ -4,7 +4,7 @@
 
 - **Window Scale:** `S.SetWindowScale` makes every window given `S.PixelScale` bigger or smaller than its designed
   size, for large screens and players who want bigger text. Windows keep their spot on the screen as they resize.
-- **Table group headers:** `S.Table`'s group header rows no longer call `tooltip` or `onClick`, which were handed
+- **Table Group Headers:** `S.Table`'s group header rows no longer call `tooltip` or `onClick`, which were handed
   the header item as if it were a row's.
 
 ## 1.3.0
