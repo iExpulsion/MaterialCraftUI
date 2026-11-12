@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.0
 
 - **Window Scale:** `S.SetWindowScale` makes every window given `S.PixelScale` bigger or smaller than its designed
   size, for large screens and players who want bigger text. Windows keep their spot on the screen as they resize.
