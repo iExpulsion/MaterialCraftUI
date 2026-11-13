@@ -324,6 +324,10 @@ Sizes are `small`, `normal`, `large`, `huge` and `edit`. `S.FONTS[size]` is the 
   `items = { { value, text, tooltip, icon, link } }` (or `search(text)` returning items), `placeholder`,
   `isSelected(value)`, `onPick(value)`, `emptyText`, and `multi` to toggle entries and stay open. `SetText` shows
   the current choice. `S.Picker.Open(anchor, spec)` and `S.Picker.Close()` open one from any frame.
+- `S.ContextMenu()`: a right-click menu one view's rows share. `menu:Open(owner, options, side)` shows it beside
+  `owner`, the clicked row (on its right for side `"RIGHT"`, else its left), with
+  `options = { { text, action, disabled, danger, tooltip } }`; picking one closes the menu and runs `action`, and
+  `danger` draws it in the error color. It closes like a dropdown's menu, and opening it closes the others.
 - `S.Input(parent, name, width, placeholder, maxLetters, lines)`: an edit box with a placeholder. With `lines`
   above 1 it wraps across several lines, and `GetText` turns line breaks into spaces.
 
@@ -336,8 +340,9 @@ items, in an `S.Well`, with sortable column headers, a thin scroll bar and the m
   least as wide as its header needs, and the one marked `stretch` (else the first, usually the primary one) takes the rest.
 - `opts.cell(item, key)` returns a cell's text and color. `opts.rowH` sets the row height (20), and `opts.icons`
   with `opts.icon(item)` puts an icon in the first column.
-- `opts.tooltip(tooltip, item)`, `opts.onClick(item, button)`, `opts.isSelected(item)`, `opts.onSort(key, desc)`,
-  and `opts.header(item)` for group header rows.
+- `opts.tooltip(tooltip, item)`, `opts.onClick(item, button, row)` (`row` is the clicked row, to open an
+  `S.ContextMenu` beside), `opts.isSelected(item)`, `opts.onSort(key, desc)`, and `opts.header(item)` for group
+  header rows.
 - `opts.plain`: a bare list, with no well frame and no column headers, for a list inside a menu or popup that
   already has a frame of its own.
 - `opts.onMove(from, to)`: rows can be dragged to reorder, through `S.Reorder` below. `from` and `to` are item

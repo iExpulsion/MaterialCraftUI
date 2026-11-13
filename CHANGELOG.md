@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Context Menus:** `S.ContextMenu` is a right-click menu for a list's rows: options with an action each, which can
+  be disabled or drawn as dangerous, opened beside the clicked row on either side. It closes like a dropdown's menu.
+  It started as QuestGPS's tracker menu.
+- **Table Clicks:** `S.Table`'s `onClick` also gets the clicked row, to open a context menu beside it.
+
 ## 1.4.1
 
 - **Window Scale Anchors:** `S.SetWindowScale` keeps each window's own anchor point in place, so a window pinned by
