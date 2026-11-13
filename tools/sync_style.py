@@ -28,7 +28,8 @@ def stamp_for(path):
 def copy_lua(src, dest, stamp):
     with open(src, encoding='utf8', newline='') as f:
         body = f.read()
-    header = f'-- Vendored from MaterialCraftUI {stamp}. Change it there, then run tools/sync_style.py.\n'
+    header = (f'-- Vendored from MaterialCraftUI {stamp}. Change it there, then run tools/sync_style.py.\n'
+              '-- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI\n')
     with open(dest, 'w', encoding='utf8', newline='\n') as f:
         f.write(header + body)
 
