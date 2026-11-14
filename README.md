@@ -20,7 +20,8 @@ runtime, so two addons using different versions never affect each other.
 - **Color Roles:** window, panel and well surfaces, borders, an accent, text, and good, warning and bad colors.
 - **Themes:** swap in your own accent or a whole Material 3 scheme with one call.
 - **Skins:** change how the controls are drawn, not just their colors. The flat Material skin is built in, and the
-  optional Classic (the default UI's own look) and painted Cognac skins come in their own folders.
+  optional Classic (the default UI's own look), painted Cognac and see-through Material Glass skins come in their
+  own folders.
 - **Controls:** buttons in five kinds, checkboxes, sliders, dropdowns, and one-line or multi-line inputs with
   placeholders.
 - **Dropdown Behavior:** menus and popups close on a click anywhere else, and inputs give up the keyboard the same
@@ -111,13 +112,14 @@ f:SetScript("OnHide", S.Dismiss)
 
 `demo/MaterialCraftUIDemo` is a small addon that shows every control in one window: each button kind and its
 disabled look, a segmented button, a popup, inputs, dropdowns, checkboxes, every color role and a scrolling list.
-A dropdown in its title bar switches between a few themes and the Cognac and Classic skins. Copy the folder into
+A dropdown in its title bar switches between a few themes and the Cognac, Classic and Material Glass skins. Copy
+the folder into
 `Interface\AddOns` and type `/mcui` in game.
 
 Its `UI/Style.lua` and `UI/Skins` are synced copies like any addon's. After changing the kit, refresh them with:
 
 ```bash
-py -I -X utf8 tools/sync_style.py demo MaterialCraftUIDemo Cognac Classic
+py -I -X utf8 tools/sync_style.py demo MaterialCraftUIDemo Cognac Classic MaterialGlass
 ```
 
 ## Reference
@@ -207,6 +209,7 @@ UI\Style.lua
 UI\Skins\Cognac\Atlas.lua
 UI\Skins\Cognac\Skin.lua
 UI\Skins\Classic\Skin.lua
+UI\Skins\MaterialGlass\Skin.lua
 ```
 
 Pick one with `S.UseSkin(key, roles)` before building any frames. A skin with a scheme of its own ignores
@@ -242,6 +245,16 @@ and lists, and the quest log's row highlight. It's drawn entirely from textures 
 just a `Skin.lua`.
 
 **Cognac** is painted gold frames, plates and chips on dark glass.
+
+**Material Glass** is Material's controls on see-through glass: windows are a translucent pane with a fine grain,
+a soft sheen and a lit top edge, buttons are faint fills with the same edge, and lists, inputs and menus stay
+nearly solid so their text reads over anything. It uses your scheme, like Material, so pass your `roles`. The
+client can't blur what's behind a window, so the grain stands in for frosting. Its folder holds a `Skin.lua` and
+the grain texture, which `tools/make_grain.py` draws:
+
+```bash
+py -I -X utf8 tools/make_grain.py
+```
 
 #### Making a Skin
 

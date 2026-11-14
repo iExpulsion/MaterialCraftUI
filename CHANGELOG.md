@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Material Glass Skin:** Material's controls on see-through glass. Windows are a translucent pane with a fine
+  grain, a soft sheen and a lit top edge; buttons are faint fills with the same edge; lists, inputs and menus stay
+  nearly solid so their text reads over anything. It takes your scheme like Material does. The demo's theme
+  dropdown has it.
+
 - **Context Menus:** `S.ContextMenu` is a right-click menu for a list's rows: options with an action each, which can
   be disabled or drawn as dangerous, opened beside the clicked row on either side. It closes like a dropdown's menu.
   It started as QuestGPS's tracker menu.

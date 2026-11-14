@@ -1,9 +1,10 @@
 -- The demo addon: it loads on the kit, opens with /mcui, builds every page, and rebuilds itself for each theme,
--- the Cognac skin included.
+-- the Cognac, Classic and Material Glass skins included.
 local S = NS.Style
 LOAD("Skins/Cognac/Atlas.lua")
 LOAD("Skins/Cognac/Skin.lua")
 LOAD("Skins/Classic/Skin.lua")
+LOAD("Skins/MaterialGlass/Skin.lua")
 
 local file = io.open(ROOT .. "/demo/MaterialCraftUIDemo/Demo.lua", "r")
 local src = file:read("*a")
@@ -38,6 +39,10 @@ MOCK.check("cognac rebuilds", S.Skin() == "cognac" and cognac:IsShown() and cogn
 -- The Classic entry rebuilds it in the stock look, larger by its dialog border.
 NS.Demo.setTheme(7)
 MOCK.check("classic rebuilds", S.Skin() == "classic" and NS.Demo.window().width == 680 + 24)
+-- The Material Glass entry rebuilds it on glass with the amber accent, at Material's size.
+NS.Demo.setTheme(8)
+MOCK.check("glass rebuilds", S.Skin() == "materialglass" and NS.Demo.window().width == 680
+	and math.abs(S.colors.accent[1] - 1) < 0.001 and NS.Demo.window().grain ~= nil)
 -- Back to a Material theme after it.
 NS.Demo.setTheme(1)
 MOCK.check("material again", S.Skin() == "material" and NS.Demo.window().width == 680)
