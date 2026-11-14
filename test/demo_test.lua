@@ -1,6 +1,6 @@
 -- The demo addon: it loads on the kit, opens with /mcui, builds every page, and rebuilds itself for each theme,
--- the Cognac, Classic and Material Glass skins included; and the Layout page's tabs, reorder list and pickers, and
--- the Items table's right-click menu, work.
+-- the Cognac, Classic and Material Glass skins included; and the Layout page's tabs, reorder list and pickers, the
+-- Text page's dialog that grows with its text, and the Items table's right-click menu, work.
 local S = NS.Style
 LOAD("Skins/Cognac/Atlas.lua")
 LOAD("Skins/Cognac/Skin.lua")
@@ -77,6 +77,39 @@ options[4].action()
 MOCK.check("hide item", #list.items == 28 and list.items[1] ~= topItem and not parts.rowMenu(list.items[1])[3].disabled)
 parts.rowMenu(list.items[1])[3].action()
 MOCK.check("show hidden", #list.items == 29 and list.items[1] == topItem)
+
+-- The Text page's dialog: longer text wraps to more lines, pushing the buttons down and growing the dialog; shorter
+-- text shrinks it again. The mock measures each line of text as 14 tall.
+local function linesOf(fs)
+	fs.GetStringHeight = function(self) return 14 * math.ceil(#(self.text or "") / 60) end
+end
+parts.openDialog.scripts.OnClick(parts.openDialog)
+local dialog = parts.dialog
+linesOf(dialog.sub)
+linesOf(dialog.body)
+dialog.relayout()
+local medium = dialog.height
+local buttonsAt = dialog.stack.rows[4].region.point[5]
+MOCK.check("dialog open", dialog:IsShown() and dialog.sub.text ~= nil and medium > 0)
+local function click(label)
+	for _, child in ipairs(MOCK.created) do
+		if child.label and child.label.text == label and child.parent and child.parent.parent == dialog then
+			child.scripts.OnClick(child)
+			return
+		end
+	end
+end
+click("Longer")
+MOCK.check("longer grows", dialog.height > medium and dialog.stack.rows[4].region.point[5] < buttonsAt)
+click("Shorter")
+click("Shorter")
+MOCK.check("shorter shrinks", dialog.height < medium and NS.Demo.state.length == 1)
+-- under Cognac the dialog is larger by its frame and its text keeps the same width
+NS.Demo.setTheme(6)
+MOCK.check("theme change drops the dialog", parts.dialog == nil and not dialog:IsShown())
+parts.openDialog.scripts.OnClick(parts.openDialog)
+MOCK.check("cognac dialog", parts.dialog.width == 360 + 2 * (S.metrics.inset - S.PAD) and parts.dialog.sub.width == 360 - 2 * S.PAD
+	and parts.dialog.sub.point[4] == S.metrics.inset)
 
 -- Back to a Material theme after it.
 NS.Demo.setTheme(1)

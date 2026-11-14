@@ -22,7 +22,7 @@ local THEMES = {
 }
 
 local NAV = {
-	{ "Controls", { "Buttons", "Forms", "Layout" } },
+	{ "Controls", { "Buttons", "Forms", "Layout", "Text" } },
 	{ "Theme", { "Colors" } },
 	{ "Data", { "Items" } },
 }
@@ -81,8 +81,20 @@ local TAB_H = 28
 local SLOTS = { "Head", "Neck", "Shoulder", "Back", "Hands", "Feet", "Finger", "One-Hand", "Two-Hand", "Off Hand",
 	"Ranged", "Relic", "Bag" }
 
+-- the Text page's dialog, from one line to several
+local LENGTHS = {
+	{ "Saved for every character.", "Pick one to load it." },
+	{ "Saved for every character. Load one into this build, or save this tab as a new one.",
+		"Templates hold the whole tab for every class, so a two-class build saves both at once." },
+	{ "Saved for every character, whatever their class. Load one into this build, or save this tab as a new one to "
+		.. "try it out on another build later.", "Templates hold the whole tab for every class, like an export, so a "
+		.. "two-class build saves both at once; loading one replaces only its classes' part, and the other class stays "
+		.. "as it was. A bigger font or a skin with a thicker frame wraps it sooner, and the dialog grows to fit." },
+}
+local DIALOG_W = 360
+
 local state = { theme = 1, page = "Buttons", size = 2, priorities = { "Interrupt", "Defensive Cooldown", "Burst",
-	"Filler" }, hidden = {}, slots = {} }
+	"Filler" }, hidden = {}, slots = {}, length = 2 }
 local window
 local PAGE = {}
 -- pieces the pages built, for the tests
@@ -462,6 +474,72 @@ function PAGE.Colors(page)
 	end
 end
 
+-- A popup laid out with S.Stack: title, a wrapped subtitle and body, then its buttons. Every row sits under the one
+-- before, so longer text pushes the buttons down and the dialog grows to fit, inside whatever frame the skin draws.
+local function textDialog()
+	local C = S.colors
+	-- the theme's dialog padding; the dialog grows by the difference from the kit's, so its contents keep their width
+	local grow = 2 * (S.metrics.inset - S.PAD)
+	local d = CreateFrame("Frame", "MaterialCraftUIDemoTextDialog", UIParent)
+	d:SetWidth(DIALOG_W + grow)
+	d:SetPoint("CENTER")
+	d:SetFrameStrata("DIALOG")
+	d:EnableMouse(true)
+	S.PixelScale(d)
+	S.Frame(d, "popup")
+	tinsert(UISpecialFrames, "MaterialCraftUIDemoTextDialog")
+
+	local stack = S.Stack(d, { width = DIALOG_W - 2 * S.PAD })
+	d.title = stack:Add(S.Text(d, "large"))
+	d.title:SetHeight(16)
+	d.title:SetText("Templates")
+	d.sub = stack:Add(S.Wrapped(d, "small", C.muted), { gap = 4 })
+	d.body = stack:Add(S.Wrapped(d, "normal"), { gap = S.PAD })
+	local buttons = CreateFrame("Frame", nil, d)
+	buttons:SetHeight(S.CONTROL_H)
+	buttons:Show()
+	stack:Add(buttons, { gap = S.PAD, fill = true })
+	local function relayout()
+		local texts = LENGTHS[state.length]
+		d.sub:SetText(texts[1])
+		d.body:SetText(texts[2])
+		d:SetHeight(stack:Layout() + S.metrics.inset)
+	end
+	local shorter = S.Button(buttons, "Shorter", "secondary", 80, function()
+		state.length = math.max(1, state.length - 1)
+		relayout()
+	end, "Less text: the dialog shrinks.")
+	shorter:SetPoint("LEFT")
+	local longer = S.Button(buttons, "Longer", "secondary", 80, function()
+		state.length = math.min(#LENGTHS, state.length + 1)
+		relayout()
+	end, "More text: it wraps, and the buttons move down.")
+	longer:SetPoint("LEFT", shorter, "RIGHT", S.GAP, 0)
+	local close = S.Button(buttons, "Close", "primary", 80, function() d:Hide() end)
+	close:SetPoint("RIGHT")
+	d.relayout, d.stack = relayout, stack
+	relayout()
+	return d
+end
+
+function PAGE.Text(page)
+	local top = heading(page, "Text", "S.Wrapped is text that wraps to its width and measures its lines, and S.Stack "
+		.. "places rows top to bottom, each under the one before. Together a dialog fits its text in any skin or font.")
+	local open = S.Button(page, "Open Dialog", "primary", 110, function()
+		parts.dialog = parts.dialog or textDialog()
+		parts.dialog.relayout()
+		parts.dialog:Show()
+		parts.dialog:Raise()
+	end, "A dialog laid out with S.Stack. Its Longer and Shorter buttons change how much text it holds.")
+	open:SetPoint("TOPLEFT", top, "BOTTOMLEFT", 0, -14)
+	local hint = S.Wrapped(page, "small", S.colors.muted)
+	hint:SetPoint("TOPLEFT", open, "BOTTOMLEFT", 0, -S.GAP)
+	hint:SetWidth(CONTENT_W - 2 * S.PAD)
+	hint:SetText("Try it under each theme and at each window size: Cognac's thicker frame and a bigger font both wrap "
+		.. "the text sooner, and nothing should spill past the dialog's edge or overlap its buttons.")
+	parts.openDialog = open
+end
+
 function PAGE.Items(page)
 	local top = heading(page, "Items", "An S.Table: sortable columns, a thin scroll bar and the mouse wheel. Rows show "
 		.. "hover and selection, the search box filters by name, and right-clicking a row opens its menu.")
@@ -672,6 +750,9 @@ end
 setTheme = function(index)
 	state.theme = index
 	window:Hide()
+	-- the dialog is drawn by the skin it was made under, so the next one is made under the new skin
+	if parts.dialog then parts.dialog:Hide() end
+	parts.dialog = nil
 	S.UseSkin(THEMES[index].skin or "material", THEMES[index].roles)
 	window = build()
 	window:Show()

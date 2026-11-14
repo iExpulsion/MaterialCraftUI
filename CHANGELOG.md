@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **Wrapped Text:** `S.Wrapped` is text that wraps to its width, inside long words too, and measures how tall its
+  lines are.
+- **Stacks:** `S.Stack` places rows top to bottom, each under the one before, so text that wraps to more lines
+  pushes everything under it down, and returns where the column ends so a dialog can size itself to fit. It starts
+  inside the skin's inset, so a skin with a thicker frame gets a narrower column instead of text past its edge.
+- **Demo:** a Text page whose dialog grows and shrinks with its text.
+
 ## 1.5.0
 
 - **Material Glass Skin:** Material's controls on see-through glass. Windows are a translucent pane with a faint

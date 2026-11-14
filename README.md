@@ -24,6 +24,7 @@ runtime, so two addons using different versions never affect each other.
   own folders.
 - **Controls:** buttons in five kinds, checkboxes, sliders, dropdowns, and one-line or multi-line inputs with
   placeholders.
+- **Text That Fits:** wrapped text and stacked rows, so dialogs grow with their text in any skin or font.
 - **Dropdown Behavior:** menus and popups close on a click anywhere else, and inputs give up the keyboard the same
   way. Nothing grabs focus on its own.
 - **Fonts Without Shadows:** text uses the client's own fonts, read again when UI addons such as ElvUI restyle them.
@@ -112,8 +113,8 @@ f:SetScript("OnHide", S.Dismiss)
 
 `demo/MaterialCraftUIDemo` is a small addon that shows every control in one window: each button kind and its
 disabled look, a segmented button, a popup, inputs, dropdowns, checkboxes, sliders, a tab bar, a list dragged
-into order, single and multi pickers, split panes, every color role, and a scrolling table with a right-click
-menu. Dropdowns in its title bar switch between a few themes and the Cognac, Classic and Material Glass skins, and
+into order, single and multi pickers, split panes, a dialog that grows with its text, every color role, and a
+scrolling table with a right-click menu. Dropdowns in its title bar switch between a few themes and the Cognac, Classic and Material Glass skins, and
 set the window size. Copy the folder into
 `Interface\AddOns` and type `/mcui` in game.
 
@@ -309,12 +310,39 @@ a piece as a nine-slice: its corners keep their shape, its edges stretch only al
 ### Text
 
 - `S.Text(parent, size, color, layer)`: a left-aligned font string.
+- `S.Wrapped(parent, size, color, layer)`: text that wraps to its width, inside long words too, and is as tall as
+  its lines. `:Measure()` gives that height once it has a width; an `S.Stack` row sets both.
 - `S.FontString(parent, size, layer)`: the same without a color or alignment.
 - `S.SetFont(region, size)`: gives an existing font string or edit box one of the kit's fonts.
 - `S.RefreshFonts()`: reads the client's fonts again. Call it when building a window, so it picks up UI addons
   that restyle fonts after yours loads.
 
 Sizes are `small`, `normal`, `large`, `huge` and `edit`. `S.FONTS[size]` is the font object.
+
+### Stacks
+
+Text that can run long, with a big font, a translated string or a skin with a thicker frame, needs room to wrap
+without overlapping what's under it. `S.Stack(parent, opts)` places rows top to bottom inside `parent`, each below
+the one before, so longer text pushes the rest down:
+
+- `opts`: `left` and `top` (where the first row goes, by default the skin's `S.metrics.inset`) and `width` (by
+  default the parent's width less the inset on both sides).
+- `stack:Add(region, opts)` adds a row and returns it. `gap` is the space above it (`S.GAP` by default, none for the
+  first row), `indent` moves it right, `fill` gives it the column's width (`S.Wrapped` text always gets it), and
+  `height` is a number or `function(region)` for a row whose height isn't its own.
+- `stack:Layout()` places the shown rows (hidden ones take no room) and returns where the column ends, measured from
+  the parent's top. Call it after changing text, and size the parent by it:
+
+```lua
+local stack = S.Stack(dialog, { width = 340 })
+local title = stack:Add(S.Text(dialog, "large"))
+title:SetHeight(16)
+local note = stack:Add(S.Wrapped(dialog, "small", S.colors.muted), { gap = 4 })
+stack:Add(buttonRow, { gap = S.PAD, fill = true })
+
+note:SetText(text)
+dialog:SetHeight(stack:Layout() + S.metrics.inset)
+```
 
 ### Controls
 
