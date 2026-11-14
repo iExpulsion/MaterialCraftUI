@@ -7,10 +7,10 @@ local S = NS.Style
 
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 local GRAIN = "Interface\\AddOns\\" .. ADDON .. "\\UI\\Skins\\MaterialGlass\\MaterialGlass"
--- the grain texture's size, drawn one texture pixel per UI unit, tiling
+-- the grain texture's size, drawn one texture pixel per UI unit
 local GRAIN_SIZE = 128
--- how strongly the grain, the sheen and the lit top edge show on a window
-local GRAIN_ALPHA, SHEEN_ALPHA, SHINE_ALPHA = 0.07, 0.07, 0.2
+-- how see-through a window is, and how strongly the grain, the sheen and the lit top edge show on it
+local WINDOW_ALPHA, GRAIN_ALPHA, SHEEN_ALPHA, SHINE_ALPHA = 0.8, 0.12, 0.07, 0.2
 -- how far down a window the sheen fades out, as a share of its height, and at most
 local SHEEN_SHARE, SHEEN_MAX = 0.4, 160
 -- the outer edge of a window, popup or menu: dark, so the pane stands off a bright background
@@ -51,21 +51,47 @@ local function shine(f, alpha)
 	return t
 end
 
+-- Covers w by h inside the frame's edge with grain tiles, the last row and column cropped. The 3.3.5 client clamps
+-- texture coordinates past 1 instead of wrapping them, so one stretched texture would smear its edge pixels.
+-- Tiles are kept for reuse and only made when a resize needs more.
+local function tileGrain(f, w, h)
+	local tiles = f.grain
+	local cols, rows = math.ceil(w / GRAIN_SIZE), math.ceil(h / GRAIN_SIZE)
+	local n = 0
+	for row = 1, rows do
+		for col = 1, cols do
+			n = n + 1
+			local t = tiles[n]
+			if not t then
+				t = f:CreateTexture(nil, "BORDER")
+				t:SetTexture(GRAIN)
+				t:SetVertexColor(1, 1, 1, GRAIN_ALPHA)
+				tiles[n] = t
+			end
+			local x, y = (col - 1) * GRAIN_SIZE, (row - 1) * GRAIN_SIZE
+			local tw, th = math.min(GRAIN_SIZE, w - x), math.min(GRAIN_SIZE, h - y)
+			t:ClearAllPoints()
+			t:SetPoint("TOPLEFT", f, "TOPLEFT", 1 + x, -1 - y)
+			t:SetWidth(tw)
+			t:SetHeight(th)
+			t:SetTexCoord(0, tw / GRAIN_SIZE, 0, th / GRAIN_SIZE)
+			t:Show()
+		end
+	end
+	for i = n + 1, #tiles do tiles[i]:Hide() end
+end
+
 -- The glass: a translucent fill in the dark edge, the grain tiled over it, the sheen and the lit top edge.
 local function glass(f, fill)
 	S.Panel(f, fill, EDGE)
-	f.grain = f:CreateTexture(nil, "BORDER")
-	f.grain:SetTexture(GRAIN)
-	f.grain:SetVertexColor(1, 1, 1, GRAIN_ALPHA)
-	f.grain:SetPoint("TOPLEFT", 1, -1)
-	f.grain:SetPoint("BOTTOMRIGHT", -1, 1)
+	f.grain = {}
 	f.sheen = S.Solid(f, "BORDER", white(1))
 	f.sheen:SetGradientAlpha("VERTICAL", 1, 1, 1, 0, 1, 1, 1, SHEEN_ALPHA)
 	f.sheen:SetPoint("TOPLEFT", 1, -1)
 	f.sheen:SetPoint("TOPRIGHT", -1, -1)
 	f.shine = shine(f, SHINE_ALPHA)
 	follow(f, function(w, h)
-		f.grain:SetTexCoord(0, (w - 2) / GRAIN_SIZE, 0, (h - 2) / GRAIN_SIZE)
+		tileGrain(f, w - 2, h - 2)
 		f.sheen:SetHeight(math.min(h * SHEEN_SHARE, SHEEN_MAX))
 	end)
 end
@@ -73,9 +99,11 @@ end
 S.RegisterSkin("materialglass", {
 	label = "Material Glass",
 	-- the scheme's surfaces made see-through: the window a pane lifted a little toward the text color, popups and
-	-- cards nearly solid, wells and inputs dark enough to read in; lines and outlines are light, as on glass
+	-- cards nearly solid, wells and inputs dark enough to read in; lines and outlines are light, as on glass, and
+	-- muted text is lifted toward the text color, since whatever is behind the glass can be bright
 	colors = function(c, M3)
-		c.window = tint(mix(M3.surface, M3.onSurface, 0.05), 0.74)
+		c.window = tint(mix(M3.surface, M3.onSurface, 0.05), WINDOW_ALPHA)
+		c.muted = tint(mix(M3.onSurfaceVariant, M3.onSurface, 0.35), 1)
 		c.sidebar = { 0, 0, 0, 0.18 }
 		c.panel = tint(M3.surfaceContainer, 0.9)
 		c.well = tint(M3.surfaceLowest, 0.8)
@@ -89,7 +117,7 @@ S.RegisterSkin("materialglass", {
 			text = c.accent, shine = 0.1 }
 		KINDS.danger = { bg = white(0.06), hover = tint(c.bad, 0.14), border = white(0.14), text = c.bad, shine = 0.12 }
 		KINDS.ghost = { bg = white(0), hover = c.hover, border = white(0), text = c.muted, shine = 0 }
-		KINDS.disabled = { bg = white(0.03), hover = white(0.03), border = white(0.07), text = c.disabled, shine = 0 }
+		KINDS.disabled = { bg = white(0.03), hover = white(0.03), border = white(0.12), text = c.disabled, shine = 0 }
 	end,
 	-- a translucent fill in a light border, with a lit top edge
 	button = function(b)

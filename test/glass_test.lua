@@ -14,21 +14,29 @@ MOCK.check("glass registered", S.Skin() == "materialglass" and listed == "Materi
 MOCK.check("glass keeps the accent", math.abs(S.colors.accent[1] - 1) < 1e-4 and math.abs(S.colors.accent[2] - 0xc4 / 255) < 1e-4)
 MOCK.check("glass metrics", S.metrics.edge == 0 and S.metrics.inset == S.PAD)
 -- The window fill is see-through, the well nearly solid, and lines light.
-MOCK.check("glass colors", S.colors.window[4] < 0.8 and S.colors.well[4] >= 0.8 and S.colors.border[1] == 1)
+MOCK.check("glass colors", S.colors.window[4] < 0.9 and S.colors.well[4] >= 0.8 and S.colors.border[1] == 1)
+-- Muted text is lifted toward the text color.
+MOCK.check("muted lifted", S.colors.muted[1] > 0xca / 255 and S.colors.muted[1] < 0xe6 / 255)
 
--- A window is the translucent fill, the grain from the addon's own copy tiled one texture pixel per unit, the sheen
--- and the lit top edge.
+-- A window is the translucent fill, the sheen and the lit top edge.
 local win = CreateFrame("Frame")
 win:SetSize(402, 258)
 S.Frame(win, "window")
 MOCK.check("window fill", win.backdrop and win.backdrop.bgFile:find("WHITE8X8") and win.backdrop.edgeFile)
-MOCK.check("window grain", win.grain.texture == "Interface\\AddOns\\TestAddon\\UI\\Skins\\MaterialGlass\\MaterialGlass"
-	and win.grain.vertex[4] > 0 and win.grain.coords[2] == 400 / 128 and win.grain.coords[4] == 256 / 128)
 MOCK.check("window sheen", win.sheen.height == math.min(258 * 0.4, 160) and win.shine.height == 1)
--- The grain keeps its scale when the window is resized.
-win:SetSize(642, 130)
+-- The grain, from the addon's own copy, is a grid of whole 128-unit tiles inside the edge, the last column and row
+-- cropped (400 x 256: 4 columns, the last 16 wide, and 2 whole rows), since the client clamps rather than wraps.
+local tiles = win.grain
+local last = tiles[4]
+MOCK.check("grain tiles", #tiles == 8 and tiles[1].texture == "Interface\\AddOns\\TestAddon\\UI\\Skins\\MaterialGlass\\MaterialGlass"
+	and tiles[1].vertex[4] > 0 and tiles[1].coords[2] == 1 and tiles[1].point[4] == 1 and tiles[1].point[5] == -1)
+MOCK.check("grain last column cropped", last.width == 16 and last.coords[2] == 16 / 128 and last.point[4] == 385)
+MOCK.check("grain second row", tiles[5].point[5] == -129 and tiles[5].height == 128)
+-- A smaller window reuses its tiles and hides the ones it no longer needs.
+win:SetSize(130, 130)
 win.scripts.OnSizeChanged(win)
-MOCK.check("grain follows size", win.grain.coords[2] == 640 / 128 and win.sheen.height == 130 * 0.4)
+MOCK.check("grain follows size", #tiles == 8 and tiles[1].shown and tiles[1].width == 128 and not tiles[2].shown
+	and not tiles[8].shown and win.sheen.height == 130 * 0.4)
 
 -- A popup is the same glass, nearly solid; a menu a near-solid panel.
 local pop = S.Frame(CreateFrame("Frame"), "popup")
