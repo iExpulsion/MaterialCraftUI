@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.4.1-17-g8499f10. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.5.0-1-g2596a2c. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
@@ -487,6 +487,68 @@ function S.Text(parent, size, color, layer)
 	fs:SetTextColor(unpack(color or S.colors.text))
 	fs:SetJustifyH("LEFT")
 	return fs
+end
+
+-- Text that wraps to its width and is as tall as its lines, for descriptions, notes and status lines that can run
+-- long with a big font or a narrow skin. Give it a width (an S.Stack row does) and :Measure() is its height.
+function S.Wrapped(parent, size, color, layer)
+	local fs = S.Text(parent, size, color, layer)
+	fs:SetJustifyV("TOP")
+	fs:SetWordWrap(true)
+	fs:SetNonSpaceWrap(true)
+	fs.wraps = true
+	function fs:Measure()
+		return math.ceil(self:GetStringHeight())
+	end
+	return fs
+end
+
+-- A column of regions placed top to bottom inside `parent`, each below the one before, so text that wraps to more
+-- lines pushes everything under it down. opts: left, top (the first row's offset, default the skin's inset), width
+-- (default the parent's width less the inset on both sides). :Add(region, { gap, indent, fill, height }) adds a row:
+-- `gap` above it (default S.GAP, none for the first), `indent` from the left, `fill` to give it the column's width
+-- (S.Wrapped text always gets it), `height` for a row whose height isn't its own (a fixed number, or a function).
+-- :Layout() places the shown rows and returns where the column ends, from the parent's top, to size the parent by.
+local Stack = {}
+Stack.__index = Stack
+
+function S.Stack(parent, opts)
+	opts = opts or {}
+	local inset = S.metrics.inset
+	return setmetatable({ parent = parent, rows = {}, left = opts.left or inset, top = opts.top or inset,
+		width = opts.width }, Stack)
+end
+
+function Stack:Add(region, opts)
+	opts = opts or {}
+	self.rows[#self.rows + 1] = { region = region, gap = opts.gap, indent = opts.indent or 0,
+		fill = opts.fill or region.wraps == true, height = opts.height }
+	return region
+end
+
+local function rowHeight(row)
+	local h = row.height
+	if type(h) == "function" then h = h(row.region) end
+	return h or (row.region.wraps and row.region:Measure()) or row.region:GetHeight() or 0
+end
+
+function Stack:Layout()
+	local width = self.width or ((self.parent:GetWidth() or 0) - 2 * S.metrics.inset)
+	local y, first = self.top, true
+	for _, row in ipairs(self.rows) do
+		local region = row.region
+		if region:IsShown() then
+			if not first then y = y + (row.gap or S.GAP) end
+			first = false
+			region:ClearAllPoints()
+			region:SetPoint("TOPLEFT", self.parent, "TOPLEFT", self.left + row.indent, -y)
+			if row.fill then region:SetWidth(width - row.indent) end
+			local h = rowHeight(row)
+			if region.wraps then region:SetHeight(h) end
+			y = y + h
+		end
+	end
+	return y
 end
 
 local function paint(b)
