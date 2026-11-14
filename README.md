@@ -311,7 +311,8 @@ a piece as a nine-slice: its corners keep their shape, its edges stretch only al
 
 - `S.Text(parent, size, color, layer)`: a left-aligned font string.
 - `S.Wrapped(parent, size, color, layer)`: text that wraps to its width, inside long words too, and is as tall as
-  its lines. `:Measure()` gives that height once it has a width; an `S.Stack` row sets both.
+  its lines. `:Measure()` gives that height once it has a width, which an `S.Stack` row gives it. Never set its
+  height: the client cuts text down to fit a height, with "...".
 - `S.FontString(parent, size, layer)`: the same without a color or alignment.
 - `S.SetFont(region, size)`: gives an existing font string or edit box one of the kit's fonts.
 - `S.RefreshFonts()`: reads the client's fonts again. Call it when building a window, so it picks up UI addons

@@ -79,9 +79,11 @@ parts.rowMenu(list.items[1])[3].action()
 MOCK.check("show hidden", #list.items == 29 and list.items[1] == topItem)
 
 -- The Text page's dialog: longer text wraps to more lines, pushing the buttons down and growing the dialog; shorter
--- text shrinks it again. The mock measures each line of text as 14 tall.
+-- text shrinks it again. The mock wraps every 60 characters to a line 14 tall, as the client reports it: the text's
+-- own height follows its lines, GetStringHeight stays at one.
 local function linesOf(fs)
-	fs.GetStringHeight = function(self) return 14 * math.ceil(#(self.text or "") / 60) end
+	fs.GetHeight = function(self) return 14 * math.ceil(#(self.text or "") / 60) end
+	fs.GetStringHeight = function() return 14 end
 end
 parts.openDialog.scripts.OnClick(parts.openDialog)
 local dialog = parts.dialog

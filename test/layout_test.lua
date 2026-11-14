@@ -3,9 +3,11 @@
 local S = NS.Style
 local check = MOCK.check
 
--- a font string whose text is `lines` lines tall at 14 per line, as the client would measure it once wrapped
+-- a font string whose text wraps to `lines` lines of 14, as the client reports it: its own height follows the
+-- wrapped lines while GetStringHeight stays at one line
 local function lines(fs, n)
-	fs.GetStringHeight = function() return 14 * n end
+	fs.GetHeight = function() return 14 * n end
+	fs.GetStringHeight = function() return 14 end
 	return fs
 end
 
@@ -14,8 +16,13 @@ local parent = CreateFrame("Frame")
 parent:SetWidth(400)
 local note = S.Wrapped(parent, "small")
 check("wrapped is text", note.text == nil and note.wraps)
-note.GetStringHeight = function() return 27.4 end
+note.GetHeight = function() return 27.4 end
 check("measures whole pixels", note:Measure() == 28)
+-- if the client hasn't sized it yet, the unwrapped width over its own width counts the lines
+note:SetWidth(300)
+note.GetHeight = function() return 14 end
+note.GetStringWidth = function() return 700 end
+check("counts lines from the width", note:Measure() == 3 * 14)
 
 -- a stack places its rows down from the inset, a gap between each, and returns where it ends
 local stack = S.Stack(parent, { width = 376 })
@@ -27,18 +34,21 @@ row:SetHeight(24)
 row:Show()
 stack:Add(row, { fill = true })
 local inset = S.metrics.inset
+-- a height would make the client cut wrapped text to one line, so the stack never sets one
+local heightSet = false
+sub.SetHeight = function() heightSet = true end
 local bottom = stack:Layout()
 check("first row at the inset", title.point[2] == parent and title.point[4] == inset and title.point[5] == -inset)
 check("text below with its gap", sub.point[5] == -(inset + 16 + 4))
 check("row below the text", row.point[5] == -(inset + 16 + 4 + 14 + S.GAP))
 check("returns the end", bottom == inset + 16 + 4 + 14 + S.GAP + 24)
 check("wrapped text and fill rows get the width", sub.width == 376 and row.width == 376 and title.width == nil)
-check("wrapped text is as tall as its lines", sub.height == 14)
+check("wrapped text gets no height", not heightSet)
 
 -- two lines of text push the row down by a line and the column ends a line lower
 lines(sub, 2)
 local taller = stack:Layout()
-check("pushed down", row.point[5] == -(inset + 16 + 4 + 28 + S.GAP) and taller == bottom + 14 and sub.height == 28)
+check("pushed down", row.point[5] == -(inset + 16 + 4 + 28 + S.GAP) and taller == bottom + 14 and not heightSet)
 
 -- hidden rows take no room and no gap
 row:Hide()
