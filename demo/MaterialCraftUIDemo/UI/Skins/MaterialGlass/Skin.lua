@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.4.1-9-ga1e3b65. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.4.1-11-g41dc128. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- Material Glass: Material's flat controls on see-through glass. Windows are a light-tinted, translucent pane with
 -- a fine grain, a soft sheen down from the top and a lit top edge; wells, inputs and menus stay near solid so text

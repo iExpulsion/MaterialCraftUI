@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.4.1-9-ga1e3b65. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.4.1-11-g41dc128. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
@@ -1220,10 +1220,11 @@ local function newRow(self, i)
 	row.headerText:SetPoint("RIGHT", -6 - BAR_SPACE, 0)
 	row.headerText:Hide()
 
-	-- the row's item, or nil for an empty row or a group heading, which get no tooltip and no clicks
+	-- the row's item, or nil for an empty row or a group heading, which get no tooltip and no clicks unless the
+	-- table takes header clicks
 	local function itemOf(r)
 		local item = r.item
-		return item and not (self.header and self.header(item)) and item or nil
+		return item and (self.headerClicks or not (self.header and self.header(item))) and item or nil
 	end
 	row:SetScript("OnEnter", function(r)
 		r.hoverTex:Show()
@@ -1324,6 +1325,7 @@ end
 -- opts: columns = { { key, label, width, justify, sortable, defaultDesc, tooltip, stretch } }, rowH, icons (the
 -- first column has an icon), cell(item, key) -> text, color, icon(item) -> texture, tooltip(tt, item),
 -- onClick(item, button, row) (row: the clicked row, to open an S.ContextMenu beside), onSort(key, desc), header(item) -> label when the item is a group header row,
+-- headerClicks (group header rows also get tooltip and onClick, to collapse a group or act on all of it),
 -- isSelected(item), plain (a bare list for inside a menu or popup: no well frame and no column headers),
 -- onMove(from, to) (rows can be dragged to reorder; from and to are item indexes, to as it is after the move, and
 -- the table leaves moving the item to the caller). The table's frame is .frame; its contents sit inside the well's
@@ -1334,7 +1336,7 @@ function Table.New(parent, name, width, height, opts)
 	local inset = opts.plain and 0 or 1 + S.metrics.wellInset
 	local self = setmetatable({ columns = opts.columns, rowH = opts.rowH or 20, icons = opts.icons, cell = opts.cell,
 		iconOf = opts.icon, tooltip = opts.tooltip, onClick = opts.onClick, onSort = opts.onSort, header = opts.header,
-		isSelected = opts.isSelected, plain = opts.plain, onMove = opts.onMove, items = {}, width = width,
+		headerClicks = opts.headerClicks, isSelected = opts.isSelected, plain = opts.plain, onMove = opts.onMove, items = {}, width = width,
 		innerW = width - 2 * inset,
 		offset = 0, rows = {}, headers = {} }, { __index = Table })
 	local columns = {}
