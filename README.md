@@ -111,9 +111,10 @@ f:SetScript("OnHide", S.Dismiss)
 ## Demo
 
 `demo/MaterialCraftUIDemo` is a small addon that shows every control in one window: each button kind and its
-disabled look, a segmented button, a popup, inputs, dropdowns, checkboxes, every color role and a scrolling list.
-A dropdown in its title bar switches between a few themes and the Cognac, Classic and Material Glass skins. Copy
-the folder into
+disabled look, a segmented button, a popup, inputs, dropdowns, checkboxes, sliders, a tab bar, a list dragged
+into order, single and multi pickers, split panes, every color role, and a scrolling table with a right-click
+menu. Dropdowns in its title bar switch between a few themes and the Cognac, Classic and Material Glass skins, and
+set the window size. Copy the folder into
 `Interface\AddOns` and type `/mcui` in game.
 
 Its `UI/Style.lua` and `UI/Skins` are synced copies like any addon's. After changing the kit, refresh them with:

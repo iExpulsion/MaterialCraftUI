@@ -1,5 +1,6 @@
 -- The demo addon: it loads on the kit, opens with /mcui, builds every page, and rebuilds itself for each theme,
--- the Cognac, Classic and Material Glass skins included.
+-- the Cognac, Classic and Material Glass skins included; and the Layout page's tabs, reorder list and pickers, and
+-- the Items table's right-click menu, work.
 local S = NS.Style
 LOAD("Skins/Cognac/Atlas.lua")
 LOAD("Skins/Cognac/Skin.lua")
@@ -43,6 +44,40 @@ MOCK.check("classic rebuilds", S.Skin() == "classic" and NS.Demo.window().width 
 NS.Demo.setTheme(8)
 MOCK.check("glass rebuilds", S.Skin() == "materialglass" and NS.Demo.window().width == 680
 	and math.abs(S.colors.accent[1] - 1) < 0.001 and NS.Demo.window().grain ~= nil)
+-- The Layout page's tabs: the first starts selected, and clicking another moves the selection.
+local parts = NS.Demo.parts
+local tabs = parts.tabs
+MOCK.check("tabs built", #tabs == 3 and tabs[1].selected and not tabs[2].selected)
+tabs[2].scripts.OnClick(tabs[2])
+MOCK.check("tab click selects", tabs[2].selected and not tabs[1].selected)
+
+-- Dropping the last priority at the top moves it there and renumbers the rows.
+parts.reorder.onMove(4, 1)
+MOCK.check("reorder moves", NS.Demo.state.priorities[1] == "Filler" and parts.priorityRows[1].text.text == "1.  Filler"
+	and parts.priorityRows[2].text.text == "2.  Interrupt")
+parts.reorder.onMove(1, 4)
+
+-- The item picker shows the picked item; the slot picker toggles slots and counts them.
+parts.itemSpec.onPick(3)
+MOCK.check("item picked", parts.itemPicker.label.text == "Cracked Stone Idol" and parts.itemSpec.isSelected(3))
+parts.slotSpec.onPick("Head")
+parts.slotSpec.onPick("Feet")
+parts.slotSpec.onPick("Head")
+MOCK.check("slots toggled", parts.slotSpec.isSelected("Feet") and not parts.slotSpec.isSelected("Head"))
+
+-- Right-clicking an Items row opens its menu beside the row; Hide takes the item out of the list, and Show Hidden
+-- Items, enabled only while something is hidden, brings it back.
+local list = parts.list
+local topItem = list.items[1]
+local options = parts.rowMenu(topItem)
+MOCK.check("menu options", #options == 4 and options[3].disabled and options[4].danger and options[2].disabled)
+list.onClick(topItem, "RightButton", list.rows[1])
+MOCK.check("right-click opens menu", parts.menu:IsShown() and parts.menu.owner == list.rows[1])
+options[4].action()
+MOCK.check("hide item", #list.items == 28 and list.items[1] ~= topItem and not parts.rowMenu(list.items[1])[3].disabled)
+parts.rowMenu(list.items[1])[3].action()
+MOCK.check("show hidden", #list.items == 29 and list.items[1] == topItem)
+
 -- Back to a Material theme after it.
 NS.Demo.setTheme(1)
 MOCK.check("material again", S.Skin() == "material" and NS.Demo.window().width == 680)

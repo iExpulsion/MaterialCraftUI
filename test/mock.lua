@@ -163,6 +163,10 @@ unpack = unpack or table.unpack
 LOCALIZED_CLASS_NAMES_MALE = { PALADIN = "Paladin", MAGE = "Mage", HUNTER = "Hunter", WARRIOR = "Warrior" }
 DEFAULT_CHAT_FRAME = { AddMessage = function(_, msg) mock.lastMessage = msg end }
 GetAddOnMetadata = function() return "test" end
+wipe = function(t)
+	for k in pairs(t) do t[k] = nil end
+	return t
+end
 IsShiftKeyDown = function() return false end
 IsModifiedClick = function() return mock.modified end
 mock.time = 100

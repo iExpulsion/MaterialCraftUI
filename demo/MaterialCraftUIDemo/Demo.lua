@@ -22,7 +22,7 @@ local THEMES = {
 }
 
 local NAV = {
-	{ "Controls", { "Buttons", "Forms" } },
+	{ "Controls", { "Buttons", "Forms", "Layout" } },
 	{ "Theme", { "Colors" } },
 	{ "Data", { "Items" } },
 }
@@ -64,9 +64,29 @@ local ITEMS = {
 	{ "Veteran's Pauldrons", 7, "Shoulder", 80 },
 }
 
-local state = { theme = 1, page = "Buttons" }
+local SIZES = {
+	{ value = 1, text = "90%", scale = 0.9 },
+	{ value = 2, text = "100%", scale = 1 },
+	{ value = 3, text = "115%", scale = 1.15 },
+	{ value = 4, text = "130%", scale = 1.3 },
+}
+
+local TABS = {
+	{ "Overview", "S.Tab buttons, sized to their labels, over the bar's S.Rule of kind \"tabs\"." },
+	{ "Details", "Each skin marks the selected tab its own way: an underline, a chip or the stock tab art." },
+	{ "History", "You place the tabs and swap what's under them; the kit only draws them." },
+}
+local TAB_H = 28
+
+local SLOTS = { "Head", "Neck", "Shoulder", "Back", "Hands", "Feet", "Finger", "One-Hand", "Two-Hand", "Off Hand",
+	"Ranged", "Relic", "Bag" }
+
+local state = { theme = 1, page = "Buttons", size = 2, priorities = { "Interrupt", "Defensive Cooldown", "Burst",
+	"Filler" }, hidden = {}, slots = {} }
 local window
 local PAGE = {}
+-- pieces the pages built, for the tests
+local parts = {}
 
 local function heading(page, title, blurb)
 	local t = S.Text(page, "large", S.colors.heading)
@@ -284,6 +304,128 @@ function PAGE.Forms(page)
 	setStatus("No Changes", S.colors.muted)
 end
 
+function PAGE.Layout(page)
+	local top = heading(page, "Layout", "Tabs, a list you drag into order, pickers, and two panes split by a divider. "
+		.. "The Size dropdown at the top scales the whole window.")
+	local fullW = CONTENT_W - 2 * S.PAD
+
+	local tabsLabel = label(page, "Tabs", top)
+	local bar = CreateFrame("Frame", nil, page)
+	bar:SetPoint("TOPLEFT", tabsLabel, "BOTTOMLEFT", 0, -6)
+	bar:SetSize(fullW, TAB_H)
+	S.Rule(bar, "BOTTOM", "tabs")
+	local about = S.Text(page, "small")
+	about:SetPoint("TOPLEFT", bar, "BOTTOMLEFT", 0, -10)
+	about:SetWidth(fullW)
+	local tabs = {}
+	local function pickTab(index)
+		for i, t in ipairs(tabs) do t:SetSelected(i == index) end
+		about:SetText(TABS[index][2])
+	end
+	local x = 0
+	for i, t in ipairs(TABS) do
+		local b = CreateFrame("Button", nil, bar)
+		b:SetHeight(TAB_H)
+		S.Tab(b, t[1])
+		b:SetWidth(math.ceil(b.label:GetStringWidth()) + 2 * S.metrics.tabPad)
+		b:SetPoint("BOTTOMLEFT", x, 0)
+		x = x + b:GetWidth()
+		b:SetScript("OnClick", function() pickTab(i) end)
+		tabs[i] = b
+	end
+	pickTab(1)
+	parts.tabs = tabs
+
+	-- two panes, a vertical divider centered in the gap between them
+	local split, splitW = S.VerticalDivider(page)
+	local gap = 2 * S.GAP + splitW
+	local paneW = math.floor((fullW - gap) / 2)
+
+	local orderLabel = label(page, "Drag to Reorder", about, -18)
+	local inset = 1 + S.metrics.wellInset
+	local list = CreateFrame("Frame", nil, page)
+	list:SetPoint("TOPLEFT", orderLabel, "BOTTOMLEFT", 0, -6)
+	list:SetSize(paneW, #state.priorities * ROW_H + 2 * inset)
+	S.Well(list)
+	local rows = {}
+	local function relabel()
+		for i, r in ipairs(rows) do r.text:SetText(i .. ".  " .. state.priorities[i]) end
+	end
+	for i = 1, #state.priorities do
+		local r = CreateFrame("Button", nil, list)
+		r:SetHeight(ROW_H)
+		r:SetPoint("TOPLEFT", inset, -inset - (i - 1) * ROW_H)
+		r:SetPoint("TOPRIGHT", -inset, -inset - (i - 1) * ROW_H)
+		S.Highlight(r)
+		local grip = S.Grip(r)
+		grip:SetPoint("LEFT", 8, 0)
+		r.text = S.Text(r, "small")
+		r.text:SetPoint("LEFT", grip, "RIGHT", 10, 0)
+		r.moveIndex = i
+		rows[i] = r
+	end
+	local reorder = S.Reorder.New({ rows = rows, lineParent = list, onMove = function(from, to)
+		local moved = table.remove(state.priorities, from)
+		table.insert(state.priorities, to, moved)
+		relabel()
+	end })
+	for _, r in ipairs(rows) do reorder:Attach(r, function(dragged) return state.priorities[dragged.moveIndex] end) end
+	relabel()
+	parts.priorityRows, parts.reorder = rows, reorder
+
+	split:SetPoint("TOPLEFT", list, "TOPRIGHT", S.GAP, 0)
+	split:SetPoint("BOTTOMLEFT", list, "BOTTOMRIGHT", S.GAP, 0)
+
+	local pickLabel = S.Text(page, "small", S.colors.muted)
+	pickLabel:SetPoint("LEFT", orderLabel, "LEFT", paneW + gap, 0)
+	pickLabel:SetText("Pickers")
+	local choices = {}
+	for i, item in ipairs(ITEMS) do
+		choices[i] = { value = i, text = item[1], tooltip = item[3] .. ", level " .. item[4] }
+	end
+	local favorite
+	local itemPicker
+	local itemSpec = {
+		items = choices,
+		placeholder = "Search Items",
+		isSelected = function(v) return v == favorite end,
+		onPick = function(v)
+			favorite = v
+			itemPicker:SetText(ITEMS[v][1])
+		end,
+	}
+	itemPicker = S.PickerButton(page, paneW, function() return itemSpec end)
+	itemPicker:SetText("Pick an Item")
+	itemPicker:SetPoint("TOPLEFT", pickLabel, "BOTTOMLEFT", 0, -6)
+
+	local slotChoices = {}
+	for i, slot in ipairs(SLOTS) do slotChoices[i] = { value = slot, text = slot } end
+	local slotPicker
+	local function slotText()
+		local n = 0
+		for _ in pairs(state.slots) do n = n + 1 end
+		slotPicker:SetText(n == 0 and "Any Slot" or S.Count(n, "Slot"))
+	end
+	local slotSpec = {
+		items = slotChoices,
+		placeholder = "Search Slots",
+		multi = true,
+		isSelected = function(v) return state.slots[v] end,
+		onPick = function(v)
+			state.slots[v] = not state.slots[v] or nil
+			slotText()
+		end,
+	}
+	slotPicker = S.PickerButton(page, paneW, function() return slotSpec end)
+	slotPicker:SetPoint("TOPLEFT", itemPicker, "BOTTOMLEFT", 0, -S.GAP)
+	slotText()
+	local pickHint = S.Text(page, "small", S.colors.muted)
+	pickHint:SetPoint("TOPLEFT", slotPicker, "BOTTOMLEFT", 0, -S.GAP)
+	pickHint:SetWidth(paneW)
+	pickHint:SetText("The first picks one item; the second toggles several slots and stays open.")
+	parts.itemPicker, parts.itemSpec, parts.slotSpec = itemPicker, itemSpec, slotSpec
+end
+
 function PAGE.Colors(page)
 	local top = heading(page, "Color Roles", "Every color in S.colors, drawn on a well so the translucent layers show. "
 		.. "Pick another theme at the top to see them change.")
@@ -322,7 +464,7 @@ end
 
 function PAGE.Items(page)
 	local top = heading(page, "Items", "An S.Table: sortable columns, a thin scroll bar and the mouse wheel. Rows show "
-		.. "hover and selection, and the search box filters by name.")
+		.. "hover and selection, the search box filters by name, and right-clicking a row opens its menu.")
 
 	local search = S.Input(page, nil, 220, "Search Items", 40)
 	search:SetPoint("TOPLEFT", top, "BOTTOMLEFT", 0, -14)
@@ -332,7 +474,26 @@ function PAGE.Items(page)
 	local selected
 	local sortKey, sortDesc = "level", false
 	local SORT = { name = 1, slot = 3, level = 4 }
-	local list
+	local list, refresh
+	local menu = S.ContextMenu()
+	local function rowMenu(item)
+		local anyHidden = next(state.hidden) ~= nil
+		return {
+			{ text = "Select", action = function()
+				selected = item
+				list:Redraw()
+			end },
+			{ text = "Link to Chat", disabled = true, tooltip = "The demo's items aren't real, so there's nothing to link." },
+			{ text = "Show Hidden Items", disabled = not anyHidden, action = function()
+				wipe(state.hidden)
+				refresh()
+			end },
+			{ text = "Hide", danger = true, tooltip = "Hides it until you show hidden items again.", action = function()
+				state.hidden[item] = true
+				refresh()
+			end },
+		}
+	end
 	list = S.Table.New(page, nil, CONTENT_W - 2 * S.PAD, ITEMS_H, {
 		rowH = ROW_H,
 		columns = {
@@ -350,18 +511,24 @@ function PAGE.Items(page)
 			tt:AddLine(item[3] .. ", level " .. item[4], 1, 1, 1)
 		end,
 		isSelected = function(item) return item == selected end,
-		onClick = function(item)
-			selected = item
-			list:Redraw()
+		onClick = function(item, button, r)
+			if button == "RightButton" then
+				menu:Open(r, rowMenu(item), "RIGHT")
+			else
+				selected = item
+				list:Redraw()
+			end
 		end,
 	})
 	list.frame:SetPoint("TOPLEFT", search, "BOTTOMLEFT", 0, -S.GAP)
 
-	local function refresh()
+	refresh = function()
 		local query = (search:GetText() or ""):lower()
 		local shown = {}
 		for _, item in ipairs(ITEMS) do
-			if query == "" or item[1]:lower():find(query, 1, true) then shown[#shown + 1] = item end
+			if not state.hidden[item] and (query == "" or item[1]:lower():find(query, 1, true)) then
+				shown[#shown + 1] = item
+			end
 		end
 		local field = SORT[sortKey]
 		table.sort(shown, function(a, b)
@@ -379,6 +546,7 @@ function PAGE.Items(page)
 	list:SetSort(sortKey, sortDesc)
 	search:HookScript("OnTextChanged", refresh)
 	refresh()
+	parts.list, parts.menu, parts.rowMenu = list, menu, rowMenu
 end
 
 local setTheme
@@ -434,6 +602,18 @@ local function build()
 	local themeLabel = S.Text(bar, "small", C.muted)
 	themeLabel:SetPoint("RIGHT", theme, "LEFT", -S.GAP, 0)
 	themeLabel:SetText("Theme")
+	local size
+	size = S.Dropdown(bar, 70, function(v)
+		state.size = v
+		size:SetText(SIZES[v].text)
+		S.SetWindowScale(SIZES[v].scale)
+	end)
+	size:SetOptions(SIZES)
+	size:SetText(SIZES[state.size].text)
+	size:SetPoint("RIGHT", themeLabel, "LEFT", -2 * S.GAP, 0)
+	local sizeLabel = S.Text(bar, "small", C.muted)
+	sizeLabel:SetPoint("RIGHT", size, "LEFT", -S.GAP, 0)
+	sizeLabel:SetText("Size")
 
 	local nav = CreateFrame("Frame", nil, f)
 	nav:SetPoint("TOPLEFT", bar, "BOTTOMLEFT")
@@ -509,5 +689,5 @@ end
 tinsert(UISpecialFrames, WINDOW)
 SLASH_MATERIALCRAFTUIDEMO1 = "/mcui"
 SlashCmdList.MATERIALCRAFTUIDEMO = toggle
-NS.Demo = { state = state, toggle = toggle, setTheme = setTheme, window = function() return window end }
+NS.Demo = { state = state, parts = parts, toggle = toggle, setTheme = setTheme, window = function() return window end }
 DEFAULT_CHAT_FRAME:AddMessage(S.Hex(S.colors.accent, "MaterialCraftUI Demo") .. " loaded. Type /mcui to open it.")
