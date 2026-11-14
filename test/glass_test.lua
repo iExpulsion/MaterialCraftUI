@@ -62,6 +62,16 @@ MOCK.check("disabled", b.shine.alpha == 0 and b.label.color[1] == S.colors.disab
 local g = S.Button(parent, "X", "ghost", 24)
 MOCK.check("ghost", g.shine.alpha == 0)
 
+-- A well has the field border, as strong as a secondary button's, under a faint lit top edge.
+local well = S.Well(CreateFrame("Frame"))
+MOCK.check("well edge", well.shine ~= nil and well.shine.vertex[4] < 0.1 and S.colors.border[4] < 0.14)
+-- An input has the same edge, keeps the field border at rest and takes the accent while focused.
+local e = S.Input(parent, nil, 120)
+MOCK.check("input edge", (e.box or e).shine ~= nil)
+e:SetFocus()
+e:ClearFocus()
+MOCK.check("input focus round trip", not e.focused)
+
 -- Checkboxes fall back to Material's: a well with an accent fill.
 local cb = S.Check(parent)
 MOCK.check("material checkbox", cb.fill ~= nil and cb.backdrop ~= nil)
