@@ -1,18 +1,19 @@
--- Vendored from MaterialCraftUI v1.4.1-11-g41dc128. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.4.1-13-g87f1e1d. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- Material Glass: Material's flat controls on see-through glass. Windows are a light-tinted, translucent pane with
--- a fine grain, a soft sheen down from the top and a lit top edge; wells, inputs and menus stay near solid so text
--- in them reads over anything. The 3.3.5 client can't blur what's behind a frame, so the grain stands in for the
--- frost. Load it after Style.lua; S.UseSkin("materialglass") switches to it.
+-- a faint cloudy frost, a soft sheen down from the top and a lit top edge; wells, inputs and menus stay near solid
+-- so text in them reads over anything. The 3.3.5 client can't blur what's behind a frame, so the frost texture
+-- stands in for it. Load it after Style.lua; S.UseSkin("materialglass") switches to it.
 local ADDON, NS = ...
 local S = NS.Style
 
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 local GRAIN = "Interface\\AddOns\\" .. ADDON .. "\\UI\\Skins\\MaterialGlass\\MaterialGlass"
--- the grain texture's size, drawn one texture pixel per UI unit
-local GRAIN_SIZE = 128
--- how see-through a window is, and how strongly the grain, the sheen and the lit top edge show on it
-local WINDOW_ALPHA, GRAIN_ALPHA, SHEEN_ALPHA, SHINE_ALPHA = 0.8, 0.12, 0.07, 0.2
+-- the units one tile of the frost texture covers: its 128 pixels drawn at twice their size, so its clouds stay soft
+local GRAIN_SIZE = 256
+-- how see-through a window is, and how strongly the frost, the sheen and the lit top edge show on it; the frost
+-- stays faint, as a stronger one reads as static
+local WINDOW_ALPHA, GRAIN_ALPHA, SHEEN_ALPHA, SHINE_ALPHA = 0.8, 0.05, 0.07, 0.2
 -- how far down a window the sheen fades out, as a share of its height, and at most
 local SHEEN_SHARE, SHEEN_MAX = 0.4, 160
 -- the outer edge of a window, popup or menu: dark, so the pane stands off a bright background
