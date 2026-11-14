@@ -489,7 +489,9 @@ local function textDialog()
 	S.Frame(d, "popup")
 	tinsert(UISpecialFrames, "MaterialCraftUIDemoTextDialog")
 
-	local stack = S.Stack(d, { width = DIALOG_W - 2 * S.PAD })
+	-- sized after each pass, the second once the client has wrapped the new text
+	local stack = S.Stack(d, { width = DIALOG_W - 2 * S.PAD,
+		onLayout = function(bottom) d:SetHeight(bottom + S.metrics.inset) end })
 	d.title = stack:Add(S.Text(d, "large"))
 	d.title:SetHeight(16)
 	d.title:SetText("Templates")
@@ -503,7 +505,7 @@ local function textDialog()
 		local texts = LENGTHS[state.length]
 		d.sub:SetText(texts[1])
 		d.body:SetText(texts[2])
-		d:SetHeight(stack:Layout() + S.metrics.inset)
+		stack:Layout()
 	end
 	local shorter = S.Button(buttons, "Shorter", "secondary", 80, function()
 		state.length = math.max(1, state.length - 1)

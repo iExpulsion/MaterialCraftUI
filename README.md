@@ -326,23 +326,26 @@ Text that can run long, with a big font, a translated string or a skin with a th
 without overlapping what's under it. `S.Stack(parent, opts)` places rows top to bottom inside `parent`, each below
 the one before, so longer text pushes the rest down:
 
-- `opts`: `left` and `top` (where the first row goes, by default the skin's `S.metrics.inset`) and `width` (by
-  default the parent's width less the inset on both sides).
+- `opts`: `left` and `top` (where the first row goes, by default the skin's `S.metrics.inset`), `width` (by
+  default the parent's width less the inset on both sides), and `onLayout(bottom)`, called after each layout with
+  where the column ends: the place to size the parent.
 - `stack:Add(region, opts)` adds a row and returns it. `gap` is the space above it (`S.GAP` by default, none for the
   first row), `indent` moves it right, `fill` gives it the column's width (`S.Wrapped` text always gets it), and
   `height` is a number or `function(region)` for a row whose height isn't its own.
 - `stack:Layout()` places the shown rows (hidden ones take no room) and returns where the column ends, measured from
-  the parent's top. Call it after changing text, and size the parent by it:
+  the parent's top. Call it after changing text. The client measures newly wrapped text only once it has drawn it,
+  so the stack lays out once more on the next frame and calls `onLayout` again; size the parent there:
 
 ```lua
-local stack = S.Stack(dialog, { width = 340 })
+local stack = S.Stack(dialog, { width = 340,
+	onLayout = function(bottom) dialog:SetHeight(bottom + S.metrics.inset) end })
 local title = stack:Add(S.Text(dialog, "large"))
 title:SetHeight(16)
 local note = stack:Add(S.Wrapped(dialog, "small", S.colors.muted), { gap = 4 })
 stack:Add(buttonRow, { gap = S.PAD, fill = true })
 
 note:SetText(text)
-dialog:SetHeight(stack:Layout() + S.metrics.inset)
+stack:Layout()
 ```
 
 ### Controls

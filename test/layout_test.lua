@@ -3,11 +3,10 @@
 local S = NS.Style
 local check = MOCK.check
 
--- a font string whose text wraps to `lines` lines of 14, as the client reports it: its own height follows the
--- wrapped lines while GetStringHeight stays at one line
+-- a font string whose text the client has wrapped to `lines` lines of 14
 local function lines(fs, n)
 	fs.GetHeight = function() return 14 * n end
-	fs.GetStringHeight = function() return 14 end
+	fs.GetStringHeight = function() return 14 * n end
 	return fs
 end
 
@@ -17,12 +16,10 @@ parent:SetWidth(400)
 local note = S.Wrapped(parent, "small")
 check("wrapped is text", note.text == nil and note.wraps)
 note.GetHeight = function() return 27.4 end
-check("measures whole pixels", note:Measure() == 28)
--- if the client hasn't sized it yet, the unwrapped width over its own width counts the lines
-note:SetWidth(300)
-note.GetHeight = function() return 14 end
-note.GetStringWidth = function() return 700 end
-check("counts lines from the width", note:Measure() == 3 * 14)
+note.GetStringHeight = function() return 14 end
+check("measures whole pixels, the taller reading", note:Measure() == 28)
+note.GetHeight = function() return 0 end
+check("either reading", note:Measure() == 14)
 
 -- a stack places its rows down from the inset, a gap between each, and returns where it ends
 local stack = S.Stack(parent, { width = 376 })
@@ -50,6 +47,25 @@ lines(sub, 2)
 local taller = stack:Layout()
 check("pushed down", row.point[5] == -(inset + 16 + 4 + 28 + S.GAP) and taller == bottom + 14 and not heightSet)
 
+-- the client measures new lines only once it has drawn them, so the stack lays out again on the next frame and
+-- tells onLayout where it ends after each pass
+local ends = {}
+stack.onLayout = function(bottom) ends[#ends + 1] = bottom end
+stack:Layout()
+check("lays out again next frame", stack.later.shown and ends[1] == taller)
+lines(sub, 3)
+stack.later.scripts.OnUpdate(stack.later)
+check("second pass sees the new lines", not stack.later.shown and ends[2] == taller + 14
+	and row.point[5] == -(inset + 16 + 4 + 42 + S.GAP))
+lines(sub, 2)
+stack.onLayout = nil
+stack:Layout()
+
+-- a wrapped row gets its width as it's added, before any layout
+local early = S.Stack(parent, { width = 200 })
+local fresh = early:Add(S.Wrapped(parent, "small"))
+check("width on add", fresh.width == 200)
+
 -- hidden rows take no room and no gap
 row:Hide()
 check("hidden row skipped", stack:Layout() == inset + 16 + 4 + 28)
@@ -62,9 +78,9 @@ stack:Add(indented, { indent = 20, fill = true, height = function() return 30 en
 local fixed = CreateFrame("Frame", nil, parent)
 fixed:Show()
 stack:Add(fixed, { height = 10, gap = 0 })
-local ends = stack:Layout()
+local finish = stack:Layout()
 check("indent", indented.point[4] == inset + 20 and indented.width == 376 - 20)
-check("height from a function and a number", ends == taller + S.GAP + 30 + 10)
+check("height from a function and a number", finish == taller + S.GAP + 30 + 10)
 
 -- without a width the column is the parent's width less the inset on both sides
 local open = S.Stack(parent)
