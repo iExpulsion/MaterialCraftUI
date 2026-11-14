@@ -355,7 +355,8 @@ items, in an `S.Well`, with sortable column headers, a thin scroll bar and the m
   with `opts.icon(item)` puts an icon in the first column.
 - `opts.tooltip(tooltip, item)`, `opts.onClick(item, button, row)` (`row` is the clicked row, to open an
   `S.ContextMenu` beside), `opts.isSelected(item)`, `opts.onSort(key, desc)`, and `opts.header(item)` for group
-  header rows.
+  header rows. Header rows get no tooltip or click unless `opts.headerClicks` is set, for groups that collapse or
+  act on all their rows.
 - `opts.plain`: a bare list, with no well frame and no column headers, for a list inside a menu or popup that
   already has a frame of its own.
 - `opts.onMove(from, to)`: rows can be dragged to reorder, through `S.Reorder` below. `from` and `to` are item

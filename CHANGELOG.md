@@ -11,6 +11,8 @@
   be disabled or drawn as dangerous, opened beside the clicked row on either side. It closes like a dropdown's menu.
   It started as QuestGPS's tracker menu.
 - **Table Clicks:** `S.Table`'s `onClick` also gets the clicked row, to open a context menu beside it.
+- **Clickable Group Headers:** `S.Table`'s `headerClicks` option gives group header rows their tooltip and click
+  again, for groups that collapse or act on all their rows. 1.4.0 had turned them off for every table.
 
 ## 1.4.1
 

@@ -192,6 +192,20 @@ end
 MOCK.check("headers have no tooltip or click", #tipped == 1 and tipped[1].n == "A"
 	and #clickedItem == 1 and clickedItem[1].n == "A", #tipped .. "/" .. #clickedItem)
 
+-- With headerClicks, header rows get their tooltip and click too, so a group can collapse
+local headTips, headClicks = {}, {}
+local collapsing = S.Table.New(UIParent, nil, 300, 140, {
+	columns = { { key = "n", label = "Name", width = 100 } }, cell = cell, headerClicks = true,
+	header = function(item) return item.group end,
+	tooltip = function(_, item) headTips[#headTips + 1] = item end,
+	onClick = function(item) headClicks[#headClicks + 1] = item end,
+})
+collapsing:SetItems({ { group = "Group" }, { n = "A" } })
+collapsing.rows[1].scripts.OnEnter(collapsing.rows[1])
+collapsing.rows[1].scripts.OnClick(collapsing.rows[1], "LeftButton")
+MOCK.check("headerClicks gives headers a tooltip and click", #headTips == 1 and headTips[1].group == "Group"
+	and #headClicks == 1 and headClicks[1].group == "Group", #headTips .. "/" .. #headClicks)
+
 -- A grip is two columns of three 2px dots in the muted color, and SetColor recolors every dot.
 local grip = S.Grip(UIParent)
 MOCK.check("grip dots", #grip.dots == 6 and grip.width == 6 and grip.height == 12 and grip.dots[6].point[2] == 4
