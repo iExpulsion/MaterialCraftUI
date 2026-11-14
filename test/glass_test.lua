@@ -24,19 +24,23 @@ win:SetSize(402, 258)
 S.Frame(win, "window")
 MOCK.check("window fill", win.backdrop and win.backdrop.bgFile:find("WHITE8X8") and win.backdrop.edgeFile)
 MOCK.check("window sheen", win.sheen.height == math.min(258 * 0.4, 160) and win.shine.height == 1)
--- The grain, from the addon's own copy, is a grid of whole 128-unit tiles inside the edge, the last column and row
--- cropped (400 x 256: 4 columns, the last 16 wide, and 2 whole rows), since the client clamps rather than wraps.
+-- The frost, from the addon's own copy, is a grid of whole 256-unit tiles inside the edge, the last column and row
+-- cropped (400 x 256: 2 columns, the last 144 wide, and 1 whole row), since the client clamps rather than wraps.
 local tiles = win.grain
-local last = tiles[4]
-MOCK.check("grain tiles", #tiles == 8 and tiles[1].texture == "Interface\\AddOns\\TestAddon\\UI\\Skins\\MaterialGlass\\MaterialGlass"
+local last = tiles[2]
+MOCK.check("frost tiles", #tiles == 2 and tiles[1].texture == "Interface\\AddOns\\TestAddon\\UI\\Skins\\MaterialGlass\\MaterialGlass"
 	and tiles[1].vertex[4] > 0 and tiles[1].coords[2] == 1 and tiles[1].point[4] == 1 and tiles[1].point[5] == -1)
-MOCK.check("grain last column cropped", last.width == 16 and last.coords[2] == 16 / 128 and last.point[4] == 385)
-MOCK.check("grain second row", tiles[5].point[5] == -129 and tiles[5].height == 128)
+MOCK.check("frost last column cropped", last.width == 144 and last.coords[2] == 144 / 256 and last.point[4] == 257)
+-- A taller window adds a second row, cropped.
+win:SetSize(402, 302)
+win.scripts.OnSizeChanged(win)
+MOCK.check("frost second row", #tiles == 4 and tiles[3].point[5] == -257 and tiles[3].height == 44
+	and tiles[3].coords[4] == 44 / 256)
 -- A smaller window reuses its tiles and hides the ones it no longer needs.
 win:SetSize(130, 130)
 win.scripts.OnSizeChanged(win)
-MOCK.check("grain follows size", #tiles == 8 and tiles[1].shown and tiles[1].width == 128 and not tiles[2].shown
-	and not tiles[8].shown and win.sheen.height == 130 * 0.4)
+MOCK.check("frost follows size", #tiles == 4 and tiles[1].shown and tiles[1].width == 128 and not tiles[2].shown
+	and not tiles[4].shown and win.sheen.height == 130 * 0.4)
 
 -- A popup is the same glass, nearly solid; a menu a near-solid panel.
 local pop = S.Frame(CreateFrame("Frame"), "popup")

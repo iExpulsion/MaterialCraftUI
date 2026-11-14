@@ -246,11 +246,11 @@ just a `Skin.lua`.
 
 **Cognac** is painted gold frames, plates and chips on dark glass.
 
-**Material Glass** is Material's controls on see-through glass: windows are a translucent pane with a fine grain,
-a soft sheen and a lit top edge, buttons are faint fills with the same edge, and lists, inputs and menus stay
-nearly solid so their text reads over anything. It uses your scheme, like Material, so pass your `roles`. The
-client can't blur what's behind a window, so the grain stands in for frosting. Its folder holds a `Skin.lua` and
-the grain texture, which `tools/make_grain.py` draws:
+**Material Glass** is Material's controls on see-through glass: windows are a translucent pane with a faint cloudy
+frost, a soft sheen and a lit top edge, buttons are faint fills with the same edge, and lists, inputs and menus
+stay nearly solid so their text reads over anything. It uses your scheme, like Material, so pass your `roles`. The
+client can't blur what's behind a window, so the frost texture stands in for it. Its folder holds a `Skin.lua` and
+that texture, which `tools/make_grain.py` draws:
 
 ```bash
 py -I -X utf8 tools/make_grain.py

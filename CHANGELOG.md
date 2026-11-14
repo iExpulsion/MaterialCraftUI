@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-- **Material Glass Skin:** Material's controls on see-through glass. Windows are a translucent pane with a fine
-  grain, a soft sheen and a lit top edge; buttons are faint fills with the same edge; lists, inputs and menus stay
+- **Material Glass Skin:** Material's controls on see-through glass. Windows are a translucent pane with a faint
+  cloudy frost, a soft sheen and a lit top edge; buttons are faint fills with the same edge; lists, inputs and menus stay
   nearly solid so their text reads over anything. It takes your scheme like Material does. The demo's theme
   dropdown has it.
 
