@@ -2,7 +2,7 @@
 ## Title: |cffff9a2eMaterialCraftUI Demo|r
 ## Notes: Every MaterialCraftUI control in one window, for trying the kit and taking screenshots. /mcui
 ## Author: Expulsion
-## Version: 1.4.1
+## Version: 1.5.0
 
 UI\Style.lua
 UI\Skins\Cognac\Atlas.lua

@@ -1,18 +1,19 @@
 # Changelog
 
-## Unreleased
+## 1.5.0
 
 - **Material Glass Skin:** Material's controls on see-through glass. Windows are a translucent pane with a faint
-  cloudy frost, a soft sheen and a lit top edge; buttons are faint fills with the same edge; lists, inputs and menus stay
-  nearly solid so their text reads over anything. It takes your scheme like Material does. The demo's theme
-  dropdown has it.
-
+  cloudy frost, a soft sheen and a lit top edge; buttons are faint fills with the same edge; lists, inputs and menus
+  stay nearly solid so their text reads over anything. It takes your scheme like Material does, in
+  `Skins/MaterialGlass`.
 - **Context Menus:** `S.ContextMenu` is a right-click menu for a list's rows: options with an action each, which can
   be disabled or drawn as dangerous, opened beside the clicked row on either side. It closes like a dropdown's menu.
   It started as QuestGPS's tracker menu.
 - **Table Clicks:** `S.Table`'s `onClick` also gets the clicked row, to open a context menu beside it.
 - **Clickable Group Headers:** `S.Table`'s `headerClicks` option gives group header rows their tooltip and click
   again, for groups that collapse or act on all their rows. 1.4.0 had turned them off for every table.
+- **Demo:** a Layout page with tabs, a list dragged into order, single and multi pickers and split panes; a
+  right-click menu on the Items table; a window Size dropdown; and Material Glass in the theme dropdown.
 
 ## 1.4.1
 
