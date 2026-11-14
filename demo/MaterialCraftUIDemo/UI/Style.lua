@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.4.1-7-g5cf165b. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.4.1-9-ga1e3b65. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
