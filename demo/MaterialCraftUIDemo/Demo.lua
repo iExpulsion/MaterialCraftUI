@@ -17,6 +17,8 @@ local THEMES = {
 		tooltip = "S.UseSkin(\"cognac\"): the painted skin. Art by Jeff, from AttuneNext." },
 	{ value = 7, text = "Classic", skin = "classic",
 		tooltip = "S.UseSkin(\"classic\"): the default UI's own frames, buttons and fonts." },
+	{ value = 8, text = "Material Glass", skin = "materialglass", roles = { primary = "ffc400" },
+		tooltip = "S.UseSkin(\"materialglass\", { primary = \"ffc400\" }): Material on see-through glass." },
 }
 
 local NAV = {
