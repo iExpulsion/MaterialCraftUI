@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.5.0-3-g0b3d3bd. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.5.0-5-g3e30a52. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
@@ -492,8 +492,7 @@ end
 -- Text that wraps to its width and is as tall as its lines, for descriptions, notes and status lines that can run
 -- long with a big font or a narrow skin. Give it a width (an S.Stack row does) and :Measure() is its height. It
 -- must never be given a height: the client cuts text to fit one, with "...". Without one the client sizes it to its
--- wrapped lines, which GetHeight reports; GetStringHeight gives a single line's height on this client, so the line
--- count from the unwrapped width backs it up, and the taller of the two wins.
+-- wrapped lines. Its height can lag a width or text change until the client next draws it, which S.Stack allows for.
 function S.Wrapped(parent, size, color, layer)
 	local fs = S.Text(parent, size, color, layer)
 	fs:SetJustifyV("TOP")
@@ -501,9 +500,7 @@ function S.Wrapped(parent, size, color, layer)
 	fs:SetNonSpaceWrap(true)
 	fs.wraps = true
 	function fs:Measure()
-		local width = self:GetWidth() or 0
-		local lines = width > 0 and math.ceil((self:GetStringWidth() or 0) / width) or 1
-		return math.ceil(math.max(self:GetHeight() or 0, lines * (self:GetStringHeight() or 0)))
+		return math.ceil(math.max(self:GetHeight() or 0, self:GetStringHeight() or 0))
 	end
 	return fs
 end
@@ -514,20 +511,36 @@ end
 -- `gap` above it (default S.GAP, none for the first), `indent` from the left, `fill` to give it the column's width
 -- (S.Wrapped text always gets it), `height` for a row whose height isn't its own (a fixed number, or a function).
 -- :Layout() places the shown rows and returns where the column ends, from the parent's top, to size the parent by.
+-- Wrapped text measures its new lines only once the client has drawn it, so the stack lays out again on the next
+-- frame; opts.onLayout(bottom) runs after each pass, the place to size the parent.
 local Stack = {}
 Stack.__index = Stack
 
 function S.Stack(parent, opts)
 	opts = opts or {}
 	local inset = S.metrics.inset
-	return setmetatable({ parent = parent, rows = {}, left = opts.left or inset, top = opts.top or inset,
-		width = opts.width }, Stack)
+	local self = setmetatable({ parent = parent, rows = {}, left = opts.left or inset, top = opts.top or inset,
+		width = opts.width, onLayout = opts.onLayout }, Stack)
+	self.later = CreateFrame("Frame")
+	self.later:Hide()
+	self.later:SetScript("OnUpdate", function(later)
+		later:Hide()
+		self:Place()
+	end)
+	return self
 end
 
+function Stack:Width()
+	return self.width or ((self.parent:GetWidth() or 0) - 2 * S.metrics.inset)
+end
+
+-- A filled row gets its width at once, so the client can start wrapping its text before the first layout.
 function Stack:Add(region, opts)
 	opts = opts or {}
-	self.rows[#self.rows + 1] = { region = region, gap = opts.gap, indent = opts.indent or 0,
-		fill = opts.fill or region.wraps == true, height = opts.height }
+	local row = { region = region, gap = opts.gap, indent = opts.indent or 0, fill = opts.fill or region.wraps == true,
+		height = opts.height }
+	self.rows[#self.rows + 1] = row
+	if row.fill and self:Width() > 0 then region:SetWidth(self:Width() - row.indent) end
 	return region
 end
 
@@ -537,8 +550,9 @@ local function rowHeight(row)
 	return h or (row.region.wraps and row.region:Measure()) or row.region:GetHeight() or 0
 end
 
-function Stack:Layout()
-	local width = self.width or ((self.parent:GetWidth() or 0) - 2 * S.metrics.inset)
+-- One pass: places the shown rows and tells onLayout where the column ends.
+function Stack:Place()
+	local width = self:Width()
 	local y, first = self.top, true
 	for _, row in ipairs(self.rows) do
 		local region = row.region
@@ -551,7 +565,13 @@ function Stack:Layout()
 			y = y + rowHeight(row)
 		end
 	end
+	if self.onLayout then self.onLayout(y) end
 	return y
+end
+
+function Stack:Layout()
+	self.later:Show()
+	return self:Place()
 end
 
 local function paint(b)
