@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.4.1-13-g87f1e1d. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.4.1-15-g86a6039. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- Material Glass: Material's flat controls on see-through glass. Windows are a light-tinted, translucent pane with
 -- a faint cloudy frost, a soft sheen down from the top and a lit top edge; wells, inputs and menus stay near solid
@@ -18,6 +18,9 @@ local WINDOW_ALPHA, GRAIN_ALPHA, SHEEN_ALPHA, SHINE_ALPHA = 0.8, 0.05, 0.07, 0.2
 local SHEEN_SHARE, SHEEN_MAX = 0.4, 160
 -- the outer edge of a window, popup or menu: dark, so the pane stands off a bright background
 local EDGE = { 0, 0, 0, 0.55 }
+-- wells and inputs: the same border as buttons and dropdowns, so a row of fields shares one edge, and a fainter lit
+-- top edge, so their dark fill looks set into the glass rather than cut out of it
+local FIELD_BORDER, FIELD_SHINE = { 1, 1, 1, 0.14 }, 0.06
 
 -- button kinds, filled from the scheme in colors(): fill, hover fill, border, label, and its lit top edge's alpha
 local KINDS = {}
@@ -148,7 +151,8 @@ S.RegisterSkin("materialglass", {
 		end
 	end,
 	well = function(f)
-		S.Panel(f, S.colors.well, S.colors.border)
+		S.Panel(f, S.colors.well, FIELD_BORDER)
+		f.shine = shine(f, FIELD_SHINE)
 	end,
 	line = function(parent)
 		return S.Solid(parent, "BORDER", S.colors.border), 1
@@ -181,10 +185,12 @@ S.RegisterSkin("materialglass", {
 		if on then b.bar:Show() b.selectedTex:Show() else b.bar:Hide() b.selectedTex:Hide() end
 	end,
 	input = function(e)
-		S.Panel(e.box or e, S.colors.well, S.colors.border)
+		local box = e.box or e
+		S.Panel(box, S.colors.well, FIELD_BORDER)
+		box.shine = shine(box, FIELD_SHINE)
 	end,
-	-- the light border at rest, brighter on hover, the accent while focused
+	-- the field border at rest, brighter on hover, the accent while focused
 	paintInput = function(e)
-		(e.box or e):SetBackdropBorderColor(unpack(e.focused and S.colors.accent or e.hovered and S.colors.outline or S.colors.border))
+		(e.box or e):SetBackdropBorderColor(unpack(e.focused and S.colors.accent or e.hovered and S.colors.outline or FIELD_BORDER))
 	end,
 })
