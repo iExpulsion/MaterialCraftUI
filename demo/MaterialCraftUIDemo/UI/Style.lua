@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.5.0-1-g2596a2c. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.5.0-3-g0b3d3bd. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
@@ -490,7 +490,10 @@ function S.Text(parent, size, color, layer)
 end
 
 -- Text that wraps to its width and is as tall as its lines, for descriptions, notes and status lines that can run
--- long with a big font or a narrow skin. Give it a width (an S.Stack row does) and :Measure() is its height.
+-- long with a big font or a narrow skin. Give it a width (an S.Stack row does) and :Measure() is its height. It
+-- must never be given a height: the client cuts text to fit one, with "...". Without one the client sizes it to its
+-- wrapped lines, which GetHeight reports; GetStringHeight gives a single line's height on this client, so the line
+-- count from the unwrapped width backs it up, and the taller of the two wins.
 function S.Wrapped(parent, size, color, layer)
 	local fs = S.Text(parent, size, color, layer)
 	fs:SetJustifyV("TOP")
@@ -498,7 +501,9 @@ function S.Wrapped(parent, size, color, layer)
 	fs:SetNonSpaceWrap(true)
 	fs.wraps = true
 	function fs:Measure()
-		return math.ceil(self:GetStringHeight())
+		local width = self:GetWidth() or 0
+		local lines = width > 0 and math.ceil((self:GetStringWidth() or 0) / width) or 1
+		return math.ceil(math.max(self:GetHeight() or 0, lines * (self:GetStringHeight() or 0)))
 	end
 	return fs
 end
@@ -543,9 +548,7 @@ function Stack:Layout()
 			region:ClearAllPoints()
 			region:SetPoint("TOPLEFT", self.parent, "TOPLEFT", self.left + row.indent, -y)
 			if row.fill then region:SetWidth(width - row.indent) end
-			local h = rowHeight(row)
-			if region.wraps then region:SetHeight(h) end
-			y = y + h
+			y = y + rowHeight(row)
 		end
 	end
 	return y
