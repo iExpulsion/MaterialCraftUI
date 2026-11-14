@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.6.0
 
 - **Wrapped Text:** `S.Wrapped` is text that wraps to its width, inside long words too, and measures how tall its
   lines are.
