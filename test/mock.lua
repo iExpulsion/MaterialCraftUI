@@ -175,6 +175,10 @@ GetTime = function() return mock.time end
 mock.mouseDown, mock.mouseOver = false, nil
 IsMouseButtonDown = function() return mock.mouseDown end
 MouseIsOver = function(f) return f ~= nil and mock.mouseOver == f end
+-- popups: the dialogs defined, and the last one shown with its text argument
+StaticPopupDialogs = {}
+StaticPopup_Show = function(which, arg) mock.popup = { which = which, arg = arg } end
+ReloadUI = function() mock.reloaded = true end
 -- what's on the cursor, as GetCursorInfo returns it ({ kind, ... }), or nil
 GetCursorInfo = function() if mock.cursor then return unpack(mock.cursor) end end
 ClearCursor = function() mock.cursor = nil end
