@@ -14,6 +14,15 @@
   drag to reorder, colored headers and `SetSticky` headers. `S.List.AutoHideBar` gives any scroll frame a bar that
   only shows when there's something to scroll. Moved here from Synastria Build Suite and Rotation Assist, which
   each kept a copy.
+- **Settings:** `S.Settings` keeps the player's look in the addon's saved table: the skin (a change offers a
+  reload), the window size and pixel snapping, with defaults filled in. `S.Settings.TitleBar` builds a window's
+  Theme and Size dropdowns and Snap to Pixels box, which follow changes made elsewhere. Frames made through
+  `S.Settings.PixelScale` can pass a function that puts them back after their scale changes.
+- **Minimap Button:** `S.MinimapButton`, the round minimap button with an icon: drag moves it around the edge of any
+  minimap shape, Shift-drag frees it, and its spot and visibility are saved in a table the addon gives it.
+- **Text Areas:** `S.TextArea`, a scrolling multi-line edit box in a well, for notes and export strings.
+- Tables check their own options rather than row fields for header rules, so test mocks that invent fields don't
+  trip them.
 - **Demo:** icons in the navigation, a Groups page with colored, sticky headers that fold their group, and a List
   page.
 
