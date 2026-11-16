@@ -1638,8 +1638,8 @@ function Table:Redraw()
 		local item = self.items[self.offset + i]
 		local header = item and self.header and self.header(item)
 		if i == 1 and stuckItem then item, header = stuckItem, stuckLabel end
-		if row.stickyRule then
-			if i == 1 and stuckItem then row.stickyRule:Show() else row.stickyRule:Hide() end
+		if i == 1 and self.stickyHeaders then
+			if stuckItem then row.stickyRule:Show() else row.stickyRule:Hide() end
 		end
 		row.item = item
 		row.moveIndex = item and not header and self.offset + i or nil
@@ -1655,7 +1655,7 @@ function Table:Redraw()
 		end
 		local groupColor = header and self.headerColor and self.headerColor(item)
 		row.headerText:SetTextColor(unpack(groupColor or S.colors.heading))
-		if row.headerRule then
+		if self.headerColor then
 			if groupColor then
 				row.headerRule:SetVertexColor(unpack(groupColor))
 				row.headerRule:Show()
