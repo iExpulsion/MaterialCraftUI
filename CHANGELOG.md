@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Navigation Icons:** `S.NavEntry` takes an optional icon, drawn where the skin puts the label, with the label
+  moved right of it.
+- **Sticky Group Headers:** `S.Table`'s `stickyHeaders` option keeps the header of the group you've scrolled into on
+  the top row, with a rule under it, until the next group's header reaches the top.
+
 ## 1.6.0
 
 - **Wrapped Text:** `S.Wrapped` is text that wraps to its width, inside long words too, and measures how tall its

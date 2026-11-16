@@ -212,3 +212,40 @@ MOCK.check("grip dots", #grip.dots == 6 and grip.width == 6 and grip.height == 1
 	and grip.dots[6].point[3] == -10 and grip.dots[1].vertex[1] == S.colors.muted[1])
 grip:SetColor(S.colors.text)
 MOCK.check("grip recolors", grip.dots[4].vertex[1] == S.colors.text[1])
+
+-- Sticky headers: once a group's header scrolls off, the top row shows it (with a rule under it) over the group's
+-- rows; a header that's already on top, or a table without the option, draws as usual.
+local grouped = {}
+for g = 1, 3 do
+	grouped[#grouped + 1] = { head = "Group " .. g }
+	for i = 1, 5 do grouped[#grouped + 1] = { n = g .. "-" .. i } end
+end
+local function groupedTable(sticky)
+	local t = S.Table.New(UIParent, nil, 300, 140, {
+		columns = { { key = "n", label = "Name", width = 100 } },
+		cell = function(item) return item.n end,
+		header = function(item) return item.head end,
+		stickyHeaders = sticky,
+	})
+	t:SetItems(grouped)
+	return t
+end
+local sticky = groupedTable(true)
+-- at the top, the first row is the group's own header
+MOCK.check("own header on top", sticky.rows[1].headerText.text == "Group 1" and not sticky.rows[1].stickyRule.shown
+	and sticky.rows[2].cells[1].text == "1-1")
+sticky:ScrollTo(3)
+-- scrolled into a group, the top row holds its header and the rows below go on with the group
+MOCK.check("header held on top", sticky.rows[1].headerText.shown and sticky.rows[1].headerText.text == "Group 1"
+	and sticky.rows[1].item == grouped[1] and sticky.rows[1].stickyRule.shown and sticky.rows[1].moveIndex == nil
+	and sticky.rows[2].cells[1].text == "1-4")
+sticky:ScrollTo(6)
+-- the next header reaching the top replaces it
+MOCK.check("next header takes over", sticky.rows[1].headerText.text == "Group 2" and not sticky.rows[1].stickyRule.shown)
+sticky:ScrollTo(8)
+MOCK.check("second group held", sticky.rows[1].headerText.text == "Group 2" and sticky.rows[2].cells[1].text == "2-3")
+-- without the option the top row is just the next item
+local loose = groupedTable(false)
+loose:ScrollTo(3)
+MOCK.check("no sticky without the option", not loose.rows[1].headerText.shown and loose.rows[1].cells[1].text == "1-3"
+	and loose.rows[1].stickyRule == nil)

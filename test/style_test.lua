@@ -142,3 +142,12 @@ MOCK.check("unknown role is an error", not pcall(S.SetTheme, { primry = "ff0000"
 S.SetTheme()
 MOCK.check("reset to the baseline scheme", near(S.colors.accent, 0.816, 0.737, 1))
 MOCK.check("theme refreshes quality fallback", S.QualityColor(99) == S.colors.text)
+
+-- A navigation entry with an icon puts it where the skin had the label and moves the label right of it; one
+-- without has no icon.
+local navParent = CreateFrame("Frame", nil, UIParent)
+local plainNav = S.NavEntry(CreateFrame("Button", nil, navParent), "Page")
+local iconNav = S.NavEntry(CreateFrame("Button", nil, navParent), "Page", "Interface\\Icons\\Spell_Test")
+MOCK.check("nav icon placed", iconNav.icon.texture == "Interface\\Icons\\Spell_Test" and iconNav.icon.width == 18
+	and plainNav.icon == nil)
+MOCK.check("nav label moved past the icon", select(2, iconNav.label:GetPoint()) > select(2, iconNav.icon:GetPoint()))
