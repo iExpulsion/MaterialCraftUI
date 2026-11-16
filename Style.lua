@@ -2282,6 +2282,57 @@ S.RegisterSkin("material", {
 })
 skin = skins.material
 
+-------------------------------------------------------------------------------- text area
+
+-- A scrolling multi-line edit box in a well, for notes and export strings: clicking anywhere in the well types in
+-- it, and its scroll bar shows only when the text runs past the bottom. Returns the well, with .edit and .scroll,
+-- :SetValue(text) (left alone while being typed in) and :SetReadOnly(on). opts: font ("small"), pad (the space
+-- inside the well's frame, default 8), onInput(text) (as the player types), onTextChanged(edit, userInput) (on
+-- every change, typed or set), onEscape(edit) (default: stop typing), selectOnFocus (select all on click, for a
+-- string to copy).
+function S.TextArea(parent, name, width, height, opts)
+	opts = opts or {}
+	local box = CreateFrame("Frame", nil, parent)
+	box:SetSize(width, height)
+	S.Well(box)
+	local pad = (opts.pad or 8) + S.metrics.wellInset
+	local scroll = CreateFrame("ScrollFrame", name, box, "UIPanelScrollFrameTemplate")
+	scroll:SetPoint("TOPLEFT", pad, -pad)
+	scroll:SetPoint("BOTTOMRIGHT", -pad - 10, pad)
+	local edit = CreateFrame("EditBox", nil, scroll)
+	edit:SetMultiLine(true)
+	edit:SetAutoFocus(false)
+	S.SetFont(edit, opts.font or "small")
+	edit:SetWidth(width - 2 * pad - 10)
+	edit:SetScript("OnEscapePressed", function(self)
+		if opts.onEscape then opts.onEscape(self) else self:ClearFocus() end
+	end)
+	edit:SetScript("OnEditFocusGained", function(self)
+		self.focused = true
+		if opts.selectOnFocus then self:HighlightText() end
+	end)
+	edit:SetScript("OnEditFocusLost", function(self) self.focused = false end)
+	edit:SetScript("OnTextChanged", function(self, userInput)
+		if opts.onTextChanged then opts.onTextChanged(self, userInput) end
+		if userInput and opts.onInput then opts.onInput(self:GetText()) end
+	end)
+	scroll:SetScrollChild(edit)
+	S.TrackInput(edit, box)
+	List.AutoHideBar(scroll, name)
+	box:EnableMouse(true)
+	box:SetScript("OnMouseDown", function() edit:SetFocus() end)
+	box.edit, box.scroll = edit, scroll
+	function box:SetValue(text)
+		if not edit.focused then edit:SetText(text or "") end
+	end
+	function box:SetReadOnly(on)
+		edit:EnableMouse(not on)
+		box:EnableMouse(not on)
+		if on then edit:ClearFocus() end
+	end
+	return box
+end
+
 -------------------------------------------------------------------------------- minimap button
 
 -- Which quadrants of each minimap shape are round, in the order GetMinimapShape addons use.
