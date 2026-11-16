@@ -126,6 +126,11 @@ MOCK.check("group held on top", groups.rows[1].headerText.text == "Weapons" and 
 groups:ScrollTo(0)
 groups.rows[1].scripts.OnClick(groups.rows[1], "LeftButton")
 MOCK.check("group folds", groups.rows[1].headerText.text == "Weapons (Folded)" and groups.rows[2].headerText.text == "Armor")
+-- The List page lists the groups with colored headers, two-line rows and a sticky overlay.
+local listPage = parts.listPage
+MOCK.check("list page", listPage.rows[1].text.text == "Weapons" and listPage.rows[1].rule.shown
+	and listPage.rows[2].sub.shown and listPage.stuck ~= nil)
+
 local navIcons = 0
 for _, f in ipairs(MOCK.created) do
 	if f.page and f.icon and f.icon.texture then navIcons = navIcons + 1 end

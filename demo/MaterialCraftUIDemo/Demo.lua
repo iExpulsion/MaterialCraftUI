@@ -24,7 +24,7 @@ local THEMES = {
 local NAV = {
 	{ "Controls", { "Buttons", "Forms", "Layout", "Text" } },
 	{ "Theme", { "Colors" } },
-	{ "Data", { "Items", "Groups" } },
+	{ "Data", { "Items", "Groups", "List" } },
 }
 
 -- each page's icon in the navigation (S.NavEntry's icon)
@@ -36,6 +36,7 @@ local NAV_ICONS = {
 	Colors = "Interface\\Icons\\INV_Misc_Gem_Variety_01",
 	Items = "Interface\\Icons\\INV_Misc_Bag_08",
 	Groups = "Interface\\Icons\\INV_Misc_GroupLooking",
+	List = "Interface\\Icons\\INV_Scroll_03",
 }
 
 local COLOR_ROLES = { "window", "sidebar", "panel", "well", "border", "outline", "hover", "selected", "accent",
@@ -693,6 +694,43 @@ function PAGE.Groups(page)
 	list.frame:SetPoint("TOPLEFT", top, "BOTTOMLEFT", 0, -14)
 	refresh()
 	parts.groups = list
+end
+
+function PAGE.List(page)
+	local top = heading(page, "List", "An S.List, for short mixed lists rather than data: two-line rows, checkboxes, "
+		.. "an X on hover to remove a row, colored headers that stay on top, and a selected row's accent bar.")
+	local well = CreateFrame("Frame", nil, page)
+	well:SetPoint("TOPLEFT", top, "BOTTOMLEFT", 0, -14)
+	well:SetSize(CONTENT_W - 2 * S.PAD, ITEMS_H + S.CONTROL_H + S.GAP)
+	S.Well(well)
+	local wi = 1 + S.metrics.wellInset
+	local list = S.List.New(well, "MaterialCraftUIDemoList", CONTENT_W - 2 * S.PAD - 2 * wi - 14,
+		ITEMS_H + S.CONTROL_H + S.GAP - 2 * wi, "content", 14)
+	list.scroll:SetPoint("TOPLEFT", wi, -wi)
+	list:SetSticky()
+	local picked, removed, on = nil, {}, {}
+	local render
+	render = function()
+		list:Begin()
+		for _, group in ipairs(GROUPS) do
+			local count = 0
+			for _, item in ipairs(ITEMS) do
+				if group.slots[item[3]] and not removed[item] then count = count + 1 end
+			end
+			list:Add({ text = group.name, header = true, color = S.colors[group.hue], status = S.Count(count, "Item") })
+			for _, item in ipairs(ITEMS) do
+				if group.slots[item[3]] and not removed[item] then
+					list:Add({ text = S.Hex(S.QualityColor(item[2]), item[1]), sub = item[3] .. ", level " .. item[4],
+						check = on[item] == true, onCheck = function() on[item] = not on[item] or nil render() end,
+						selected = item == picked, onClick = function() picked = item render() end,
+						onRemove = function() removed[item] = true render() end, removeTip = "Remove from the list" })
+				end
+			end
+		end
+		list:End()
+	end
+	render()
+	parts.listPage = list
 end
 
 local setTheme

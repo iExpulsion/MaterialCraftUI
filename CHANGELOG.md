@@ -9,7 +9,13 @@
 - **Group Colors:** red, blue, green and yellow theme roles (`S.colors.red` and so on) for telling groups apart, and
   `S.Table`'s `headerColor` option, which colors a group header's label and draws a rule under it in that color.
   The Classic skin has its own brighter set.
-- **Demo:** icons in the navigation, and a Groups page with colored, sticky headers that fold their group.
+- **Lists:** `S.List`, for short mixed lists beside `S.Table`'s data grids: rows of different heights (two-line
+  rows, gaps above headers), checkboxes, collapse marks, icons, an X on hover to remove a row, cursor drops,
+  drag to reorder, colored headers and `SetSticky` headers. `S.List.AutoHideBar` gives any scroll frame a bar that
+  only shows when there's something to scroll. Moved here from Synastria Build Suite and Rotation Assist, which
+  each kept a copy.
+- **Demo:** icons in the navigation, a Groups page with colored, sticky headers that fold their group, and a List
+  page.
 
 ## 1.6.0
 
