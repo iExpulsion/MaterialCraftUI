@@ -249,3 +249,22 @@ local loose = groupedTable(false)
 loose:ScrollTo(3)
 MOCK.check("no sticky without the option", not loose.rows[1].headerText.shown and loose.rows[1].cells[1].text == "1-3"
 	and loose.rows[1].stickyRule == nil)
+
+-- Header colors: a group header takes its color on the label and a rule under it; one without a color keeps the
+-- heading color and no rule; the theme's group hues are there to use.
+local colored = S.Table.New(UIParent, nil, 300, 140, {
+	columns = { { key = "n", label = "Name", width = 100 } },
+	cell = function(item) return item.n end,
+	header = function(item) return item.head end,
+	headerColor = function(item) return item.head == "Group 1" and S.colors.red or nil end,
+})
+colored:SetItems(grouped)
+local r1 = colored.rows[1]
+MOCK.check("theme has group hues", S.colors.red and S.colors.blue and S.colors.green and S.colors.yellow)
+MOCK.check("colored header", r1.headerText.color[1] == S.colors.red[1] and r1.headerRule.shown
+	and r1.headerRule.vertex[1] == S.colors.red[1])
+colored:ScrollTo(6)
+MOCK.check("uncolored header", colored.rows[1].headerText.color[1] == S.colors.heading[1]
+	and not colored.rows[1].headerRule.shown)
+-- a table without headerColor makes no rules
+MOCK.check("no rules without the option", sticky.rows[1].headerRule == nil)

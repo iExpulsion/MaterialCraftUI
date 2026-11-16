@@ -116,4 +116,20 @@ MOCK.check("cognac dialog", parts.dialog.width == 360 + 2 * (S.metrics.inset - S
 NS.Demo.setTheme(1)
 MOCK.check("material again", S.Skin() == "material" and NS.Demo.window().width == 680)
 
+-- The Groups page colors each group's header from the theme, holds the scrolled-into group on top, and folds a
+-- group when its header is clicked; the navigation shows each page's icon.
+local groups = parts.groups
+MOCK.check("groups colored", groups.rows[1].headerText.text == "Weapons" and groups.rows[1].headerText.color[1] == S.colors.red[1]
+	and groups.rows[1].headerRule.shown)
+groups:ScrollTo(3)
+MOCK.check("group held on top", groups.rows[1].headerText.text == "Weapons" and groups.rows[1].stickyRule.shown)
+groups:ScrollTo(0)
+groups.rows[1].scripts.OnClick(groups.rows[1], "LeftButton")
+MOCK.check("group folds", groups.rows[1].headerText.text == "Weapons (Folded)" and groups.rows[2].headerText.text == "Armor")
+local navIcons = 0
+for _, f in ipairs(MOCK.created) do
+	if f.page and f.icon and f.icon.texture then navIcons = navIcons + 1 end
+end
+MOCK.check("nav icons", navIcons >= 7)
+
 S.UseSkin("material")

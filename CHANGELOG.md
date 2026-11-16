@@ -6,6 +6,10 @@
   moved right of it.
 - **Sticky Group Headers:** `S.Table`'s `stickyHeaders` option keeps the header of the group you've scrolled into on
   the top row, with a rule under it, until the next group's header reaches the top.
+- **Group Colors:** red, blue, green and yellow theme roles (`S.colors.red` and so on) for telling groups apart, and
+  `S.Table`'s `headerColor` option, which colors a group header's label and draws a rule under it in that color.
+  The Classic skin has its own brighter set.
+- **Demo:** icons in the navigation, and a Groups page with colored, sticky headers that fold their group.
 
 ## 1.6.0
 

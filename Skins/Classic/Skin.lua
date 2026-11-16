@@ -86,7 +86,7 @@ S.RegisterSkin("classic", {
 		surfaceLowest = "000000", surface = "0b0b0b", surfaceLow = "111111", surfaceContainer = "161616",
 		surfaceHigh = "262626", onSurface = "ffffff", onSurfaceVariant = "bfbfbf", outline = "999999",
 		outlineVariant = "4d4d4d", primary = "ffd100", onPrimary = "000000", error = "ff3a30", errorContainer = "5a1210",
-		success = "1eff00", warning = "ff8000",
+		success = "1eff00", warning = "ff8000", red = "ff4040", blue = "40a0ff", green = "40ff40", yellow = "ffd100",
 	},
 	-- rows take a blue wash on hover and a gold one when selected, as the quest log does
 	colors = function(c)

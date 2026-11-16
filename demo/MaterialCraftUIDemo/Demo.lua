@@ -24,11 +24,32 @@ local THEMES = {
 local NAV = {
 	{ "Controls", { "Buttons", "Forms", "Layout", "Text" } },
 	{ "Theme", { "Colors" } },
-	{ "Data", { "Items" } },
+	{ "Data", { "Items", "Groups" } },
+}
+
+-- each page's icon in the navigation (S.NavEntry's icon)
+local NAV_ICONS = {
+	Buttons = "Interface\\Icons\\INV_Misc_Gear_01",
+	Forms = "Interface\\Icons\\INV_Misc_Note_01",
+	Layout = "Interface\\Icons\\INV_Misc_Map_01",
+	Text = "Interface\\Icons\\INV_Misc_Book_09",
+	Colors = "Interface\\Icons\\INV_Misc_Gem_Variety_01",
+	Items = "Interface\\Icons\\INV_Misc_Bag_08",
+	Groups = "Interface\\Icons\\INV_Misc_GroupLooking",
 }
 
 local COLOR_ROLES = { "window", "sidebar", "panel", "well", "border", "outline", "hover", "selected", "accent",
-	"accentHover", "onAccent", "text", "heading", "muted", "disabled", "good", "warn", "bad", "badDim" }
+	"accentHover", "onAccent", "text", "heading", "muted", "disabled", "good", "warn", "bad", "badDim", "red", "blue",
+	"green", "yellow" }
+
+-- the Groups page's groups, each with a hue and the item slots in it
+local GROUPS = {
+	{ name = "Weapons", hue = "red", slots = { ["One-Hand"] = true, ["Two-Hand"] = true, Ranged = true, ["Off Hand"] = true } },
+	{ name = "Armor", hue = "blue", slots = { Head = true, Shoulder = true, Chest = true, Wrist = true, Hands = true,
+		Waist = true, Legs = true, Feet = true, Back = true } },
+	{ name = "Jewelry", hue = "yellow", slots = { Neck = true, Finger = true } },
+	{ name = "Other", hue = "green", slots = { Bag = true, Relic = true } },
+}
 
 local QUALITY_NAMES = { [0] = "Poor", "Common", "Uncommon", "Rare", "Epic", "Legendary", "Artifact", "Heirloom" }
 
@@ -629,6 +650,51 @@ function PAGE.Items(page)
 	parts.list, parts.menu, parts.rowMenu = list, menu, rowMenu
 end
 
+function PAGE.Groups(page)
+	local top = heading(page, "Groups", "An S.Table of groups. Each header takes a hue from the theme (headerColor), "
+		.. "the group you've scrolled into stays on top (stickyHeaders), and clicking a header folds its group away.")
+	local collapsed = {}
+	local list
+	local function refresh()
+		local rows = {}
+		for _, group in ipairs(GROUPS) do
+			rows[#rows + 1] = { header = group.name .. (collapsed[group] and " (Folded)" or ""), group = group }
+			if not collapsed[group] then
+				for _, item in ipairs(ITEMS) do
+					if group.slots[item[3]] then rows[#rows + 1] = item end
+				end
+			end
+		end
+		list:SetItems(rows, nil, true)
+	end
+	list = S.Table.New(page, nil, CONTENT_W - 2 * S.PAD, ITEMS_H + S.CONTROL_H + S.GAP, {
+		rowH = ROW_H,
+		columns = {
+			{ key = "name", label = "Name", width = 220, stretch = true, sortable = false },
+			{ key = "slot", label = "Slot", width = 120, sortable = false },
+			{ key = "level", label = "Level", width = 64, sortable = false },
+		},
+		cell = function(item, key)
+			if key == "name" then return item[1], S.QualityColor(item[2]) end
+			if key == "slot" then return item[3], S.colors.muted end
+			return tostring(item[4]), S.colors.muted
+		end,
+		header = function(item) return item.header end,
+		headerColor = function(item) return S.colors[item.group.hue] end,
+		headerClicks = true,
+		stickyHeaders = true,
+		onClick = function(item)
+			if item.group then
+				collapsed[item.group] = not collapsed[item.group] or nil
+				refresh()
+			end
+		end,
+	})
+	list.frame:SetPoint("TOPLEFT", top, "BOTTOMLEFT", 0, -14)
+	refresh()
+	parts.groups = list
+end
+
 local setTheme
 
 local function build()
@@ -731,7 +797,7 @@ local function build()
 			e:SetHeight(S.CONTROL_H)
 			e:SetPoint("TOPLEFT", 4, y)
 			e:SetPoint("TOPRIGHT", -5, y)
-			S.NavEntry(e, name)
+			S.NavEntry(e, name, NAV_ICONS[name])
 			e.page = name
 			e:SetScript("OnClick", function() show(name) end)
 			entries[#entries + 1] = e
