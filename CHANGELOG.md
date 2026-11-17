@@ -22,6 +22,11 @@
 - **Minimap Button:** `S.MinimapButton`, the round minimap button with an icon: drag moves it around the edge of any
   minimap shape, Shift-drag frees it, and its spot and visibility are saved in a table the addon gives it.
 - **Text Areas:** `S.TextArea`, a scrolling multi-line edit box in a well, for notes and export strings.
+- **Skinned Rows:** list and table rows hover and show selection in the skin's own look, through `S.Row` and
+  `S.PaintRow` and the skins' optional `row` and `paintRow`. Classic keeps the selected row lit in the quest log's
+  gold highlight and Cognac puts its selected chip under it, as their navigation entries do; Material and Material
+  Glass keep the tint, with the accent bar on a selected list row. Tables hovered in a plain wash before.
+- **Scroll Tracks:** the `scrollTrack` color role, which each skin sets: dark in Classic, a faint gold in Cognac.
 - Tables check their own options rather than row fields for header rules, so test mocks that invent fields don't
   trip them.
 - **Demo:** icons in the navigation, a Groups page with colored, sticky headers that fold their group, and a List

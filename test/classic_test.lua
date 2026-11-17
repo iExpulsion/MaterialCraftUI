@@ -55,6 +55,18 @@ MOCK.check("nav selected", nav.selectedTex.shown and nav.selectedTex.texture:fin
 nav:SetSelected(false)
 MOCK.check("nav unselected", not nav.selectedTex.shown)
 
+-- A list row lights the same gold highlight while selected, with no Material accent bar, and its scroll track is dark.
+local rowList = S.List.New(parent, "ClassicRowList", 200, 100)
+rowList:Begin()
+local row = rowList:Add({ text = "Picked", selected = true })
+rowList:End()
+MOCK.check("row selected", row.selectedTex.shown and row.selectedTex.texture:find("UI%-QuestLogTitleHighlight")
+	and row.bar == nil)
+rowList:Begin()
+rowList:Add({ text = "Picked" })
+rowList:End()
+MOCK.check("row unselected", not row.selectedTex.shown and S.colors.scrollTrack[4] == 0.5)
+
 -- A one-line input is the stock edit box border; a tall one is tooltip-bordered and turns gold while focused.
 local e = S.Input(parent, nil, 200, "Search")
 MOCK.check("edit box border", e.border.parts[1].texture == "Interface\\Common\\Common-Input-Border" and e.backdrop == nil)

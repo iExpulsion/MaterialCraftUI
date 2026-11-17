@@ -115,6 +115,7 @@ S.RegisterSkin("materialglass", {
 		c.outline = white(0.3)
 		c.scrollThumb = white(0.18)
 		c.scrollThumbHover = white(0.32)
+		c.scrollTrack = white(0.05)
 		KINDS.primary = { bg = c.accent, hover = c.accentHover, border = c.accent, text = c.onAccent, shine = 0.3 }
 		KINDS.secondary = { bg = white(0.06), hover = white(0.11), border = white(0.14), text = c.text, shine = 0.12 }
 		KINDS.selected = { bg = tint(c.accent, 0.2), hover = tint(c.accent, 0.28), border = tint(c.accent, 0.55),
