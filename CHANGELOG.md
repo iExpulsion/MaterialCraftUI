@@ -26,6 +26,10 @@
   `S.PaintRow` and the skins' optional `row` and `paintRow`. Classic keeps the selected row lit in the quest log's
   gold highlight and Cognac puts its selected chip under it, as their navigation entries do; Material and Material
   Glass keep the tint, with the accent bar on a selected list row. Tables hovered in a plain wash before.
+- **Theme Previews:** hovering a theme in the Theme dropdown shows a small card drawn in that theme beside the menu
+  (a window with buttons, a checkbox and a selected and a hovered row), so players can see it before reloading.
+  `S.SkinPreview(key, roles)` builds one, `S.Settings.SkinOptions()` gives the dropdown options with previews, and
+  dropdown options take `preview`.
 - **Scroll Tracks:** the `scrollTrack` color role, which each skin sets: dark in Classic, a faint gold in Cognac.
 - Tables check their own options rather than row fields for header rules, so test mocks that invent fields don't
   trip them.

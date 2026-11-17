@@ -43,4 +43,18 @@ MOCK.check("size picked", db.windowScale == 0.8 and controls.size.label.text == 
 -- the snap box toggles snapping
 controls.snap.scripts.OnClick(controls.snap)
 MOCK.check("snap box", db.pixelScale == false and not controls.snap.on)
+
+-- hovering a theme shows a card drawn in that skin beside the menu, and the skin in use stays as it was
+local accent = S.colors.accent
+local classicItem = controls.theme.items[2]
+classicItem.scripts.OnEnter(classicItem)
+local card = S.SkinPreview("classic")
+MOCK.check("preview shown", card and card.shown and card.point[2] == controls.theme.menu
+	and card.rows[1].selectedTex.texture:find("UI%-QuestLogTitleHighlight"))
+MOCK.check("skin kept", S.Skin() == "material" and S.colors.accent[1] == accent[1] and S.colors.accent[2] == accent[2]
+	and S.metrics.inset == S.PAD)
+-- built once per skin, and hidden again on leaving the item
+classicItem.scripts.OnEnter(classicItem)
+classicItem.scripts.OnLeave(classicItem)
+MOCK.check("preview cached and hidden", S.SkinPreview("classic") == card and not card.shown)
 S.UseSkin("material")
