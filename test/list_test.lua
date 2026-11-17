@@ -42,6 +42,22 @@ MOCK.check("remove clicked", removed == "Perk 2")
 rows[3].scripts.OnLeave(rows[3])
 MOCK.check("hover ends", not rows[3].remove.shown and rows[3].status.shown)
 
+-- moving from a row onto its X keeps the row hovered; leaving the X for elsewhere ends it
+rows[3].scripts.OnEnter(rows[3])
+MOCK.mouseOver = rows[3].remove
+rows[3].scripts.OnLeave(rows[3])
+MOCK.check("hover kept on X", list.hoverRow == rows[3] and rows[3].remove.shown)
+MOCK.mouseOver = nil
+rows[3].remove.scripts.OnLeave(rows[3].remove)
+MOCK.check("hover ends off X", list.hoverRow == nil and not rows[3].remove.shown)
+
+-- entering the next row before the last one sees the mouse leave leaves one row hovered
+rows[3].scripts.OnEnter(rows[3])
+rows[4].scripts.OnEnter(rows[4])
+MOCK.check("one hovered row", list.hoverRow == rows[4] and not rows[3].remove.shown and rows[3].status.shown)
+rows[4].scripts.OnLeave(rows[4])
+MOCK.check("no hovered row", list.hoverRow == nil)
+
 -- a shorter redraw hides the rows it no longer needs and reuses the rest
 build(1)
 MOCK.check("rows reused", list.rows[1] == rows[1] and rows[7].shown and not rows[8].shown)

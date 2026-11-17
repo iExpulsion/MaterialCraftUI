@@ -13,7 +13,8 @@
   rows, gaps above headers), checkboxes, collapse marks, icons, an X on hover to remove a row, cursor drops,
   drag to reorder, colored headers and `SetSticky` headers. `S.List.AutoHideBar` gives any scroll frame a bar that
   only shows when there's something to scroll. Moved here from Synastria Build Suite and Rotation Assist, which
-  each kept a copy.
+  each kept a copy. Rows hover in the skin's own row highlight, and only one row at a time: moving down a list
+  could leave the row above lit along with the one under the mouse.
 - **Settings:** `S.Settings` keeps the player's look in the addon's saved table: the skin (a change offers a
   reload), the window size and pixel snapping, with defaults filled in. `S.Settings.TitleBar` builds a window's
   Theme and Size dropdowns and Snap to Pixels box, which follow changes made elsewhere. Frames made through
