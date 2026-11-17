@@ -12,8 +12,7 @@
 - **Lists:** `S.List`, for short mixed lists beside `S.Table`'s data grids: rows of different heights (two-line
   rows, gaps above headers), checkboxes, collapse marks, icons, an X on hover to remove a row, cursor drops,
   drag to reorder, colored headers and `SetSticky` headers. `S.List.AutoHideBar` gives any scroll frame a bar that
-  only shows when there's something to scroll. Moved here from Synastria Build Suite and Rotation Assist, which
-  each kept a copy. Rows hover in the skin's own row highlight, and only one row at a time: moving down a list
+  only shows when there's something to scroll. Moved here from addons that each kept a copy. Rows hover in the skin's own row highlight, and only one row at a time: moving down a list
   could leave the row above lit along with the one under the mouse.
 - **Settings:** `S.Settings` keeps the player's look in the addon's saved table: the skin (a change offers a
   reload), the window size and pixel snapping, with defaults filled in. `S.Settings.TitleBar` builds a window's
@@ -76,7 +75,7 @@
 
 - **Pickers:** `S.Picker` is a searchable, scrolling list that opens under a button like a dropdown, for choices
   too many for a dropdown's menu, and `S.PickerButton` is the dropdown-looking button that opens it. It filters as
-  you type and can toggle several entries in multi mode. It started in Synastria Companion.
+  you type and can toggle several entries in multi mode.
 - **Sliders:** `S.Slider` is a horizontal slider that snaps to its steps and shows its value beside it, formatted
   as you like. Material draws a thin track with an accent fill and handle, and Classic the Interface Options
   slider; skins can draw their own with `slider` and `paintSlider`. The demo's Forms page shows two.
