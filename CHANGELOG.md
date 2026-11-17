@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.7.0
 
 - **Navigation Icons:** `S.NavEntry` takes an optional icon, drawn where the skin puts the label, with the label
   moved right of it.
