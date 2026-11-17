@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.6.0-10-gb46422f. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.6.0-13-ga65e027. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
@@ -89,13 +89,14 @@ local function build()
 	c.badDim = M3.errorContainer
 	c.red, c.blue, c.green, c.yellow = M3.red, M3.blue, M3.green, M3.yellow
 	-- roles a skin can set apart from the scheme: table rows, the selected entry of a navigation list, dropdown
-	-- arrows and scrollbar thumbs
+	-- arrows and scroll bars
 	c.rowHover = c.hover
 	c.rowSelected = c.selected
 	c.navSelected = c.heading
 	c.arrow = c.muted
 	c.scrollThumb = c.border
 	c.scrollThumbHover = c.outline
+	c.scrollTrack = withAlpha(M3.onSurface, 0.04)
 	if skin.colors then skin.colors(c, M3) end
 
 	-- Filled (primary, one per view), tonal (secondary), text (ghost), and the selected side of a segmented button
@@ -432,7 +433,7 @@ function S.ScrollBar(scroll, scrollName)
 	bar:ClearAllPoints()
 	bar:SetPoint("TOPLEFT", scroll, "TOPRIGHT", 4, 0)
 	bar:SetPoint("BOTTOMLEFT", scroll, "BOTTOMRIGHT", 4, 0)
-	local track = S.Solid(bar, "BACKGROUND", { M3.onSurface[1], M3.onSurface[2], M3.onSurface[3], 0.04 })
+	local track = S.Solid(bar, "BACKGROUND", S.colors.scrollTrack)
 	track:SetAllPoints()
 	bar:SetThumbTexture(WHITE)
 	local thumb = bar:GetThumbTexture()
@@ -1078,6 +1079,20 @@ function S.Highlight(frame)
 	return frame
 end
 
+local function rowSkin() return skin.row and skin or skins.material end
+
+-- A list or table row's hover and selected look; bar asks for an accent bar on the selected row where the skin
+-- draws one. S.PaintRow(row, on) shows it selected or not.
+function S.Row(row, bar)
+	rowSkin().row(row, bar)
+	S.PaintRow(row, false)
+	return row
+end
+
+function S.PaintRow(row, on)
+	rowSkin().paintRow(row, on)
+end
+
 -- An entry in a navigation sidebar: its label (b.label, in the "normal" size) and its hover and selected look.
 -- With an icon texture, b.icon sits where the skin puts the label and the label moves right of it.
 -- b:SetSelected(on) repaints it.
@@ -1296,12 +1311,7 @@ local function newRow(self, i)
 		local stripe = S.Solid(row, "BACKGROUND", { C.text[1], C.text[2], C.text[3], 0.025 })
 		stripe:SetAllPoints()
 	end
-	row.hoverTex = S.Solid(row, "BORDER", C.rowHover)
-	row.hoverTex:SetAllPoints()
-	row.hoverTex:Hide()
-	row.selectedTex = S.Solid(row, "BORDER", C.rowSelected)
-	row.selectedTex:SetAllPoints()
-	row.selectedTex:Hide()
+	S.Row(row)
 	row.icon = row:CreateTexture(nil, "ARTWORK")
 	row.icon:SetSize(self.rowH - 4, self.rowH - 4)
 	-- crops the dark frame Blizzard's icon art has around its edge, which is uneven and makes icons look off-center
@@ -1347,7 +1357,6 @@ local function newRow(self, i)
 		return item and (self.headerClicks or not (self.header and self.header(item))) and item or nil
 	end
 	row:SetScript("OnEnter", function(r)
-		r.hoverTex:Show()
 		local item = itemOf(r)
 		if item and self.tooltip then
 			GameTooltip:SetOwner(r, "ANCHOR_RIGHT")
@@ -1355,8 +1364,7 @@ local function newRow(self, i)
 			GameTooltip:Show()
 		end
 	end)
-	row:SetScript("OnLeave", function(r)
-		r.hoverTex:Hide()
+	row:SetScript("OnLeave", function()
 		GameTooltip:Hide()
 	end)
 	row:SetScript("OnClick", function(r, button)
@@ -1547,7 +1555,7 @@ function Table.New(parent, name, width, height, opts)
 	-- the same 2px gap below the header's rule as above the bottom border
 	bar:SetPoint("TOPRIGHT", -inset - 2, -inset - self.bodyTop - 2)
 	bar:SetPoint("BOTTOMRIGHT", -inset - 2, inset + 2)
-	local track = S.Solid(bar, "BACKGROUND", { C.text[1], C.text[2], C.text[3], 0.04 })
+	local track = S.Solid(bar, "BACKGROUND", C.scrollTrack)
 	track:SetAllPoints()
 	bar:SetThumbTexture(WHITE)
 	local thumb = bar:GetThumbTexture()
@@ -1678,7 +1686,7 @@ function Table:Redraw()
 			end
 		end
 		if item then
-			if self.isSelected and self.isSelected(item) then row.selectedTex:Show() else row.selectedTex:Hide() end
+			S.PaintRow(row, self.isSelected and self.isSelected(item) or false)
 			row:Show()
 		else
 			row:Hide()
@@ -1705,10 +1713,20 @@ local LIST_STYLES = {
 	sidebar = { rowH = 22, subRowH = 36, header = "small", row = "normal" },
 }
 
--- A hovered row shows its highlight and, when it can be removed, its remove button in place of its status.
+-- A hovered row keeps the skin's highlight lit (also while the mouse is on its remove button) and, when it can be
+-- removed, shows its remove button in place of its status. A list has one hovered row: rows share edges, and the
+-- next row can be entered before the last one is left.
 local function listHover(row, on)
+	local list = row.list
 	local removable = on and row.onRemove ~= nil
-	if on then row.hoverTex:Show() else row.hoverTex:Hide() end
+	if on then
+		if list.hoverRow and list.hoverRow ~= row then listHover(list.hoverRow, false) end
+		list.hoverRow = row
+		row:LockHighlight()
+	else
+		if list.hoverRow == row then list.hoverRow = nil end
+		row:UnlockHighlight()
+	end
 	if removable then row.remove:Show() row.status:Hide() else row.remove:Hide() row.status:Show() end
 end
 
@@ -1721,9 +1739,11 @@ local function listEnter(row)
 	end
 end
 
--- Moving onto the remove button leaves the row; the row stays hovered while the mouse is over either.
+-- Moving onto the remove button leaves the row; the row stays hovered while the mouse is over either. The button
+-- sits inside the row's edges, so the mouse on the edge shared with the next row is never over it.
 local function listLeave(row)
-	if not MouseIsOver(row) then listHover(row, false) end
+	local onRemove = row.remove:IsShown() and (GetMouseFocus() == row.remove or MouseIsOver(row.remove))
+	if not onRemove then listHover(row, false) end
 	GameTooltip:Hide()
 end
 
@@ -1746,15 +1766,8 @@ local function listRow(self, parent)
 	row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	if self.reorder and not parent then self.reorder:Attach(row, listDragLabel) end
 
-	row.hoverTex = S.Solid(row, "BACKGROUND", S.colors.rowHover)
-	row.hoverTex:SetAllPoints()
-	row.hoverTex:Hide()
-	row.selectedTex = S.Solid(row, "BACKGROUND", S.colors.rowSelected)
-	row.selectedTex:SetAllPoints()
-	row.bar = S.Solid(row, "BORDER", S.colors.accent)
-	row.bar:SetWidth(3)
-	row.bar:SetPoint("TOPLEFT")
-	row.bar:SetPoint("BOTTOMLEFT")
+	S.Highlight(row)
+	S.Row(row, true)
 
 	row.toggle = S.Text(row, "normal", S.colors.muted)
 	row.toggle:SetWidth(12)
@@ -1781,7 +1794,7 @@ local function listRow(self, parent)
 
 	-- shown on hover for rows added with onRemove, over the status
 	row.remove = CreateFrame("Button", nil, row)
-	row.remove:SetSize(S.CONTROL_H, S.CONTROL_H)
+	row.remove:SetSize(S.CONTROL_H, style.rowH - 6)
 	row.remove:SetPoint("RIGHT", -S.PAD + 6, 0)
 	row.remove.label = S.Text(row.remove, "normal", S.colors.muted)
 	row.remove.label:SetPoint("CENTER")
@@ -1796,7 +1809,8 @@ local function listRow(self, parent)
 	end)
 	row.remove:SetScript("OnLeave", function(b)
 		b.label:SetTextColor(unpack(S.colors.muted))
-		listLeave(row)
+		GameTooltip:Hide()
+		if GetMouseFocus() ~= row then listHover(row, false) end
 	end)
 
 	row:SetScript("OnClick", listDropOrClick)
@@ -1884,8 +1898,6 @@ function List:SetSticky()
 	stuck.text:ClearAllPoints()
 	stuck.text:SetPoint("LEFT", S.PAD, 0)
 	stuck.text:SetPoint("RIGHT", stuck.status, "LEFT", -6, 0)
-	stuck.selectedTex:Hide()
-	stuck.bar:Hide()
 	stuck.toggle:Hide()
 	stuck.check:Hide()
 	stuck.icon:Hide()
@@ -1996,13 +2008,7 @@ function List:Add(entry)
 		row.rule:Hide()
 	end
 	row.status:SetText(entry.status or "")
-	if entry.selected then
-		row.selectedTex:Show()
-		row.bar:Show()
-	else
-		row.selectedTex:Hide()
-		row.bar:Hide()
-	end
+	S.PaintRow(row, entry.selected and true or false)
 
 	row.tooltip, row.onClick, row.onDrop, row.onCheck = entry.tooltip, entry.onClick, entry.onDrop, entry.onCheck
 	row.onRemove, row.removeTip = entry.onRemove, entry.removeTip
@@ -2146,7 +2152,9 @@ end
 -- paintNav(b, on), input(e, tall) and paintInput(e) (e.focused, e.hovered; a tall one draws on e.box), and
 -- optionally check(b) and
 -- paintCheck(b) (b.on, b.usable, b.hovered); a skin without them gets Material's checkbox. Likewise optionally
--- slider(s) and paintSlider(s) (s.usable, s.hovered; the handle is s:GetThumbTexture()), else Material's slider.
+-- slider(s) and paintSlider(s) (s.usable, s.hovered; the handle is s:GetThumbTexture()), else Material's slider,
+-- and row(r, bar) and paintRow(r, on) for list and table rows (hover and selected; bar: the list would like an
+-- accent bar on the selected row), else Material's.
 function S.RegisterSkin(key, def)
 	skins[key] = def
 end
@@ -2236,6 +2244,25 @@ S.RegisterSkin("material", {
 	end,
 	paintNav = function(b, on)
 		if on then b.bar:Show() b.selectedTex:Show() else b.bar:Hide() b.selectedTex:Hide() end
+	end,
+	-- a list or table row: the hover tint, and selected, a tint with an accent bar where the list asks for one
+	row = function(r, bar)
+		S.Highlight(r)
+		r.selectedTex = S.Solid(r, "BACKGROUND", S.colors.rowSelected)
+		r.selectedTex:SetAllPoints()
+		r.bar = false
+		if bar then
+			r.bar = S.Solid(r, "BORDER", S.colors.accent)
+			r.bar:SetWidth(3)
+			r.bar:SetPoint("TOPLEFT")
+			r.bar:SetPoint("BOTTOMLEFT")
+		end
+	end,
+	paintRow = function(r, on)
+		if on then r.selectedTex:Show() else r.selectedTex:Hide() end
+		if r.bar then
+			if on then r.bar:Show() else r.bar:Hide() end
+		end
 	end,
 	input = function(e)
 		S.Panel(e.box or e, S.colors.well, S.colors.border)
