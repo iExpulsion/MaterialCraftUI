@@ -115,3 +115,26 @@ MOCK.check("no title rule", not S.Rule(parent, "BOTTOM").shown)
 local _, soft = S.SectionHeading(parent, "Loot", 0, 0)
 MOCK.check("heading line kept", soft.shown and soft.height == 1)
 S.UseSkin("material")
+
+-- Widgets built before the saved skin goes on (an Interface Options panel at file load) keep painting in the skin
+-- that built them.
+local early = {
+	button = S.Button(parent, "Open", "primary", 180),
+	check = S.Check(parent, 14),
+	slider = S.Slider(parent, 100, 0, 1, 1),
+	input = S.Input(parent, nil, 100),
+	row = S.Row(CreateFrame("Button", nil, parent)),
+	nav = S.NavEntry(CreateFrame("Button", nil, parent), "Page"),
+}
+S.UseSkin("classic")
+local repainted = pcall(function()
+	early.button:GetScript("OnEnter")(early.button)
+	early.button:GetScript("OnLeave")(early.button)
+	early.check:SetChecked(true)
+	early.slider:SetEnabled(false)
+	early.input:GetScript("OnEnter")(early.input)
+	S.PaintRow(early.row, true)
+	early.nav:SetSelected(true)
+end)
+MOCK.check("early widgets repaint after a skin change", repainted)
+S.UseSkin("material")

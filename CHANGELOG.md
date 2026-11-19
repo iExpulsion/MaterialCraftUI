@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Fixed:** a button, checkbox, slider, input, row or navigation entry built before the saved skin goes on (an
+  Interface Options panel made at file load) raised an error when hovered under another skin, such as Classic. Each
+  is now painted by the skin that built it.
+
 ## 1.7.0
 
 - **Navigation Icons:** `S.NavEntry` takes an optional icon, drawn where the skin puts the label, with the label

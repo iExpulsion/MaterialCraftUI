@@ -579,8 +579,10 @@ function Stack:Layout()
 	return self:Place()
 end
 
+-- Widgets are painted by the skin that built them: one made before the saved skin goes on (an Interface Options
+-- panel built at file load) has only that skin's textures.
 local function paint(b)
-	skin.paintButton(b, b:IsEnabled() == 1 or b:IsEnabled() == true)
+	b.skin.paintButton(b, b:IsEnabled() == 1 or b:IsEnabled() == true)
 end
 
 -- `template` makes it from a frame template; a secure one keeps the template's own click handler, so onClick is
@@ -589,6 +591,7 @@ function S.Button(parent, label, kind, width, onClick, tooltip, template)
 	local b = CreateFrame("Button", nil, parent, template)
 	b:SetSize(width or 90, S.CONTROL_H)
 	b.kind = kind or "secondary"
+	b.skin = skin
 	skin.button(b)
 	b.label = S.FontString(b, "small")
 	b.label:SetPoint("CENTER")
@@ -646,7 +649,7 @@ end
 local function checkSkin() return skin.check and skin or skins.material end
 
 local function paintCheck(b)
-	checkSkin().paintCheck(b)
+	b.skin.paintCheck(b)
 end
 
 -- Square checkbox, S.CHECK_H by default: SetChecked(on) and SetEnabled(on) repaint it; clicks
@@ -655,7 +658,8 @@ function S.Check(parent, size, onClick)
 	local b = CreateFrame("Button", nil, parent)
 	b:SetSize(size or S.CHECK_H, size or S.CHECK_H)
 	b.on, b.usable = false, true
-	checkSkin().check(b)
+	b.skin = checkSkin()
+	b.skin.check(b)
 	function b:SetChecked(on) self.on = on and true or false paintCheck(self) end
 	function b:SetEnabled(on) self.usable = on and true or false paintCheck(self) end
 	b:SetScript("OnEnter", function(self)
@@ -683,7 +687,7 @@ end
 local function sliderSkin() return skin.slider and skin or skins.material end
 
 local function paintSlider(s)
-	sliderSkin().paintSlider(s)
+	s.skin.paintSlider(s)
 end
 
 -- the room a slider's value text takes to its right, past S.GAP
@@ -705,7 +709,8 @@ function S.Slider(parent, width, min, max, step, onChange, format)
 	s.valueText = S.Text(s, "small")
 	s.valueText:SetPoint("LEFT", s, "RIGHT", S.GAP, 0)
 	s.valueText:SetWidth(S.SLIDER_VALUE_W)
-	sliderSkin().slider(s)
+	s.skin = sliderSkin()
+	s.skin.slider(s)
 	-- the client's own value drifts off the steps while dragging: snap it, and drop float noise
 	local function snap(v)
 		local n = math.floor((v - min) / step + 0.5)
@@ -1033,6 +1038,7 @@ function S.Input(parent, name, width, placeholder, maxLetters, lines)
 	else
 		e:SetSize(width, height)
 	end
+	e.skin = skin
 	skin.input(e, tall)
 	e.placeholder = S.Text(e, "small", S.colors.muted)
 	if tall then
@@ -1053,7 +1059,7 @@ function S.Input(parent, name, width, placeholder, maxLetters, lines)
 	e.placeholder:SetText(placeholder or "")
 	local function update(self)
 		if self.focused or self:GetText() ~= "" then self.placeholder:Hide() else self.placeholder:Show() end
-		skin.paintInput(self)
+		self.skin.paintInput(self)
 	end
 	e:SetScript("OnEditFocusGained", function(self) self.focused = true update(self) end)
 	e:SetScript("OnEditFocusLost", function(self) self.focused = false update(self) end)
@@ -1102,13 +1108,14 @@ local function rowSkin() return skin.row and skin or skins.material end
 -- A list or table row's hover and selected look; bar asks for an accent bar on the selected row where the skin
 -- draws one. S.PaintRow(row, on) shows it selected or not.
 function S.Row(row, bar)
-	rowSkin().row(row, bar)
+	row.skin = rowSkin()
+	row.skin.row(row, bar)
 	S.PaintRow(row, false)
 	return row
 end
 
 function S.PaintRow(row, on)
-	rowSkin().paintRow(row, on)
+	(row.skin or rowSkin()).paintRow(row, on)
 end
 
 -- An entry in a navigation sidebar: its label (b.label, in the "normal" size) and its hover and selected look.
@@ -1118,6 +1125,7 @@ local NAV_ICON = 18
 function S.NavEntry(b, text, icon)
 	b.label = S.Text(b, "normal")
 	b.label:SetText(text)
+	b.skin = skin
 	skin.navEntry(b)
 	if icon then
 		local _, _, _, x = b.label:GetPoint()
@@ -1132,7 +1140,7 @@ function S.NavEntry(b, text, icon)
 	end
 	function b:SetSelected(on)
 		self.selected = on
-		skin.paintNav(self, on)
+		self.skin.paintNav(self, on)
 		self.label:SetTextColor(unpack(on and S.colors.navSelected or S.colors.text))
 	end
 	b:SetSelected(false)
