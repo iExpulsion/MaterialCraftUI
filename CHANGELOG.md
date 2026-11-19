@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.7.1
 
 - **Fixed:** a button, checkbox, slider, input, row or navigation entry built before the saved skin goes on (an
   Interface Options panel made at file load) raised an error when hovered under another skin, such as Classic. Each
