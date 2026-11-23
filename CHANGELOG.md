@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.8.0
 
 - **Progress Bars:** `S.ProgressBar(parent, width, height)`, a bar filled to how much of something is done
   (`SetValue(done, total)`), in the accent color, then the good color once everything is done. Skins can draw
