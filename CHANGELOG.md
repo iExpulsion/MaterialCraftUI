@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Progress Bars:** `S.ProgressBar(parent, width, height)`, a bar filled to how much of something is done
+  (`SetValue(done, total)`), in the accent color, then the good color once everything is done. Skins can draw
+  their own with `progressBar(p)` and `paintProgress(p)`; the others get Material's flat track and fill.
+
 ## 1.7.1
 
 - **Fixed:** a button, checkbox, slider, input, row or navigation entry built before the saved skin goes on (an

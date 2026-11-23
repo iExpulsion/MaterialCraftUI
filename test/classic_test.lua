@@ -100,6 +100,8 @@ S.UseSkin("material")
 S.RegisterSkin("bare2", { label = "Bare" })
 S.UseSkin("bare2")
 MOCK.check("fallback slider", S.Slider(parent, 100, 0, 1, 1).fill ~= nil)
+-- A skin without a progress bar gets Material's too.
+MOCK.check("fallback progress bar", S.ProgressBar(parent, 100).track ~= nil)
 S.UseSkin("material")
 -- Material keeps its flat checkbox, and a skin without one gets it too, and Material's divider lines.
 MOCK.check("material checkbox", S.Check(parent, 14).fill ~= nil)

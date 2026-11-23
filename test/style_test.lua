@@ -62,6 +62,25 @@ MOCK.check("slider look", sl.track ~= nil and sl.fill.point[2] == sl:GetThumbTex
 sl:SetEnabled(false)
 MOCK.check("slider disabled", sl:GetThumbTexture().vertex[4] == S.colors.disabled[4] and sl.valueText.color[1] == S.colors.disabled[1])
 
+-- A progress bar starts empty, fills to done / total in the accent, and turns the good color once all is done.
+local pb = S.ProgressBar(parent, 120)
+MOCK.check("progress starts empty", pb.height == 4 and pb:GetValue() == 0 and not pb.fill.shown)
+pb:SetValue(47, 51)
+MOCK.check("progress fills", pb.fill.shown and math.abs(pb.fill.width - 120 * 47 / 51) < 1e-9
+	and pb.fill.vertex[1] == S.colors.accent[1])
+pb:SetValue(51, 51)
+MOCK.check("progress complete", pb.fill.width == 120 and pb.fill.vertex[1] == S.colors.good[1])
+-- Nothing to do counts as empty, and values past the total stay inside the bar.
+pb:SetValue(0, 0)
+MOCK.check("progress with nothing to do", pb:GetValue() == 0 and not pb.fill.shown)
+pb:SetValue(9, 3)
+MOCK.check("progress clamps", pb.fill.width == 120)
+-- Resizing the bar refits the fill.
+pb:SetValue(1, 2)
+pb:SetWidth(200)
+pb.scripts.OnSizeChanged(pb)
+MOCK.check("progress refits", pb.fill.width == 100)
+
 -- A tab in Material has the accent underline only while selected, and its label brightens.
 local tabB = S.Tab(CreateFrame("Button", nil, parent), "Actions")
 MOCK.check("tab unselected", not tabB.underline.shown and tabB.label.color[1] == S.colors.muted[1])

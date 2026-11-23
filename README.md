@@ -264,7 +264,8 @@ py -I -X utf8 tools/make_grain.py
 `colors(c)` to set colors apart from the scheme. Its `metrics` override `S.metrics`. Its drawing functions are
 `button(b)` and `paintButton(b, enabled)`, `frame(f, role)`, `well(f)`, `sidebar(side)`, `highlight(f)`, `navEntry(b)` and
 `paintNav(b, on)`, and `input(e, tall)` and `paintInput(e)`. Optional ones fall back to Material's: `check(b)` and
-`paintCheck(b)`, `slider(s)` and `paintSlider(s)`, and `tab(b)` and `paintTab(b, on)`. `Skins/Cognac/Skin.lua` is a
+`paintCheck(b)`, `slider(s)` and `paintSlider(s)`, `progressBar(p)` and `paintProgress(p)`, and `tab(b)` and
+`paintTab(b, on)`. `Skins/Cognac/Skin.lua` is a
 full example.
 
 Painted skins draw from an atlas. `tools/pack_art.py` packs the pieces named in a `pieces.json` from their source
@@ -362,6 +363,10 @@ stack:Layout()
   `format(value)`, so leave that room. `onChange(value, slider)` runs for the user's changes, snapped to a step;
   `SetValue` sets it without calling `onChange`, and `GetValue` and `SetEnabled` go with it. Set `tooltipText` for
   a tooltip. Classic draws the Interface Options slider; other skins without one get Material's track and handle.
+- `S.ProgressBar(parent, width, height)`: a bar showing how much of something is done, 4 tall unless `height` says
+  otherwise. `SetValue(done, total)` fills it to that share (empty when there's nothing to do) and turns it the
+  `good` color once everything is done; `GetValue` gives the share. Setting the same value again does nothing, so
+  it's fine to call every frame. Skins without their own get Material's flat track and fill.
 - `S.Dropdown(parent, width, onSelect)`: `SetOptions({ { value, text, tooltip } })`, then `SetText` for the shown
   choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others. Its menu doesn't
   scroll, so keep it to a dozen or so options and use a picker for more.
