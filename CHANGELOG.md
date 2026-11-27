@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.9.0
 
 - **Dropdown Headings:** a dropdown option `{ heading = "On You" }` is a section label over the options after it:
   dim, with a rule, shorter than an option and not clickable.
