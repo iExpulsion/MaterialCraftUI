@@ -4,6 +4,8 @@
 
 - **Dropdown Headings:** a dropdown option `{ heading = "On You" }` is a section label over the options after it:
   dim, with a rule, shorter than an option and not clickable.
+- **Dropdown Columns:** a dropdown menu too tall for the room below it (or half the screen, if that's more) opens in
+  columns, so long menus fit at any UI scale. A column never ends on a heading.
 - **Fixed:** a dropdown menu opened near the bottom of the screen ran off it; it now moves up to stay on screen.
 
 ## 1.8.1

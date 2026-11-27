@@ -85,8 +85,8 @@ MOCK.check("disabled tick", c.tick.texture == "Interface\\Buttons\\UI-CheckBox-C
 -- A dropdown's menu is tooltip-bordered like the other menus, with its rows inside the 4px border.
 local d = S.Dropdown(parent, 120, function() end)
 d:SetOptions({ { value = 1, text = "One" }, { value = 2, text = "Two" } })
-MOCK.check("dropdown menu", d.menu.backdrop.edgeFile:find("UI%-Tooltip%-Border") and d.items[1].point[2] == -4
-	and d.menu.height == 2 * S.CONTROL_H + 8)
+MOCK.check("dropdown menu", d.menu.backdrop.edgeFile:find("UI%-Tooltip%-Border") and d.items[1].point[4] == 4
+	and d.items[1].point[5] == -4 and d.menu.height == 2 * S.CONTROL_H + 8)
 
 -- A slider is the Interface Options groove and knob, the knob desaturated when disabled.
 local sl = S.Slider(parent, 150, 0, 10, 1)

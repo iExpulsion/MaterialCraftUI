@@ -370,8 +370,9 @@ stack:Layout()
 - `S.Dropdown(parent, width, onSelect)`: `SetOptions({ { value, text, tooltip } })`, then `SetText` for the shown
   choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others. An option
   `{ heading = "On You" }` is a dim section label with a rule, shorter than an option and not clickable, for
-  sorting a longer menu into groups. The menu doesn't scroll (it stays on screen, moving up if it has to), so keep
-  it to about a dozen options, or a few more under headings, and use a picker for more.
+  sorting a longer menu into groups. The menu doesn't scroll: one too tall for the room below the dropdown (or half
+  the screen, if that's more) opens in side-by-side columns, breaking where no heading is left at a column's foot,
+  and it stays on screen. Use a picker for long lists of data rather than choices.
 - `S.PickerButton(parent, width, getSpec)`: a dropdown-looking button that opens `S.Picker` under it, a searchable,
   scrolling list for long choices (zones, items). `getSpec()` returns the picker's spec each time it opens:
   `items = { { value, text, tooltip, icon, link } }` (or `search(text)` returning items), `placeholder`,

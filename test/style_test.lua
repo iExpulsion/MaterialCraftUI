@@ -37,7 +37,7 @@ MOCK.check("heading drawn", head.text.text == "On You" and head.rule and head.ru
 	and head:GetHeight() == S.MENU_HEADING_H and head.mouse == false)
 MOCK.check("heading dim", head.text.color and head.text.color[1] == S.colors.outline[1])
 MOCK.check("option after a heading", first.text.text == "Buff" and first.mouse == true
-	and -first.point[3] == S.metrics.menuInset + S.MENU_HEADING_H)
+	and -first.point[5] == S.metrics.menuInset + S.MENU_HEADING_H)
 MOCK.check("menu fits its headings", grouped.menu:GetHeight()
 	== 2 * S.MENU_HEADING_H + 2 * S.CONTROL_H + 2 * S.metrics.menuInset)
 grouped.items[4].scripts.OnClick(grouped.items[4])
@@ -47,6 +47,34 @@ grouped:SetOptions({ { value = 1, text = "One" }, { value = 2, text = "Two" } })
 MOCK.check("headings cleared", not head.rule.shown and head.mouse == true and head:GetHeight() == S.CONTROL_H
 	and head.text.color[1] == S.colors.text[1] and not grouped.items[3].shown)
 MOCK.check("menu clamped to the screen", grouped.menu.clamped == true)
+
+-- A menu too tall for the room below its dropdown opens in columns, each as wide as the dropdown, and no column
+-- ends on a heading.
+local long = S.Dropdown(UIParent, 150, function() end)
+local opts = {}
+for g = 1, 4 do
+	opts[#opts + 1] = { heading = "Group " .. g }
+	for k = 1, 5 do opts[#opts + 1] = { value = g * 10 + k, text = "Option " .. g .. k } end
+end
+long:SetOptions(opts)
+MOCK.check("one column while closed", long.columns == 1)
+long.GetBottom = function() return 300 end
+long.scripts.OnClick(long)
+local m = S.metrics.menuInset
+MOCK.check("splits into columns", long.columns > 1 and long.menu:GetHeight() <= 300 - 2 - 8
+	and long.menu:GetWidth() == 2 * m + long.columns * (150 - 2 * m) + (long.columns - 1) * m)
+local endsOnHeading = false
+for i = 1, #opts - 1 do
+	local item, nextItem = long.items[i], long.items[i + 1]
+	if item.heading and nextItem.point[4] ~= item.point[4] then endsOnHeading = true end
+end
+MOCK.check("no column ends on a heading", not endsOnHeading)
+long.scripts.OnClick(long)
+-- With room enough below, the same menu is one column.
+long.GetBottom = function() return 2000 end
+long.scripts.OnClick(long)
+MOCK.check("one column with room", long.columns == 1 and long.menu:GetWidth() == 150)
+long.scripts.OnClick(long)
 -- Opened from a window scaled 1.5, the menu moves to UIParent at that scale, above dialogs: inside a scroll frame
 -- it would stay in the scroll frame's layer, under the controls after it
 local scaledParent = CreateFrame("Frame")
