@@ -368,8 +368,10 @@ stack:Layout()
   `good` color once everything is done; `GetValue` gives the share. Setting the same value again does nothing, so
   it's fine to call every frame. Skins without their own get Material's flat track and fill.
 - `S.Dropdown(parent, width, onSelect)`: `SetOptions({ { value, text, tooltip } })`, then `SetText` for the shown
-  choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others. Its menu doesn't
-  scroll, so keep it to a dozen or so options and use a picker for more.
+  choice. Picking an option calls `onSelect(value)`. Opening one dropdown closes the others. An option
+  `{ heading = "On You" }` is a dim section label with a rule, shorter than an option and not clickable, for
+  sorting a longer menu into groups. The menu doesn't scroll (it stays on screen, moving up if it has to), so keep
+  it to about a dozen options, or a few more under headings, and use a picker for more.
 - `S.PickerButton(parent, width, getSpec)`: a dropdown-looking button that opens `S.Picker` under it, a searchable,
   scrolling list for long choices (zones, items). `getSpec()` returns the picker's spec each time it opens:
   `items = { { value, text, tooltip, icon, link } }` (or `search(text)` returning items), `placeholder`,

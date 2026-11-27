@@ -27,6 +27,26 @@ d.items[2].scripts.OnClick(d.items[2])
 MOCK.check("dropdown pick", picked == 2)
 d:SetText("Two")
 MOCK.check("dropdown text", d.label.text == "Two")
+
+-- Headings label the options under them: shorter than an option, dim with a rule, and not clickable.
+local grouped = S.Dropdown(parent, 160, function(v) picked = v end)
+grouped:SetOptions({ { heading = "On You" }, { value = "buff", text = "Buff" }, { heading = "On the Target" },
+	{ value = "debuff", text = "Debuff" } })
+local head, first = grouped.items[1], grouped.items[2]
+MOCK.check("heading drawn", head.text.text == "On You" and head.rule and head.rule.shown
+	and head:GetHeight() == S.MENU_HEADING_H and head.mouse == false)
+MOCK.check("heading dim", head.text.color and head.text.color[1] == S.colors.outline[1])
+MOCK.check("option after a heading", first.text.text == "Buff" and first.mouse == true
+	and -first.point[3] == S.metrics.menuInset + S.MENU_HEADING_H)
+MOCK.check("menu fits its headings", grouped.menu:GetHeight()
+	== 2 * S.MENU_HEADING_H + 2 * S.CONTROL_H + 2 * S.metrics.menuInset)
+grouped.items[4].scripts.OnClick(grouped.items[4])
+MOCK.check("option under a heading picked", picked == "debuff")
+-- The same menu given plain options again drops the headings' look.
+grouped:SetOptions({ { value = 1, text = "One" }, { value = 2, text = "Two" } })
+MOCK.check("headings cleared", not head.rule.shown and head.mouse == true and head:GetHeight() == S.CONTROL_H
+	and head.text.color[1] == S.colors.text[1] and not grouped.items[3].shown)
+MOCK.check("menu clamped to the screen", grouped.menu.clamped == true)
 -- Opened from a window scaled 1.5, the menu moves to UIParent at that scale, above dialogs: inside a scroll frame
 -- it would stay in the scroll frame's layer, under the controls after it
 local scaledParent = CreateFrame("Frame")

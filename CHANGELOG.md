@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Dropdown Headings:** a dropdown option `{ heading = "On You" }` is a section label over the options after it:
+  dim, with a rule, shorter than an option and not clickable.
+- **Fixed:** a dropdown menu opened near the bottom of the screen ran off it; it now moves up to stay on screen.
+
 ## 1.8.1
 
 - **Fixed:** with a UI addon that sets the UI scale itself (DragonUI), windows given `S.PixelScale` kept the size
