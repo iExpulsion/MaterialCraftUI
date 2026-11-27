@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Fixed:** with a UI addon that sets the UI scale itself (DragonUI), windows given `S.PixelScale` kept the size
+  worked out for the old scale until Snap to Pixels was toggled. They now follow `UIParent:SetScale` too.
+
 ## 1.8.0
 
 - **Progress Bars:** `S.ProgressBar(parent, width, height)`, a bar filled to how much of something is done

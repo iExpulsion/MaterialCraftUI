@@ -130,6 +130,15 @@ CreateFrame = function(_, name, parent)
 	return f
 end
 UIParent = Stub()
+-- runs fn after t[name], as the client's secure hook does
+hooksecurefunc = function(t, name, fn)
+	local old = t[name]
+	t[name] = function(...)
+		local a, b, c, d = old(...)
+		fn(...)
+		return a, b, c, d
+	end
+end
 -- the screen: its resolution, as the gxResolution setting holds it
 mock.resolution = "1920x1080"
 GetCVar = function(name) return name == "gxResolution" and mock.resolution or nil end

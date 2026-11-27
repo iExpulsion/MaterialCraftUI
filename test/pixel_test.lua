@@ -24,6 +24,10 @@ MOCK.check("rounds to the nearest multiple", near(win:GetEffectiveScale() * 1080
 UIParent.scale = 768 / 1080
 MOCK.Fire("UI_SCALE_CHANGED")
 MOCK.check("follows the UI scale", near(win:GetEffectiveScale() * 1080 / 768, 1))
+-- An addon setting UIParent's scale directly (no UI_SCALE_CHANGED) re-scales them too.
+UIParent:SetScale(1.8 * 768 / 1080)
+MOCK.check("follows UIParent:SetScale", near(win:GetEffectiveScale() * 1080 / 768, 2))
+UIParent:SetScale(768 / 1080)
 
 -- On a 1440p screen at a UI scale of 1, units are 1.875 pixels, so the window rounds to 2.
 MOCK.resolution = "2560x1440"

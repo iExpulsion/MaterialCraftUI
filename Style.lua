@@ -277,15 +277,19 @@ function S.SetWindowScale(scale)
 	end
 end
 
-local pixelWatch = CreateFrame("Frame")
-pixelWatch:RegisterEvent("UI_SCALE_CHANGED")
-pixelWatch:RegisterEvent("DISPLAY_SIZE_CHANGED")
-pixelWatch:SetScript("OnEvent", function()
+local function uiScaleChanged()
 	for frame, snap in pairs(pixelFrames) do
 		applyScale(frame)
 		if snap then S.SnapPosition(frame) end
 	end
-end)
+end
+
+local pixelWatch = CreateFrame("Frame")
+pixelWatch:RegisterEvent("UI_SCALE_CHANGED")
+pixelWatch:RegisterEvent("DISPLAY_SIZE_CHANGED")
+pixelWatch:SetScript("OnEvent", uiScaleChanged)
+-- UI addons that set their own UI scale call UIParent:SetScale, which fires no UI_SCALE_CHANGED.
+hooksecurefunc(UIParent, "SetScale", uiScaleChanged)
 
 -- Atlases: painted pieces packed into one texture by tools/pack_art.py, which writes the RegisterAtlas call. Each
 -- piece is u0, u1, v0, v1 on the atlas, then how much trimming took off its left, top, right and bottom, as
@@ -2764,6 +2768,7 @@ local settingsWatch = CreateFrame("Frame")
 settingsWatch:RegisterEvent("UI_SCALE_CHANGED")
 settingsWatch:RegisterEvent("DISPLAY_SIZE_CHANGED")
 settingsWatch:SetScript("OnEvent", function() rescaled(false) end)
+hooksecurefunc(UIParent, "SetScale", function() rescaled(false) end)
 
 local function barLabel(bar, anchor, text, gap)
 	local label = S.Text(bar, "small", S.colors.muted)
