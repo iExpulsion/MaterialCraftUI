@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.8.1
 
 - **Fixed:** with a UI addon that sets the UI scale itself (DragonUI), windows given `S.PixelScale` kept the size
   worked out for the old scale until Snap to Pixels was toggled. They now follow `UIParent:SetScale` too.
