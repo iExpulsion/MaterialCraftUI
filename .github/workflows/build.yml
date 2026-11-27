@@ -1,0 +1,72 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # A push to main builds only when the demo .toc's version has no release yet; pull requests and manual runs always build.
+      - name: Check for a new version
+        id: check
+        run: |
+          version=$(sed -n 's/^## Version: *//p' demo/MaterialCraftUIDemo/MaterialCraftUIDemo.toc | tr -d '\r')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_EVENT_NAME" = "push" ] && git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "v$version is already released; raise ## Version in the demo .toc to publish a new one."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v7
+        if: steps.check.outputs.build == 'true'
+        with:
+          python-version: "3.12"
+
+      - name: Install Lua 5.1 and test dependencies
+        if: steps.check.outputs.build == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.1
+          pip install lupa
+
+      - name: Check Lua syntax
+        if: steps.check.outputs.build == 'true'
+        run: find . -name "*.lua" -not -path "./.git/*" -exec luac5.1 -p {} +
+
+      - name: Run tests
+        if: steps.check.outputs.build == 'true'
+        run: python test/run.py
+
+      # The release notes are the version's section of CHANGELOG.md; a version without one fails here.
+      - name: Read the changelog
+        if: steps.check.outputs.build == 'true'
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          tr -d '\r' < CHANGELOG.md | awk -v v="## $VERSION" '$0 == v { f = 1; next } /^## / { if (f) exit } f' \
+            | sed '/./,$!d' > notes.md
+          if [ ! -s notes.md ]; then
+            echo "CHANGELOG.md has no '## $VERSION' section."
+            exit 1
+          fi
+          cat notes.md
+
+      - name: Publish the release
+        if: steps.check.outputs.build == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.check.outputs.version }}
+        run: gh release create "v$VERSION" --target "$GITHUB_SHA" --title "MaterialCraftUI $VERSION" --notes-file notes.md
