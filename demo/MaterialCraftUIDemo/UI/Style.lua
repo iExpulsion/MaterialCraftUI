@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.6.0-15-g63895f7. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.8.0-1-gb5356b0. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
@@ -279,15 +279,19 @@ function S.SetWindowScale(scale)
 	end
 end
 
-local pixelWatch = CreateFrame("Frame")
-pixelWatch:RegisterEvent("UI_SCALE_CHANGED")
-pixelWatch:RegisterEvent("DISPLAY_SIZE_CHANGED")
-pixelWatch:SetScript("OnEvent", function()
+local function uiScaleChanged()
 	for frame, snap in pairs(pixelFrames) do
 		applyScale(frame)
 		if snap then S.SnapPosition(frame) end
 	end
-end)
+end
+
+local pixelWatch = CreateFrame("Frame")
+pixelWatch:RegisterEvent("UI_SCALE_CHANGED")
+pixelWatch:RegisterEvent("DISPLAY_SIZE_CHANGED")
+pixelWatch:SetScript("OnEvent", uiScaleChanged)
+-- UI addons that set their own UI scale call UIParent:SetScale, which fires no UI_SCALE_CHANGED.
+hooksecurefunc(UIParent, "SetScale", uiScaleChanged)
 
 -- Atlases: painted pieces packed into one texture by tools/pack_art.py, which writes the RegisterAtlas call. Each
 -- piece is u0, u1, v0, v1 on the atlas, then how much trimming took off its left, top, right and bottom, as
@@ -581,8 +585,10 @@ function Stack:Layout()
 	return self:Place()
 end
 
+-- Widgets are painted by the skin that built them: one made before the saved skin goes on (an Interface Options
+-- panel built at file load) has only that skin's textures.
 local function paint(b)
-	skin.paintButton(b, b:IsEnabled() == 1 or b:IsEnabled() == true)
+	b.skin.paintButton(b, b:IsEnabled() == 1 or b:IsEnabled() == true)
 end
 
 -- `template` makes it from a frame template; a secure one keeps the template's own click handler, so onClick is
@@ -591,6 +597,7 @@ function S.Button(parent, label, kind, width, onClick, tooltip, template)
 	local b = CreateFrame("Button", nil, parent, template)
 	b:SetSize(width or 90, S.CONTROL_H)
 	b.kind = kind or "secondary"
+	b.skin = skin
 	skin.button(b)
 	b.label = S.FontString(b, "small")
 	b.label:SetPoint("CENTER")
@@ -648,7 +655,7 @@ end
 local function checkSkin() return skin.check and skin or skins.material end
 
 local function paintCheck(b)
-	checkSkin().paintCheck(b)
+	b.skin.paintCheck(b)
 end
 
 -- Square checkbox, S.CHECK_H by default: SetChecked(on) and SetEnabled(on) repaint it; clicks
@@ -657,7 +664,8 @@ function S.Check(parent, size, onClick)
 	local b = CreateFrame("Button", nil, parent)
 	b:SetSize(size or S.CHECK_H, size or S.CHECK_H)
 	b.on, b.usable = false, true
-	checkSkin().check(b)
+	b.skin = checkSkin()
+	b.skin.check(b)
 	function b:SetChecked(on) self.on = on and true or false paintCheck(self) end
 	function b:SetEnabled(on) self.usable = on and true or false paintCheck(self) end
 	b:SetScript("OnEnter", function(self)
@@ -685,7 +693,7 @@ end
 local function sliderSkin() return skin.slider and skin or skins.material end
 
 local function paintSlider(s)
-	sliderSkin().paintSlider(s)
+	s.skin.paintSlider(s)
 end
 
 -- the room a slider's value text takes to its right, past S.GAP
@@ -707,7 +715,8 @@ function S.Slider(parent, width, min, max, step, onChange, format)
 	s.valueText = S.Text(s, "small")
 	s.valueText:SetPoint("LEFT", s, "RIGHT", S.GAP, 0)
 	s.valueText:SetWidth(S.SLIDER_VALUE_W)
-	sliderSkin().slider(s)
+	s.skin = sliderSkin()
+	s.skin.slider(s)
 	-- the client's own value drifts off the steps while dragging: snap it, and drop float noise
 	local function snap(v)
 		local n = math.floor((v - min) / step + 0.5)
@@ -753,6 +762,43 @@ function S.Slider(parent, width, min, max, step, onChange, format)
 	s:SetValue(min)
 	paintSlider(s)
 	return s
+end
+
+-- a skin without its own progress bar draws Material's
+local function progressSkin() return skin.progressBar and skin or skins.material end
+
+-- A bar filled to how much of something is done, `width` by `height` (4 by default): p:SetValue(done, total) fills
+-- it to done / total and turns it the good color once all is done. Writes nothing when the value is unchanged, so it
+-- can be set every frame.
+function S.ProgressBar(parent, width, height)
+	local p = CreateFrame("Frame", nil, parent)
+	p:SetSize(width, height or 4)
+	p.share, p.complete = 0, false
+	p.skin = progressSkin()
+	p.skin.progressBar(p)
+	local function layout(self)
+		local w = (self:GetWidth() or 0) * self.share
+		if w > 0 then
+			self.fill:SetWidth(w)
+			self.fill:Show()
+		else
+			self.fill:Hide()
+		end
+	end
+	function p:SetValue(done, total)
+		local share = (total or 0) > 0 and math.max(0, math.min(1, done / total)) or 0
+		local complete = (total or 0) > 0 and done >= total
+		if share ~= self.share or complete ~= self.complete then
+			self.share, self.complete = share, complete
+			layout(self)
+			self.skin.paintProgress(self)
+		end
+	end
+	function p:GetValue() return self.share end
+	p:SetScript("OnSizeChanged", layout)
+	layout(p)
+	p.skin.paintProgress(p)
+	return p
 end
 
 local menus, inputs, dismissers = {}, {}, {}
@@ -1035,6 +1081,7 @@ function S.Input(parent, name, width, placeholder, maxLetters, lines)
 	else
 		e:SetSize(width, height)
 	end
+	e.skin = skin
 	skin.input(e, tall)
 	e.placeholder = S.Text(e, "small", S.colors.muted)
 	if tall then
@@ -1055,7 +1102,7 @@ function S.Input(parent, name, width, placeholder, maxLetters, lines)
 	e.placeholder:SetText(placeholder or "")
 	local function update(self)
 		if self.focused or self:GetText() ~= "" then self.placeholder:Hide() else self.placeholder:Show() end
-		skin.paintInput(self)
+		self.skin.paintInput(self)
 	end
 	e:SetScript("OnEditFocusGained", function(self) self.focused = true update(self) end)
 	e:SetScript("OnEditFocusLost", function(self) self.focused = false update(self) end)
@@ -1104,13 +1151,14 @@ local function rowSkin() return skin.row and skin or skins.material end
 -- A list or table row's hover and selected look; bar asks for an accent bar on the selected row where the skin
 -- draws one. S.PaintRow(row, on) shows it selected or not.
 function S.Row(row, bar)
-	rowSkin().row(row, bar)
+	row.skin = rowSkin()
+	row.skin.row(row, bar)
 	S.PaintRow(row, false)
 	return row
 end
 
 function S.PaintRow(row, on)
-	rowSkin().paintRow(row, on)
+	(row.skin or rowSkin()).paintRow(row, on)
 end
 
 -- An entry in a navigation sidebar: its label (b.label, in the "normal" size) and its hover and selected look.
@@ -1120,6 +1168,7 @@ local NAV_ICON = 18
 function S.NavEntry(b, text, icon)
 	b.label = S.Text(b, "normal")
 	b.label:SetText(text)
+	b.skin = skin
 	skin.navEntry(b)
 	if icon then
 		local _, _, _, x = b.label:GetPoint()
@@ -1134,7 +1183,7 @@ function S.NavEntry(b, text, icon)
 	end
 	function b:SetSelected(on)
 		self.selected = on
-		skin.paintNav(self, on)
+		self.skin.paintNav(self, on)
 		self.label:SetTextColor(unpack(on and S.colors.navSelected or S.colors.text))
 	end
 	b:SetSelected(false)
@@ -2406,6 +2455,17 @@ S.RegisterSkin("material", {
 		s.fill:SetVertexColor(unpack(s.usable and S.colors.accent or S.colors.disabled))
 		s.valueText:SetTextColor(unpack(s.usable and S.colors.text or S.colors.disabled))
 	end,
+	-- a flat track with the accent filling it from the left, the good color once complete
+	progressBar = function(p)
+		p.track = S.Solid(p, "BACKGROUND", S.colors.border)
+		p.track:SetAllPoints()
+		p.fill = S.Solid(p, "ARTWORK", S.colors.accent)
+		p.fill:SetPoint("TOPLEFT")
+		p.fill:SetPoint("BOTTOMLEFT")
+	end,
+	paintProgress = function(p)
+		p.fill:SetVertexColor(unpack(p.complete and S.colors.good or S.colors.accent))
+	end,
 	-- the soft border at rest, the stronger outline on hover, the accent while focused
 	paintInput = function(e)
 		(e.box or e):SetBackdropBorderColor(unpack(e.focused and S.colors.accent or e.hovered and S.colors.outline or S.colors.border))
@@ -2710,6 +2770,7 @@ local settingsWatch = CreateFrame("Frame")
 settingsWatch:RegisterEvent("UI_SCALE_CHANGED")
 settingsWatch:RegisterEvent("DISPLAY_SIZE_CHANGED")
 settingsWatch:SetScript("OnEvent", function() rescaled(false) end)
+hooksecurefunc(UIParent, "SetScale", function() rescaled(false) end)
 
 local function barLabel(bar, anchor, text, gap)
 	local label = S.Text(bar, "small", S.colors.muted)
