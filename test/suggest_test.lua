@@ -29,15 +29,17 @@ MOCK.check("starts first", #list.matches == 3 and list.matches[1].text == "Death
 	and list.matches[2].text == "Blood Strike" and list.matches[3].text == "Blood Boil")
 MOCK.check("first highlighted", list.rows[1].locked and not list.rows[2].locked)
 
--- Down and Up move the highlight, wrapping at the ends
-input.scripts.OnArrowPressed(input, "DOWN")
+-- Down and Up move the highlight, wrapping at the ends; the client's edit boxes have no OnArrowPressed, so the keys
+-- come through OnKeyDown
+MOCK.check("no arrow script hooked", input.scripts.OnArrowPressed == nil and input.scripts.OnKeyDown ~= nil)
+input.scripts.OnKeyDown(input, "DOWN")
 MOCK.check("down moves", list.rows[2].locked and not list.rows[1].locked)
-input.scripts.OnArrowPressed(input, "UP")
-input.scripts.OnArrowPressed(input, "UP")
+input.scripts.OnKeyDown(input, "UP")
+input.scripts.OnKeyDown(input, "UP")
 MOCK.check("up wraps to the last", list.rows[#list.matches].locked)
 
 -- Tab takes the highlighted one (Down from the last wraps to the first) and closes the list without Enter's action
-input.scripts.OnArrowPressed(input, "DOWN")
+input.scripts.OnKeyDown(input, "DOWN")
 input.scripts.OnTabPressed(input)
 MOCK.check("tab picks", input:GetText() == "Death Strike" and picked == "Death Strike" and not list.shown and entered == 0)
 

@@ -22,18 +22,26 @@ bit = {
 	rshift = function(a, n) return math.floor((a % 4294967296) / 2 ^ n) end,
 }
 
+-- scripts the 3.3.5 client's frames don't have: setting or hooking one raises an error there, and here
+local MISSING_SCRIPTS = { OnArrowPressed = true }
+local function haveScript(self, s)
+	if MISSING_SCRIPTS[s] then error(("%s doesn't have a \"%s\" script"):format(tostring(self.name), s), 3) end
+end
+
 -- frames: every method exists and does nothing unless listed
 local function Stub()
 	local o = { scripts = {}, shown = false }
 	return setmetatable(o, { __index = function(t, k)
 		local f
 		if type(k) ~= "string" or not k:match("^%u") then return nil
-		elseif k == "SetScript" then f = function(self, s, fn) self.scripts[s] = fn end
+		elseif k == "SetScript" then f = function(self, s, fn) haveScript(self, s) self.scripts[s] = fn end
+		elseif k == "HasScript" then f = function(_, s) return not MISSING_SCRIPTS[s] end
 		elseif k == "Show" then f = function(self) self.shown = true end
 		elseif k == "Hide" then f = function(self) self.shown = false end
 		elseif k == "IsShown" then f = function(self) return self.shown end
 		elseif k == "RegisterEvent" then f = function(self) mock.frames[#mock.frames + 1] = self end
 		elseif k == "HookScript" then f = function(self, s, fn)
+			haveScript(self, s)
 			local old = self.scripts[s]
 			self.scripts[s] = function(...) if old then old(...) end fn(...) end
 		end
