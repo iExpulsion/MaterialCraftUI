@@ -1,4 +1,4 @@
--- Vendored from MaterialCraftUI v1.8.0-1-gb5356b0. Change it there, then run tools/sync_style.py.
+-- Vendored from MaterialCraftUI v1.8.1-6-g7fd27b1. Change it there, then run tools/sync_style.py.
 -- MIT License, Copyright (c) 2026 Expulsion: https://github.com/iExpulsion/MaterialCraftUI
 -- MaterialCraftUI: a flat dark style kit for WoW 3.3.5 addons on Material 3 color roles: one accent color, 1px
 -- borders, state layers and a few button kinds. Each addon ships its own copy, listed in its .toc, and reads it
@@ -901,9 +901,43 @@ local function showPreview(menu, card)
 	end
 end
 
+-- The height of a heading in a dropdown menu: shorter than an option, since it's only a label.
+S.MENU_HEADING_H = 20
+
+-- Lays a dropdown's items out in as many columns as it takes to keep the menu within `limit` tall (one when it
+-- fits), each column as wide as the dropdown. A column never ends on a heading: it moves to the next column with
+-- the option under it.
+local function layoutMenu(b, limit)
+	local menu, items, count = b.menu, b.items, b.count or 0
+	local m = S.metrics.menuInset
+	local cw = (b:GetWidth() or 0) - 2 * m
+	local total = 0
+	for i = 1, count do total = total + items[i].h end
+	local cols = math.max(1, math.ceil(total / math.max(limit - 2 * m, S.CONTROL_H)))
+	local target = total / cols
+	local x, y, col, tallest = m, m, 1, m
+	for i = 1, count do
+		local item, after = items[i], items[i + 1]
+		local need = item.h + ((item.heading and i < count) and after.h or 0)
+		if col < cols and y > m and y - m + need > target + 0.5 then
+			col, x, y = col + 1, x + cw + m, m
+		end
+		item:ClearAllPoints()
+		item:SetPoint("TOPLEFT", menu, "TOPLEFT", x, -y)
+		item:SetWidth(cw)
+		y = y + item.h
+		tallest = math.max(tallest, y)
+	end
+	b.columns = cols
+	menu:SetSize(2 * m + cols * cw + (cols - 1) * m, tallest + m)
+end
+
 -- Flat dropdown: a button showing the current choice that opens a menu below it. SetOptions takes
 -- { { value, text, tooltip, preview } }, preview() giving a frame shown beside the menu while the item is hovered,
--- in place of its tooltip; picking one calls onSelect(value) and closes the menu. Opening one closes the others.
+-- in place of its tooltip; picking one calls onSelect(value) and closes the menu. An option { heading = text } is a
+-- section label over the options after it, dim with a rule, which can't be picked. A menu too tall for the room
+-- below the dropdown (or half the screen, if that's more) splits into columns as it opens, so long menus fit at any
+-- UI scale. Opening one closes the others.
 function S.Dropdown(parent, width, onSelect)
 	local b = S.AddArrow(S.Button(parent, "", "secondary", width))
 
@@ -912,6 +946,8 @@ function S.Dropdown(parent, width, onSelect)
 	menu:SetFrameStrata("FULLSCREEN_DIALOG")
 	menu:SetPoint("TOPLEFT", b, "BOTTOMLEFT", 0, -2)
 	menu:SetWidth(width)
+	-- a long menu near the bottom of the screen moves up rather than running off it
+	menu:SetClampedToScreen(true)
 	S.Frame(menu, "menu")
 	menu:EnableMouse(true)
 	menu:Hide()
@@ -926,14 +962,8 @@ function S.Dropdown(parent, width, onSelect)
 			local item = self.items[i]
 			if not item then
 				item = CreateFrame("Button", nil, menu)
-				item:SetHeight(S.CONTROL_H)
-				local m = S.metrics.menuInset
-				item:SetPoint("TOPLEFT", m, -m - (i - 1) * S.CONTROL_H)
-				item:SetPoint("TOPRIGHT", -m, -m - (i - 1) * S.CONTROL_H)
 				S.Highlight(item)
 				item.text = S.Text(item, "small")
-				item.text:SetPoint("LEFT", 8, 0)
-				item.text:SetPoint("RIGHT", -8, 0)
 				item:SetScript("OnClick", function(it)
 					menu:Hide()
 					onSelect(it.value)
@@ -953,12 +983,34 @@ function S.Dropdown(parent, width, onSelect)
 				end)
 				self.items[i] = item
 			end
+			local heading = opt.heading ~= nil
+			item.h, item.heading = heading and S.MENU_HEADING_H or S.CONTROL_H, heading
+			item:SetHeight(item.h)
+			-- a heading takes no mouse, so it never lights up and a click on it leaves the menu open
+			item:EnableMouse(not heading)
 			item.value, item.tooltip, item.preview = opt.value, opt.tooltip, opt.preview
-			item.text:SetText(opt.text)
+			item.text:SetText(heading and opt.heading or opt.text)
+			item.text:SetTextColor(unpack(heading and S.colors.outline or S.colors.text))
+			item.text:ClearAllPoints()
+			item.text:SetPoint("LEFT", 8, heading and -2 or 0)
+			if heading then
+				if not item.rule then
+					local rule, thickness = line(item, "heading")
+					rule:SetHeight(thickness)
+					rule:SetPoint("LEFT", item.text, "RIGHT", 6, 0)
+					rule:SetPoint("RIGHT", item, "RIGHT", -8, 0)
+					item.rule = rule
+				end
+				item.rule:Show()
+			else
+				item.text:SetPoint("RIGHT", -8, 0)
+				if item.rule then item.rule:Hide() end
+			end
 			item:Show()
 		end
 		for i = #options + 1, #self.items do self.items[i]:Hide() end
-		menu:SetHeight(#options * S.CONTROL_H + 2 * S.metrics.menuInset)
+		self.count = #options
+		layoutMenu(self, math.huge)
 	end
 	b:SetScript("OnClick", function()
 		local open = menu:IsShown()
@@ -969,6 +1021,10 @@ function S.Dropdown(parent, width, onSelect)
 			menu:SetParent(UIParent)
 			menu:SetScale(b:GetEffectiveScale() / UIParent:GetEffectiveScale())
 			menu:SetFrameStrata("FULLSCREEN_DIALOG")
+			-- the room below the dropdown and the screen's height, in the dropdown's own units
+			local below = (b:GetBottom() or math.huge) - 2
+			local screen = (UIParent:GetHeight() or 0) * UIParent:GetEffectiveScale() / b:GetEffectiveScale()
+			layoutMenu(b, math.max(below, screen / 2) - 8)
 			menu:Show()
 		end
 	end)
@@ -2210,6 +2266,155 @@ function S.PickerButton(parent, width, getSpec)
 		if picker and picker.owner == self then picker:Hide() end
 	end)
 	return b
+end
+
+-- Suggestions under an input as it's typed in: names that start with the typed text first, then names that
+-- contain it, each with its icon. opts: list() -> { { text, icon } }, every choice (matched here, with capitals
+-- ignored); max (default 8); separator, for an input holding a list ("A, B"): only the text after the last one is
+-- matched, and a pick replaces just that; enabled() -> false keeps it quiet; onPick(item, text) after a pick.
+-- Tab or Enter takes the highlighted suggestion, the top one unless the mouse moved it (Enter then does what the
+-- input's own Enter does), a click picks one, and Escape closes the list before it does anything else. There are no
+-- arrow keys: the 3.3.5 client's edit boxes keep Up and Down to themselves. Attach it after the
+-- input's own Enter, Tab and Escape scripts are set. The list closes on a click elsewhere, like a menu, and never
+-- takes the keyboard. Returns the list frame (.rows, .matches, :Refresh()).
+function S.Suggest(input, opts)
+	local max = opts.max or 8
+	local anchor = input.box or input
+	local popup = CreateFrame("Frame", nil, UIParent)
+	popup:SetFrameStrata("FULLSCREEN_DIALOG")
+	popup:SetClampedToScreen(true)
+	S.Frame(popup, "menu")
+	popup:EnableMouse(true)
+	popup:Hide()
+	popup.owner = anchor
+	S.TrackPopup(popup)
+	local rows, matches, starts, contains = {}, {}, {}, {}
+	local selected = 1
+	popup.rows, popup.matches = rows, matches
+
+	-- where the text being completed starts, and that text
+	local function token(text)
+		local start = 1
+		if opts.separator then
+			local at = text:find(opts.separator, 1, true)
+			while at do
+				start = at + 1
+				at = text:find(opts.separator, at + 1, true)
+			end
+		end
+		local lead = #(text:sub(start):match("^%s*"))
+		return start + lead, text:sub(start + lead)
+	end
+
+	local function paint()
+		for i, row in ipairs(rows) do
+			if i == selected then row:LockHighlight() else row:UnlockHighlight() end
+		end
+	end
+
+	local function pick(i)
+		local text = input:GetText() or ""
+		local start = token(text)
+		local picked = text:sub(1, start - 1) .. matches[i].text
+		input:SetText(picked)
+		input:SetCursorPosition(#picked)
+		popup:Hide()
+		if input.UpdatePlaceholder then input:UpdatePlaceholder() end
+		if opts.onPick then opts.onPick(matches[i], picked) end
+	end
+
+	local function row(i)
+		local r = rows[i]
+		if not r then
+			local m = S.metrics.menuInset
+			r = CreateFrame("Button", nil, popup)
+			r:SetHeight(S.CONTROL_H)
+			r:SetPoint("TOPLEFT", m, -m - (i - 1) * S.CONTROL_H)
+			r:SetPoint("TOPRIGHT", -m, -m - (i - 1) * S.CONTROL_H)
+			S.Highlight(r)
+			r.icon = r:CreateTexture(nil, "ARTWORK")
+			r.icon:SetSize(16, 16)
+			r.icon:SetPoint("LEFT", 6, 0)
+			r.text = S.Text(r, "small")
+			r.text:SetPoint("LEFT", r.icon, "RIGHT", 6, 0)
+			r.text:SetPoint("RIGHT", -8, 0)
+			r.text:SetJustifyH("LEFT")
+			r:SetScript("OnClick", function() pick(i) end)
+			r:SetScript("OnEnter", function()
+				selected = i
+				paint()
+			end)
+			rows[i] = r
+		end
+		return r
+	end
+
+	function popup:Refresh()
+		for k in pairs(matches) do matches[k] = nil end
+		for k in pairs(starts) do starts[k] = nil end
+		for k in pairs(contains) do contains[k] = nil end
+		local _, typed = token(input:GetText() or "")
+		local key = typed:lower()
+		local exact = false
+		if key ~= "" and (not opts.enabled or opts.enabled()) then
+			for _, item in ipairs(opts.list()) do
+				local name = item.text:lower()
+				local at = name:find(key, 1, true)
+				if name == key then exact = true end
+				if at == 1 then starts[#starts + 1] = item elseif at then contains[#contains + 1] = item end
+			end
+		end
+		for _, list in ipairs({ starts, contains }) do
+			for _, item in ipairs(list) do
+				if #matches < max then matches[#matches + 1] = item end
+			end
+		end
+		-- nothing to offer, or the one match is what's already typed
+		if #matches == 0 or (exact and #matches == 1) then
+			popup:Hide()
+		else
+			selected = 1
+			for i, item in ipairs(matches) do
+				local r = row(i)
+				r.text:SetText(item.text)
+				r.icon:SetTexture(item.icon)
+				if item.icon then r.icon:Show() else r.icon:Hide() end
+				r:Show()
+			end
+			for i = #matches + 1, #rows do rows[i]:Hide() end
+			paint()
+			popup:SetScale(anchor:GetEffectiveScale() / UIParent:GetEffectiveScale())
+			popup:ClearAllPoints()
+			popup:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -2)
+			popup:SetSize(math.max(anchor:GetWidth() or 0, 220), #matches * S.CONTROL_H + 2 * S.metrics.menuInset)
+			popup:Show()
+		end
+	end
+
+	input:HookScript("OnTextChanged", function(_, userInput)
+		if userInput then popup:Refresh() end
+	end)
+	local enter, tab, escape = input:GetScript("OnEnterPressed"), input:GetScript("OnTabPressed"), input:GetScript("OnEscapePressed")
+	input:SetScript("OnEnterPressed", function(self)
+		if popup:IsShown() and matches[selected] then pick(selected) end
+		if enter then enter(self) end
+	end)
+	input:SetScript("OnTabPressed", function(self)
+		if popup:IsShown() and matches[selected] then
+			pick(selected)
+		elseif tab then
+			tab(self)
+		end
+	end)
+	input:SetScript("OnEscapePressed", function(self)
+		if popup:IsShown() then
+			popup:Hide()
+		elseif escape then
+			escape(self)
+		end
+	end)
+	input:HookScript("OnHide", function() popup:Hide() end)
+	return popup
 end
 
 -- Skins: how the controls above are drawn. A skin can carry a scheme of its own (roles, as S.SetTheme takes them),
