@@ -29,19 +29,20 @@ MOCK.check("starts first", #list.matches == 3 and list.matches[1].text == "Death
 	and list.matches[2].text == "Blood Strike" and list.matches[3].text == "Blood Boil")
 MOCK.check("first highlighted", list.rows[1].locked and not list.rows[2].locked)
 
--- Down and Up move the highlight, wrapping at the ends; the client's edit boxes have no OnArrowPressed, so the keys
--- come through OnKeyDown
-MOCK.check("no arrow script hooked", input.scripts.OnArrowPressed == nil and input.scripts.OnKeyDown ~= nil)
-input.scripts.OnKeyDown(input, "DOWN")
-MOCK.check("down moves", list.rows[2].locked and not list.rows[1].locked)
-input.scripts.OnKeyDown(input, "UP")
-input.scripts.OnKeyDown(input, "UP")
-MOCK.check("up wraps to the last", list.rows[#list.matches].locked)
+-- no arrow keys: the client's edit boxes have no OnArrowPressed and keep Up and Down to themselves (in game,
+-- 2026-11-27), so nothing is hooked for them, and the mouse moves the highlight
+MOCK.check("no arrow script hooked", input.scripts.OnArrowPressed == nil and input.scripts.OnKeyDown == nil)
+list.rows[2].scripts.OnEnter(list.rows[2])
+MOCK.check("hover moves", list.rows[2].locked and not list.rows[1].locked)
 
--- Tab takes the highlighted one (Down from the last wraps to the first) and closes the list without Enter's action
-input.scripts.OnKeyDown(input, "DOWN")
+-- Tab takes the highlighted one and closes the list without Enter's action
 input.scripts.OnTabPressed(input)
-MOCK.check("tab picks", input:GetText() == "Death Strike" and picked == "Death Strike" and not list.shown and entered == 0)
+MOCK.check("tab picks", input:GetText() == "Blood Strike" and picked == "Blood Strike" and not list.shown and entered == 0)
+
+-- a new list starts on its top suggestion
+type(input, "D")
+input.scripts.OnTabPressed(input)
+MOCK.check("tab takes the top one", input:GetText() == "Death Strike")
 
 -- Enter takes it and then runs the input's own Enter
 type(input, "icy")

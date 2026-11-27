@@ -2270,8 +2270,9 @@ end
 -- contain it, each with its icon. opts: list() -> { { text, icon } }, every choice (matched here, with capitals
 -- ignored); max (default 8); separator, for an input holding a list ("A, B"): only the text after the last one is
 -- matched, and a pick replaces just that; enabled() -> false keeps it quiet; onPick(item, text) after a pick.
--- Tab or Enter takes the highlighted suggestion (Enter then does what the input's own Enter does), Up and Down move
--- the highlight, a click picks one, and Escape closes the list before it does anything else. Attach it after the
+-- Tab or Enter takes the highlighted suggestion, the top one unless the mouse moved it (Enter then does what the
+-- input's own Enter does), a click picks one, and Escape closes the list before it does anything else. There are no
+-- arrow keys: the 3.3.5 client's edit boxes keep Up and Down to themselves. Attach it after the
 -- input's own Enter, Tab and Escape scripts are set. The list closes on a click elsewhere, like a menu, and never
 -- takes the keyboard. Returns the list frame (.rows, .matches, :Refresh()).
 function S.Suggest(input, opts)
@@ -2410,17 +2411,6 @@ function S.Suggest(input, opts)
 			escape(self)
 		end
 	end)
-	-- the 3.3.5 client's edit boxes have no OnArrowPressed (hooking it raises an error), so Up and Down go through
-	-- whichever key script the client gives the box; with neither, the mouse still moves the highlight
-	local arrows = (input:HasScript("OnArrowPressed") and "OnArrowPressed") or (input:HasScript("OnKeyDown") and "OnKeyDown")
-	if arrows then
-		input:HookScript(arrows, function(_, key)
-			if popup:IsShown() and (key == "UP" or key == "DOWN") then
-				selected = (selected + (key == "UP" and -2 or 0)) % #matches + 1
-				paint()
-			end
-		end)
-	end
 	input:HookScript("OnHide", function() popup:Hide() end)
 	return popup
 end

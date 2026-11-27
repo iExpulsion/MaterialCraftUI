@@ -7,7 +7,8 @@
 - **Dropdown Columns:** a dropdown menu too tall for the room below it (or half the screen, if that's more) opens in
   columns, so long menus fit at any UI scale. A column never ends on a heading.
 - **Suggestions:** `S.Suggest(input, opts)` lists matching choices under an input as you type, with icons: Tab or
-  Enter takes one, Up and Down move through them, and a list input (`"A, B"`) completes only its last entry.
+  Enter takes the top one (or the one under the mouse), a click picks any, and a list input (`"A, B"`) completes only
+  its last entry.
 - **Fixed:** a dropdown menu opened near the bottom of the screen ran off it; it now moves up to stay on screen.
 
 ## 1.8.1

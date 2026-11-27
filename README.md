@@ -381,8 +381,9 @@ stack:Layout()
 - `S.Suggest(input, opts)`: suggestions under an `S.Input` as it's typed in, names starting with the text first,
   then names containing it, with icons. `opts.list()` returns every choice (`{ { text, icon } }`), `max` caps the
   list (8), `separator` makes it complete only the last entry of a list input (`","`), `enabled()` can keep it
-  quiet, and `onPick(item, text)` runs after a pick. Tab or Enter takes the highlighted one (Enter then does the
-  input's own Enter), Up and Down move, Escape closes it first. Attach it after setting the input's own Enter, Tab
+  quiet, and `onPick(item, text)` runs after a pick. Tab or Enter takes the highlighted one, the top one unless the
+  mouse moved it (Enter then does the input's own Enter), and Escape closes it first. The 3.3.5 client's edit boxes
+  keep Up and Down to themselves, so there are no arrow keys; typing more narrows the list. Attach it after setting the input's own Enter, Tab
   and Escape scripts.
 - `S.ContextMenu()`: a right-click menu one view's rows share. `menu:Open(owner, options, side)` shows it beside
   `owner`, the clicked row (on its right for side `"RIGHT"`, else its left), with
