@@ -58,6 +58,8 @@ local function Stub()
 		elseif k == "GetScale" then f = function(self) return self.scale or 1 end
 		elseif k == "SetPoint" then f = function(self, ...) self.point = { ... } end
 		elseif k == "EnableMouse" then f = function(self, on) self.mouse = on and true or false end
+		elseif k == "LockHighlight" then f = function(self) self.locked = true end
+		elseif k == "UnlockHighlight" then f = function(self) self.locked = false end
 		elseif k == "SetClampedToScreen" then f = function(self, on) self.clamped = on end
 		elseif k == "GetPoint" then f = function(self) return unpack(self.point or {}) end
 		elseif k == "SetSize" then f = function(self, w, h) self.width, self.height = w, h end
